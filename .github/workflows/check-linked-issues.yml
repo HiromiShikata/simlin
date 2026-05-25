@@ -20,7 +20,7 @@ jobs:
         with:
           app-id: ${{ secrets.HS_BOT_GH_AP_APP_ID }}
           private-key: ${{ secrets.HS_BOT_GH_AP_PRIVATE_KEY }}
-          owner: HiromiShikata
+          owner: ${{ github.repository_owner }}
       - uses: nearform-actions/github-action-check-linked-issues@v1
         id: check-linked-issues
         if: github.event.pull_request.user.login != 'dependabot[bot]'

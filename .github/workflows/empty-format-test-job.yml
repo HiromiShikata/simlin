@@ -10,20 +10,11 @@ jobs:
 
   format:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - uses: actions/checkout@v6
-        with:
-          token: ${{ github.token }}
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: git pull
       - run: |
           printf '.github/\n' > /tmp/.prettierignore-workflows
-          npx prettier --write "**/*.{md,yaml,yml,js}" --ignore-path /tmp/.prettierignore-workflows --trailing-comma all --print-width 80 --single-quote true
-          git --no-pager diff
-      - uses: stefanzweifel/git-auto-commit-action@v7
-        with:
-          commit_message: 'style: re-format / npx prettier --write "**/*.{md,yaml,yml,js}"'
+          npx prettier --check "**/*.{md,yaml,yml,js}" --ignore-path /tmp/.prettierignore-workflows --trailing-comma all --print-width 80 --single-quote true
