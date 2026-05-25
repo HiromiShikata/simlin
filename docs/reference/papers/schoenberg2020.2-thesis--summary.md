@@ -26,13 +26,13 @@ Article #1 is already summarized in detail in [schoenberg2020-loops-that-matter-
 
 ### 1.1 The Central Problem
 
-The thesis addresses what Sterman (2000, chapter 21 of *Business Dynamics*) identified as key challenges for the future of system dynamics:
+The thesis addresses what Sterman (2000, chapter 21 of _Business Dynamics_) identified as key challenges for the future of system dynamics:
 
 1. **"Automated identification of dominant loops and feedback structure"** -- Automatically determine which feedback loops drive model behavior
 2. **"Visualization of model behavior"** -- Animate structural diagrams to show dynamic behavior
 3. **"Linking behavior to generative structure"** -- Create tools that connect observed behavior back to the causal structure generating it
 
-Prior to this work, loop dominance analysis methods existed (EEA, PPM, Loop Impact) but none had been widely adopted by practitioners. Ford (1999, p.4-5) stated the requirements clearly: *"To rigorously analyze loop dominance in all but small and simple models and effectively apply analysis results, system dynamicists need at least two things: (1) automated analysis tools applicable to models with many loops and (2) a clear and unambiguous understanding of loop dominance and how it impacts system behavior."* The thesis argues that existing methods failed both tests because:
+Prior to this work, loop dominance analysis methods existed (EEA, PPM, Loop Impact) but none had been widely adopted by practitioners. Ford (1999, p.4-5) stated the requirements clearly: _"To rigorously analyze loop dominance in all but small and simple models and effectively apply analysis results, system dynamicists need at least two things: (1) automated analysis tools applicable to models with many loops and (2) a clear and unambiguous understanding of loop dominance and how it impacts system behavior."_ The thesis argues that existing methods failed both tests because:
 
 - They require the practitioner to do significant work beyond normal modeling
 - They require specialized knowledge (eigenvalue analysis, linearization)
@@ -67,6 +67,7 @@ The thesis is grounded in the system dynamics tradition originating with Jay For
 The thesis provides a comprehensive literature review covering four families of approaches:
 
 **Eigenvalue Elasticity Analysis (EEA):**
+
 - Originated with Forrester (1982), formalized by Kampmann (2012), refined by Saleh et al. (2002, 2006, 2010), Oliva (2004, 2016), Naumov and Oliva (2018)
 - Built on the observation that a linear system's behavior can be expressed as a weighted combination of behavior modes, each characterized by a decoupled (or pairwise coupled) set of eigenvalues
 - EEA examines both link and loop significance with regard to the dynamic behavior of the model by identifying the relationship, expressed in the form of elasticity, between the parameters that make up the gains of individual feedback loops and the eigenvalues (and sometimes eigenvectors) that characterize dynamic behavior
@@ -77,6 +78,7 @@ The thesis provides a comprehensive literature review covering four families of 
 - **Weaknesses:** Requires model linearization; limited to continuously differentiable systems; requires specialized knowledge; current tools modify model equations (e.g., changing a discrete integer-only variable from 2 to 2.1) which introduces logical errors and affects validity
 
 **Pathway Participation Metric (PPM):**
+
 - Mojtahedzadeh et al. (2004)
 - Starting point is the behavior of a single variable, typically a stock
 - Partitions the stock's behavior into phases where slope and convexity are maintained (i.e., first and second time derivatives do not change sign), characterized by 7 behavior patterns (Mojtahedzadeh et al., 2004)
@@ -86,6 +88,7 @@ The thesis provides a comprehensive literature review covering four families of 
 - **Weaknesses:** Focused on single stocks, not whole-model behavior; criticized for inability to clearly explain oscillatory behavior (Kampmann and Oliva, 2009); may fail to identify structure when two pathways have similar importance (Kampmann and Oliva, 2009)
 
 **Loop Impact Method:**
+
 - Hayward and Boswell (2014), simplified from PPM
 - Can be implemented in standard SD software by adding equations to the model (no engine changes required)
 - Key difference from PPM: does not identify dominant pathways (impacts from one stock to another); instead focuses on the direct impact one stock has on another stock to identify which loops dominate the behavior of the selected stock
@@ -96,6 +99,7 @@ The thesis provides a comprehensive literature review covering four families of 
 - **Weaknesses:** Still stock-specific rather than model-wide; like PPM, treats integration links using second derivative rather than first
 
 **Ford's Behavioral Approach:**
+
 - Ford (1999) -- qualitative approach based on practitioner intuition
 - Identifies behavioral phases by examining stock behavior
 - **Strengths:** Intuitive; no specialized tools needed
@@ -139,7 +143,7 @@ LS(x -> z)  =  | -------- | * sign(delta_xz / delta_x)       if delta_z != 0 AND
              =  0                                              if delta_z = 0 OR delta_x = 0
 ```
 
-Where `delta_xz` (the "partial change") is the amount z would have changed if only x had changed (ceteris paribus): `f(x_current, y_previous) - z_previous`. The link score magnitude is not a partial derivative (sensitivity) but rather the **fraction of actual change** in z attributable to x. This distinction matters: a partial derivative measures how much z *would* change per unit change in x, while the link score measures how much of z's *actual* change was caused by x's actual change.
+Where `delta_xz` (the "partial change") is the amount z would have changed if only x had changed (ceteris paribus): `f(x_current, y_previous) - z_previous`. The link score magnitude is not a partial derivative (sensitivity) but rather the **fraction of actual change** in z attributable to x. This distinction matters: a partial derivative measures how much z _would_ change per unit change in x, while the link score measures how much of z's _actual_ change was caused by x's actual change.
 
 The ceteris paribus computation requires re-evaluating `z = f(...)` once per input variable, holding all other inputs at their previous-timestep values. This is the primary computational cost of LTM: for a variable with k inputs, k additional equation evaluations are needed per timestep.
 
@@ -173,32 +177,32 @@ Where the sum is over all loops Y in the same **cycle partition** as loop X. A c
 - **Generally applicable:** Works on discrete, discontinuous, and agent-based models. EEA requires continuously differentiable equations; LTM has no such restriction because it uses actual computed values rather than derivatives.
 - **Whole-model metric:** Loop scores describe behavior of all stocks in a connected cycle partition, not just individual stocks. This is a direct consequence of the integration link score design (Equation 2).
 - **Chain rule property:** Link scores can be multiplied along paths, and the result is invariant under model reformulation. Proved in Appendix II of Article #1: for a chain `x -> y -> z` where `y = f(x)` and `z = g(y)`, the product `LS(x -> y) * LS(y -> z)` equals the link score `LS(x -> z)` that would be computed if `y` were eliminated and `z = g(f(x))` were computed directly. This ensures that structurally equivalent models (differing only in how many intermediate auxiliary variables they use) produce identical loop scores.
-- **Isolated loop always scores +/-1:** A single loop with no competition always has relative loop score magnitude 1 regardless of the loop's gain. This is because the loop score measures the *fraction* of behavior attributable to that loop, and with no other loops, 100% of behavior is attributable to the single loop.
+- **Isolated loop always scores +/-1:** A single loop with no competition always has relative loop score magnitude 1 regardless of the loop's gain. This is because the loop score measures the _fraction_ of behavior attributable to that loop, and with no other loops, 100% of behavior is attributable to the single loop.
 - **Constants and parameters:** Variables whose values do not change have link scores of 0 (by definition, delta_x = 0). However, constants are still significant to loop dominance analysis because they condition the link scores of other links: a parameter appearing in an equation affects how much of z's change is attributable to x vs. y, even though the parameter itself is not changing.
 
 ### 3.3 Limitations
 
-- **Cannot analyze equilibrium:** When all stocks are unchanging, all net flows are 0, so all integration link scores produce 0/0 = 0. This is a fundamental limitation: the method measures the fraction of *actual change* driven by each loop, and when there is no change, there is nothing to attribute.
+- **Cannot analyze equilibrium:** When all stocks are unchanging, all net flows are 0, so all integration link scores produce 0/0 = 0. This is a fundamental limitation: the method measures the fraction of _actual change_ driven by each loop, and when there is no change, there is nothing to attribute.
 - **Focused on endogenous behavior:** Less useful for models dominated by external forcing functions. The method attributes behavior to feedback loops, but exogenous inputs are not part of loops. Models where exogenous drivers dominate will have low total loop scores.
-- **Cannot identify behavior modes:** Unlike EEA, does not decompose behavior into distinct modes (exponential growth, oscillation, etc.). LTM reports which loops are dominant but not *what kind of behavior* they are generating. A practitioner must infer the behavior mode from the combination of loop polarities and time-varying dominance patterns.
+- **Cannot identify behavior modes:** Unlike EEA, does not decompose behavior into distinct modes (exponential growth, oscillation, etc.). LTM reports which loops are dominant but not _what kind of behavior_ they are generating. A practitioner must infer the behavior mode from the combination of loop polarities and time-varying dominance patterns.
 - **Reports only on observed behavior:** LTM only analyzes the behavior that actually occurs during a specific simulation run with specific parameter values. Alternative scenarios, counterfactuals, and sensitivity to parameters are not covered by a single LTM analysis.
 
 ### 3.4 Relationship Between LTM and Other Methods
 
 The thesis framing provides an explicit comparison of LTM against each prior method:
 
-| Property | EEA | PPM | Loop Impact | LTM |
-|----------|-----|-----|-------------|-----|
-| Scope | Whole model | Single stock | Single stock | Whole model (cycle partition) |
-| Integration link treatment | Second derivative | Second derivative | Second derivative | First derivative (Eq. 2) |
-| Works at equilibrium? | Yes | No | No | No |
-| Identifies behavior modes? | Yes | Partial (7 patterns) | No | No |
-| Requires linearization? | Yes | No | No | No |
-| Works on discontinuous models? | No | Yes | Yes | Yes |
-| Requires model modification? | Yes (perturbation) | No | Yes (added equations) | No |
-| Computational complexity | High | Moderate | Low | Low-moderate |
-| Identifies leverage points? | Yes | No | No | No |
-| Tool availability | Specialized | Specialized | In-model | Stella 2.0 checkbox |
+| Property                       | EEA                | PPM                  | Loop Impact           | LTM                           |
+| ------------------------------ | ------------------ | -------------------- | --------------------- | ----------------------------- |
+| Scope                          | Whole model        | Single stock         | Single stock          | Whole model (cycle partition) |
+| Integration link treatment     | Second derivative  | Second derivative    | Second derivative     | First derivative (Eq. 2)      |
+| Works at equilibrium?          | Yes                | No                   | No                    | No                            |
+| Identifies behavior modes?     | Yes                | Partial (7 patterns) | No                    | No                            |
+| Requires linearization?        | Yes                | No                   | No                    | No                            |
+| Works on discontinuous models? | No                 | Yes                  | Yes                   | Yes                           |
+| Requires model modification?   | Yes (perturbation) | No                   | Yes (added equations) | No                            |
+| Computational complexity       | High               | Moderate             | Low                   | Low-moderate                  |
+| Identifies leverage points?    | Yes                | No                   | No                    | No                            |
+| Tool availability              | Specialized        | Specialized          | In-model              | Stella 2.0 checkbox           |
 
 LTM sacrifices equilibrium analysis and behavior mode identification in exchange for generality (works on any model type), simplicity (no specialized math), and accessibility (single checkbox in production software).
 
@@ -231,6 +235,7 @@ XMILE Model File
 ```
 
 Components:
+
 - **sd.js engine** (Powers, 2019): Modified to compute LTM metrics during simulation
 - **Graphviz neato**: Force-directed graph layout, modified for curved edges
 - **Web frontend**: Renders animated diagrams with user controls
@@ -251,6 +256,7 @@ The key insight is that force-directed layout algorithms (like Kamada-Kawai) alr
 **Initialization with SFD positions:** To avoid degenerate layouts, neato uses the position of each variable in the stock-and-flow diagram as its initial position. This preserves local clusters from the original SFD (assumes a well-laid-out SFD keeps related variables near each other).
 
 **Neato configuration for quality CLDs:**
+
 1. `overlap = 'prism'` -- Prism algorithm (Gansner & Hu, 2010) to remove overlapping variable names with minimal layout disturbance
 2. `mode = 'KK'` -- Kamada-Kawai gradient descent for node placement
 3. `model = 'shortpath'` -- Shortest path between node pairs as ideal spring length
@@ -294,29 +300,31 @@ Purpose: Filter out feedback loops (and their associated stocks/flows) that have
 - If such a pathway exists, a simplified link is created between the source and target
 - All kept simplified links are valid in both the aggregated and disaggregated model
 - The link score for a simplified link is the **product** of link scores along the pathway (chain rule property), which preserves consistency across aggregation levels
-- **Limitation:** The DFS only finds the *first* valid pathway, which may not be the most important one. If multiple distinct causal pathways connect two kept variables (through different intermediate variables), only one is represented in the simplified link. This is one of the key problems identified for future improvement.
+- **Limitation:** The DFS only finds the _first_ valid pathway, which may not be the most important one. If multiple distinct causal pathways connect two kept variables (through different intermediate variables), only one is represented in the simplified link. This is one of the key problems identified for future improvement.
 
 ### 4.5 Application: Forrester's 1968 Market Growth Model
 
 The Market Growth model (Forrester, 1968) with all macros expanded contains:
+
 - 10 stocks, 48 variables, 23 feedback loops (including macro-internal loops)
 
 **Note on loop count:** Article #2 reports 23 loops for Market Growth with macros expanded. Article #4 reports 19 loops for the same model (Morecroft 1983 replication). The difference of 4 loops is due to macro expansion: DELAY and SMOOTH macros contain internal feedback loops that are counted when macros are expanded (Article #2) but hidden when macros are treated as atomic units (Article #4, and the Article #5 production implementation which trims macro-internal loops from reported results).
 
 LoopX generates progressively simplified CLDs:
 
-| Thresholds | Variables | Description |
-|-----------|-----------|-------------|
-| Link 0%, Loop 0% | All (48) | Full CLD, all feedback complexity |
-| Link 100%, Loop 0% | ~22 | Less than half the variables; all 23 loops represented; 10 stocks, 12 flows, 2 auxiliaries |
-| Link 100%, Loop 20% | ~17 | 7 stocks, 10 flows, 2 auxiliaries |
-| Link 100%, Loop 100% | 4 | Maximally simplified: 2 flows, 2 auxiliaries; captures the single most dominant loop |
+| Thresholds           | Variables | Description                                                                                |
+| -------------------- | --------- | ------------------------------------------------------------------------------------------ |
+| Link 0%, Loop 0%     | All (48)  | Full CLD, all feedback complexity                                                          |
+| Link 100%, Loop 0%   | ~22       | Less than half the variables; all 23 loops represented; 10 stocks, 12 flows, 2 auxiliaries |
+| Link 100%, Loop 20%  | ~17       | 7 stocks, 10 flows, 2 auxiliaries                                                          |
+| Link 100%, Loop 100% | 4         | Maximally simplified: 2 flows, 2 auxiliaries; captures the single most dominant loop       |
 
 The tradeoff across these is **descriptive power vs. ease of cognition**, best decided case-by-case.
 
 ### 4.6 Challenge 3: Visualization of LTM Results
 
 **Animated diagrams:** In both SFDs and CLDs:
+
 - **Color** represents link polarity (red = negative/balancing, green = positive/reinforcing)
 - **Thickness** represents magnitude of the relative link score
 - For simplified CLDs, relative link scores along multi-step pathways are **multiplied** to get the simplified link's score
@@ -332,12 +340,14 @@ The tradeoff across these is **descriptive power vs. ease of cognition**, best d
 ### 4.7 Discussion and Limitations
 
 **CLD generation quality:**
+
 - Curved edges appear naturally drawn, following Richardson (1986) best practices for CLD aesthetics
 - Generated CLDs minimize non-feedback-looking structures while keeping short loops close in 2D space
 - The quality is substantially improved over Schoenberg (2009)'s Forio Model Explorer, which produced diagrams "of significantly less quality" than expert hand-drawn CLDs. The edge curving heuristic was the key advance that made machine-generated CLDs visually competitive.
 - CLD generation is independent of LTM -- the edge curving technique and force-directed layout work for any directed network data, not just SD models
 
 **Simplified CLD quality:**
+
 - Link score multiplication ensures consistency across aggregation levels (the chain rule property)
 - Information loss is controlled by the user via threshold parameters
 - Loop inclusion threshold can cause loss of stock representation if those stocks only appear in filtered loops
@@ -345,6 +355,7 @@ The tradeoff across these is **descriptive power vs. ease of cognition**, best d
 - The link inclusion threshold acts as a "surgical scalpel" -- it removes variables that exist for equation simplification rather than dynamic complexity
 
 **Problems with simplified CLDs:**
+
 - No quality indicator for the generated diagram (user must manually check which important loops are represented)
 - Simplified links may represent multiple causal pathways; the simplification method only chooses the first valid one found, which may not be the most important
 
@@ -352,13 +363,14 @@ The tradeoff across these is **descriptive power vs. ease of cognition**, best d
 
 1. **Raw link scores:** Would explode to infinity near equilibrium transitions. When a stock approaches equilibrium, its net flow approaches 0, and the integration link score (Equation 2) has (i - o) in the denominator, causing the score to grow without bound. This makes raw scores unsuitable for direct visual representation.
 
-2. **Relative link magnitude** (normalized across all inputs of a dependent variable): This is what was chosen. The relative link score divides the link score by the sum of all link scores for that dependent variable, yielding a fraction in [0, 1]. However, this normalization is per-variable, so loops are not directly identifiable from thickness alone -- a thick link only means it dominates *its particular variable's* inputs, not that it is part of a dominant loop.
+2. **Relative link magnitude** (normalized across all inputs of a dependent variable): This is what was chosen. The relative link score divides the link score by the sum of all link scores for that dependent variable, yielding a fraction in [0, 1]. However, this normalization is per-variable, so loops are not directly identifiable from thickness alone -- a thick link only means it dominates _its particular variable's_ inputs, not that it is part of a dominant loop.
 
 3. **Loop-score-based thickness:** Each link would be colored/sized based on the loop scores of the loops it participates in. Rejected because in models where important loops share many links, representing a link's membership in multiple loops simultaneously doesn't scale visually. A link could be in 5 important loops of different polarities, and there is no clear way to render this.
 
 4. **Global normalization** (across all links at a time step, or across all time steps): Both have problems. Normalizing across a time step means equilibrium periods (when most scores are near 0 but their ratios blow up) dominate the visual. Normalizing across all time steps means that when different parts of the model reach equilibrium at different times, the still-active parts appear increasingly bright relative to the quiescent parts, creating misleading impressions of relative importance.
 
 **Use cases for simplified CLDs:**
+
 1. Education (accurate but simpler depictions)
 2. Model construction (verify understanding of key dynamics)
 3. Policy maker communication (overviews of key structure)
@@ -377,9 +389,10 @@ LoopX works well for models with up to ~50 variables and <50 feedback loops. For
 
 ### 5.1 Motivation and Problem Statement
 
-This article extends LTM from analyzing *known* system dynamics models to **inferring causal structure from observational data**. The key insight: if the LTM link score can measure the contribution of one variable to another in a known model, can we construct a model from data and then use link scores to identify which causal relationships are real?
+This article extends LTM from analyzing _known_ system dynamics models to **inferring causal structure from observational data**. The key insight: if the LTM link score can measure the contribution of one variable to another in a known model, can we construct a model from data and then use link scores to identify which causal relationships are real?
 
 **The gap in existing causal inference:**
+
 - **Granger causality** (Granger, 1969): Tests whether past values of one time series improve prediction of another. Can identify specific causal links in simple systems, but fails to generalize to complex non-linear feedback systems where multiple variables simultaneously influence each other. Also assumes stationarity.
 - **Causal network learning algorithms** (PC algorithm, Bayesian network learning, etc.): Start from an empty or fully connected network and iteratively test/score edges. Fundamental limitation: they assume **directed acyclic graphs (DAGs)**, which by definition cannot represent feedback. Any system with feedback loops -- the core subject of system dynamics -- is outside their representational capacity.
 - **Convergent Cross-Mapping** (Sugihara et al., 2012): Tests for causation by measuring whether the state of one variable can be recovered from the manifold of another. Works for coupled dynamical systems but requires very long time series and struggles with noise.
@@ -401,7 +414,7 @@ The fundamental gap: no existing method can infer **directed cyclic causal graph
   - Hidden layers: individually sized per best practice
   - Single output: the derivative of the target state variable
 - A-priori knowledge can be incorporated by removing input nodes for known non-existent relationships (e.g., if a researcher knows that State_3 cannot directly influence State_1, the State_3 input to f_1 is removed)
-- **Critical architectural distinction from Neural ODEs (Chen et al., 2018):** In Neural ODEs, the state variables are latent -- they are part of a hidden network and do not correspond to observable quantities. In FSNN, the states are explicitly the **observed real system variables** (e.g., population, temperature, pressure). This is what makes FSNN interpretable: the neural networks learn the *relationships between observable quantities*, not a latent representation. The tradeoff is that FSNN requires knowing which variables are the state variables of the system, while Neural ODEs discover latent states automatically.
+- **Critical architectural distinction from Neural ODEs (Chen et al., 2018):** In Neural ODEs, the state variables are latent -- they are part of a hidden network and do not correspond to observable quantities. In FSNN, the states are explicitly the **observed real system variables** (e.g., population, temperature, pressure). This is what makes FSNN interpretable: the neural networks learn the _relationships between observable quantities_, not a latent representation. The tradeoff is that FSNN requires knowing which variables are the state variables of the system, while Neural ODEs discover latent states automatically.
 - The relationship between state variables is fully general: each `f_i` can learn arbitrary nonlinear functions, including thresholds, saturation, and complex multi-variable interactions
 
 **Step 2: Train/parameterize the model**
@@ -447,6 +460,7 @@ f = nonlinear sigmoid function, x range [0,100], y range [0,100], inflection at 
 This produces **4 feedback loops** (all balancing) and exhibits **dampened oscillation**.
 
 **Training setup:**
+
 - Two distinct initializations: (29, 96, 4) and (22, 11, 78)
 - 100 time points per initialization, sampled at each time unit
 - dt = 1/4, RK4 solver
@@ -477,7 +491,7 @@ This produces **4 feedback loops** (all balancing) and exhibits **dampened oscil
 - The neural network is a **universal approximator** (Cybenko, 1989), capable of representing an infinitely wide range of behavior patterns. This means many different weight configurations can produce the same behavioral output.
 - After training, the generated model is just one possible explanation -- a hypothesis about causal structure, not a proven fact.
 - The distinction between the singular well-defined model and a set of behaviorally-equivalent models is "miniscule to insignificant in the behavioral space, but vastly different in the structural (causal) space." Two models that are indistinguishable by behavior may attribute causation to completely different variables.
-- The payoff surface has regions of degeneracy where multiple weight configurations score equally well. The optimizer finds *one* of these configurations, which may or may not reflect the true causal structure.
+- The payoff surface has regions of degeneracy where multiple weight configurations score equally well. The optimizer finds _one_ of these configurations, which may or may not reflect the true causal structure.
 - **Ultimately, validation of inferred causal structure requires empirical experimentation beyond behavior-matching.** Matching behavior is necessary but not sufficient for establishing causation. This is analogous to the fundamental problem of observational studies in statistics.
 
 **The manifold perspective:** The ground truth system can be understood as an n-sized set of n-dimensional functions (one per state variable's derivative), each producing a manifold in state space. The derivative of State_i is a function of the current values of all state variables, so as the system evolves, it traces out a trajectory on the surface of these n-dimensional manifolds. Training explores these manifold surfaces:
@@ -550,6 +564,7 @@ The ILS (Kampmann, 2012) and SILS (Oliva, 2004) reduce the set of loops to analy
 Different loops are important at different times. A loop that is inactive early may be dominant later (demonstrated with the decoupled two-stock IF/THEN model -- Figure 4 of Article #4). This means loop discovery must account for all links that are active at **any point** during the simulation.
 
 **Composite link score approaches tried and rejected:**
+
 - **Maximum link score magnitude over time:** Always gives 1 for every link near a stock's own flow; biased toward longer loops; scores can exceed 1.0E300
 - **Average link score magnitude over time:** Biased toward shorter loops; small equation changes can make major loops score 0
 
@@ -579,15 +594,15 @@ For each time step in the simulation:
 
 ### 6.5 Completeness Results
 
-| Model | Total Loops | Loops Found | Notes |
-|-------|------------|-------------|-------|
-| Market Growth (Forrester, 1968; Morecroft 1983) | 19 | 19 | All found (19 loops without macro expansion; 23 with macro expansion per Article #2) |
-| Service Quality (Oliva & Sterman, 2001) | 104 (main set) | 76 | Of top 15, only 8th missing; misses are siblings of found loops |
-| Economic Cycles (Mass, 1975) | 494 | 261 | Of top 40, only 22nd and 40th missing |
-| Urban Dynamics (Forrester, 1969) | 43,722,744 | 20,172 | Truncated to <200 at 0.1% contribution threshold; 10-20 seconds on i7 |
-| World 3-03 (Meadows, 2004) | 330,574 | 2,709 | Truncated to 112 at 0.1% threshold; ~4 seconds |
+| Model                                           | Total Loops    | Loops Found | Notes                                                                                |
+| ----------------------------------------------- | -------------- | ----------- | ------------------------------------------------------------------------------------ |
+| Market Growth (Forrester, 1968; Morecroft 1983) | 19             | 19          | All found (19 loops without macro expansion; 23 with macro expansion per Article #2) |
+| Service Quality (Oliva & Sterman, 2001)         | 104 (main set) | 76          | Of top 15, only 8th missing; misses are siblings of found loops                      |
+| Economic Cycles (Mass, 1975)                    | 494            | 261         | Of top 40, only 22nd and 40th missing                                                |
+| Urban Dynamics (Forrester, 1969)                | 43,722,744     | 20,172      | Truncated to <200 at 0.1% contribution threshold; 10-20 seconds on i7                |
+| World 3-03 (Meadows, 2004)                      | 330,574        | 2,709       | Truncated to 112 at 0.1% threshold; ~4 seconds                                       |
 
-Missing loops are typically **siblings** of discovered loops -- slightly longer or shorter variants that share most of their elements. The algorithm has high confidence of finding loops *similar to* the strongest ones.
+Missing loops are typically **siblings** of discovered loops -- slightly longer or shorter variants that share most of their elements. The algorithm has high confidence of finding loops _similar to_ the strongest ones.
 
 ### 6.6 Paths Not Taken
 
@@ -613,6 +628,7 @@ This article describes the production implementation of LTM in the **Stella** fa
 Macros like DELAY3 hide complex internal structure (3 stocks, 4 flows, internal feedback loops). From the practitioner's perspective, a DELAY3 looks like a single link from input to output.
 
 **Solution -- composite link score:** The link score for a pathway through a macro is the **path score of the expanded pathway with the largest magnitude** (positive or negative). This:
+
 - Preserves loop score integrity (if single internal path, identical to expansion)
 - If multiple internal paths (DELAY3 has 7 distinct causal pathways): uses the largest
 - Can be computed during simulation with no post-processing
@@ -631,6 +647,7 @@ Stella includes Conveyors, Queues, Ovens, and functions like PREVIOUS that retai
 ### 7.3 Too Many Loops
 
 Uses the strongest path algorithm (Article #4) to find only the important loops. Additionally:
+
 - **LOOPSCORE builtin function:** Allows practitioners to specify any arbitrary feedback loop and compute its score over time, regardless of whether the strongest path algorithm found it. Reports relative values, available at end of simulation.
 - **PATHSCORE builtin function:** Computes raw loop/path scores during simulation. Can be used in model equations.
 
@@ -641,7 +658,8 @@ These builtins solve the problem that the strongest path algorithm's results cha
 The LoopX prototype had a significant design flaw in how it constructed simplified CLDs: after filtering variables, it searched the **entire network of model equations** to reconnect kept variables, which "ignored why a certain variable was kept and brought forth links (and therefore loops) of demonstrable unimportance in highly simplified CLDs." The Stella implementation fixes this with a fundamentally different approach:
 
 **Evolution of the simplification algorithm:**
-1. When a variable is kept by the **link inclusion threshold**, the system now also records *which specific link(s)* justified keeping that variable (the links with relative link variance above the threshold)
+
+1. When a variable is kept by the **link inclusion threshold**, the system now also records _which specific link(s)_ justified keeping that variable (the links with relative link variance above the threshold)
 2. For each kept link, the system identifies the **strongest feedback loop** that the link is a member of
 3. This creates a direct mapping from each kept variable to the specific feedback loop(s) that made it important
 4. Simplified links are only generated along pathways that are part of these identified important loops, rather than any arbitrary pathway through the equation network
@@ -673,6 +691,7 @@ Where `r` = sum of highest-magnitude instantaneous reinforcing pathway scores ov
 Some links change polarity during simulation (e.g., the formulation flaw in the yeast alcohol model). Loops containing such links have expressed both positive and negative polarities at different times.
 
 **Labeling scheme:**
+
 - Rx, Bx: Standard reinforcing/balancing
 - Rux, Bux: Unknown polarity but **predominantly** reinforcing/balancing (confidence > 0.99)
 - Ux: Unknown polarity with no clear predominance
@@ -684,12 +703,14 @@ A boolean parameter controls whether flows are automatically kept when their sto
 ### 7.8 Demonstrations
 
 **Pedagogy (Population Model):**
+
 - Births only: R1 = 100% (exponential growth, obvious)
 - Births + deaths (lifetime = 20): Text states R1 = 67%, B1 = 35%; Figure 5 shows precise values R1 = 66.67%, B1 = -33.33%. The text's "35%" for the balancing loop appears to be a rounding error in the paper; the mathematically correct value from the figure is 33.33%.
 - Setting lifetime = 10: No loops reported (equilibrium -- LTM limitation)
 - Adding carrying capacity: Text states "one reinforcing loop with a score of 50%, and two balancing loops with scores that add to -50%." The capacity constraint loop (B1) is at first inactive, but then becomes the bigger of the two balancing loops. Figure 7 shows specific instantaneous values at the end of simulation: R1 = 50.00%, B1 = -36.17%, B2 = -13.82%. Dominance shifts over time from R1-dominant to a three-way split.
 
 **Complex Model (Mass's 1975 Economic Cycles):**
+
 - 163 variables, 17 stocks, 494 feedback loops
 - Simplified CLD: 9 simplified loops representing 21 full loops, explaining **59.7%** of total behavior
 - Of remaining 40.3%: 31.2% from 469 unimportant loops (<2% each), 8.9% from 4 loops consisting of perfectly canceling reinforcing/balancing pairs
@@ -697,6 +718,7 @@ A boolean parameter controls whether flows are automatically kept when their sto
 - R1 and B3 are perfectly destructive interference -- same loop path but opposite effects through perceived price changes on backlogs vs. inventory
 
 **Discrete System (Workforce Training):**
+
 - Model with conveyor (pipeline delay) and non-negative stock
 - Two parameterizations (time to adjust = 5 vs. 2) produce different feedback structures
 - LTM identifies hidden feedback loops in the conveyor (between Apprentices and finishing training)
@@ -724,6 +746,7 @@ The thesis argues five contributions:
 ### 8.2 Practical Impact
 
 The thesis was written concurrent with the production implementation in Stella 2.0 (isee systems). The LTM tools are:
+
 - Turned on by a **single checkbox** ("Loop dominance analysis") in the simulation settings
 - Automatically find important loops using the strongest path algorithm, compute all link and loop scores during simulation, and report results
 - Display animated SFDs and auto-generated simplified CLDs with real-time threshold controls
@@ -735,19 +758,20 @@ This represents the first time any loop dominance analysis technique has been se
 ### 8.3 Relationship to Sterman's Challenges and the Research Questions
 
 The two research questions map to Sterman's three challenges:
+
 - **RQ1** (algorithmic discovery of behavioral origins) corresponds to Sterman's "automated identification of dominant loops"
 - **RQ2** (visualization, animation, simplification) corresponds to Sterman's "visualization of model behavior" and "linking behavior to generative structure"
 
-| Challenge | Prior State | After Thesis |
-|-----------|-----------|-------------|
-| Automated identification of dominant loops | EEA, PPM existed but not widely adopted | LTM automated, packaged in Stella |
-| Visualization of model behavior | Static diagrams | Animated SFDs and CLDs with dynamic link/loop scores |
-| Linking behavior to generative structure | Required specialized analysis | Simplified CLDs automatically connect behavior to minimal structural explanation |
+| Challenge                                  | Prior State                             | After Thesis                                                                     |
+| ------------------------------------------ | --------------------------------------- | -------------------------------------------------------------------------------- |
+| Automated identification of dominant loops | EEA, PPM existed but not widely adopted | LTM automated, packaged in Stella                                                |
+| Visualization of model behavior            | Static diagrams                         | Animated SFDs and CLDs with dynamic link/loop scores                             |
+| Linking behavior to generative structure   | Required specialized analysis           | Simplified CLDs automatically connect behavior to minimal structural explanation |
 
 ### 8.4 Limitations Acknowledged
 
 1. **Cannot report on unobserved behavioral modes:** LTM only analyzes the behavior that actually occurs during a specific simulation with specific parameters. Alternative scenarios, counterfactuals, and parameter sensitivity are not covered by a single analysis. This is in contrast to EEA, which can decompose behavior into distinct modes (growth, oscillation) and identify how parameter changes would affect each mode.
-2. **Cannot report on loop dominance during equilibrium:** Fundamental limitation of the approach. When all net flows are zero, all link scores are 0/0 = 0. This means LTM provides no information about which feedback structure is *maintaining* an equilibrium, only about which structure is *driving change*. EEA can analyze equilibrium states.
+2. **Cannot report on loop dominance during equilibrium:** Fundamental limitation of the approach. When all net flows are zero, all link scores are 0/0 = 0. This means LTM provides no information about which feedback structure is _maintaining_ an equilibrium, only about which structure is _driving change_. EEA can analyze equilibrium states.
 3. **Scalability of simplified CLDs:** While the strongest path algorithm handles the Urban Dynamics model (43M loops, ~10-20 seconds on i7), the simplified CLD generation process (mapping full loops to simplified loops, generating simplified links) needs further engineering for truly giant models. The loop finding itself is fast; the visualization pipeline is the bottleneck.
 4. **FSNN is early-stage:** The article is a "working paper" demonstrating feasibility on a synthetic system. Many challenges remain for real-world application: measurement error, appropriate scaling, manifold coverage, identifying state variables from observational data, and validating inferred causal structure without access to ground truth.
 5. **LTM does not identify leverage points:** Unlike EEA, LTM does not directly identify where structural changes (policy interventions) would most affect behavior. It identifies which loops dominate, but not where to intervene.
@@ -772,7 +796,7 @@ The thesis documents that the LTM method was originally implemented by modifying
 - **Equation re-evaluation:** For each non-stock variable with equation `z = f(x1, x2, ..., xk)`, the equation must be re-evaluated **k times** per timestep (once per input variable, holding others at previous values). For a typical model where most variables have 2-4 inputs, this roughly doubles the number of equation evaluations vs. normal simulation. For variables with many inputs (e.g., a lookup function of 10 variables), the cost is proportionally higher.
 - **Storage:** Previous values of **all** variables must be retained between time steps. The delta computation requires both current and previous values for every variable. This doubles memory usage for variable storage.
 - **Loop finding:** The strongest path algorithm runs at each dt (or a configurable subset of time steps), with complexity roughly proportional to the **square of the number of variables** per pass. The 3x speedup from edge sorting (Article #4) is critical for large models. For Urban Dynamics, the algorithm takes ~10-20 seconds total across all time steps on an i7 processor.
-- **Link scores are computed for every link at every dt** during simulation. For a model with L total links and T time steps, this is L*T link score computations. Each link score computation is O(1) given the precomputed ceteris paribus values.
+- **Link scores are computed for every link at every dt** during simulation. For a model with L total links and T time steps, this is L\*T link score computations. Each link score computation is O(1) given the precomputed ceteris paribus values.
 - **Total overhead:** For typical models, LTM roughly doubles simulation time. For models with many inputs per variable or many feedback loops, the overhead can be higher.
 
 ### 9.2 PATHSCORE and LOOPSCORE Builtins
@@ -793,6 +817,7 @@ Approximated as instantaneous response (perfect mixing analog). Gets polarity an
 ## 10. Key Figures Summary
 
 ### Thesis Body Figures
+
 - **Figure 1:** Simple population stock-and-flow diagram (births feedback loop)
 - **Figure 2:** Simple population causal loop diagram
 - **Figure 3:** Seven basic SD behavior modes (exponential growth, goal seeking, oscillation, S-shaped growth, S-shaped growth with overshoot, overshoot and collapse, overshoot and oscillation)
@@ -801,6 +826,7 @@ Approximated as instantaneous response (perfect mixing analog). Gets polarity an
 - **Figure 6:** Comparison of thesis goals vs. thesis articles mapping (which article addresses which goal)
 
 ### Article #2 Figures
+
 - **Figure 1:** LoopX architecture schematic (XMILE -> sd.js + LTM -> animated SFD/CLD)
 - **Figure 2:** Machine-generated CLD from Bass diffusion SFD (demonstrating edge curving quality)
 - **Figure 3:** Stock-and-flow diagram of Forrester's 1968 Market Growth model (10 stocks)
@@ -812,12 +838,14 @@ Approximated as instantaneous response (perfect mixing analog). Gets polarity an
 - **Figure 9:** LoopX screenshot -- simplified CLD of Bass diffusion
 
 ### Article #3 Figures
+
 - **Figure 1:** Generated model vs. ground truth on two training initializations (good fit)
 - **Figure 2:** 3x3 matrix of pathway link scores comparing ground truth and generated model (correct causal links and polarities identified)
 - **Figure 3:** Prediction error distribution across 100 Monte Carlo initializations (tight 95% bounds)
 - **Figure 4:** Maximum error vs. sum of initial states (exponential degradation beyond training range)
 
 ### Article #4 Figures
+
 - **Figure 1:** Three-party arms race model SFD
 - **Figure 2:** Behavior of the 3 stocks in the arms race model
 - **Figure 3:** Relative loop scores for all 8 loops (long loops dominate by time 50)
@@ -827,6 +855,7 @@ Approximated as instantaneous response (perfect mixing analog). Gets polarity an
 - **Figure 7:** Failure case for direct Dijkstra adaptation (a->d->c->a found instead of stronger a->b->c->a)
 
 ### Article #5 Figures
+
 - **Figure 1:** DELAY3 macro internal structure (3 stocks, 4 flows, 7 distinct causal pathways)
 - **Figure 2:** Weakly coupled system that becomes disconnected when simplified (valid representation)
 - **Figure 3:** Over-simplified Market Growth CLD with gray link (mixed polarity indicator) and its expansion
@@ -844,49 +873,49 @@ Approximated as instantaneous response (perfect mixing analog). Gets polarity an
 
 ## 11. Complete Reference List of Models Analyzed
 
-| Model | Stocks | Variables | Loops | Articles |
-|-------|--------|-----------|-------|----------|
-| Bass Diffusion (1969) | 2 | ~10 | 2 | #1, #2, #5 |
-| Yeast Alcohol | 2 | ~5 | 4 | #1 |
-| Inventory Workforce (Goncalves, 2009) | 3 | ~12 | 3 | #1 |
-| Three-State ODE (synthetic) | 3 | ~8 | 4 | #3 |
-| Three-Party Arms Race | 3 | ~18 | 8 | #4 |
-| Market Growth (Forrester, 1968) | 10 | 48 | 19 (or 23 with macro expansion) | #2, #4, #5 |
-| Service Quality (Oliva & Sterman, 2001) | ~15 | ~50 | 104+ | #4 |
-| Economic Cycles (Mass, 1975) | 17 | 163 | 494 | #4, #5 |
-| Simple Population | 1 | ~4 | 1-3 | #5 |
-| Workforce Training (discrete) | 2 | ~10 | 2-4 | #5 |
-| Urban Dynamics (Forrester, 1969) | ~20 | ~100+ | 43,722,744 | #4 |
-| World 3-03 (Meadows, 2004) | ~30 | ~200+ | 330,574 | #4 |
+| Model                                   | Stocks | Variables | Loops                           | Articles   |
+| --------------------------------------- | ------ | --------- | ------------------------------- | ---------- |
+| Bass Diffusion (1969)                   | 2      | ~10       | 2                               | #1, #2, #5 |
+| Yeast Alcohol                           | 2      | ~5        | 4                               | #1         |
+| Inventory Workforce (Goncalves, 2009)   | 3      | ~12       | 3                               | #1         |
+| Three-State ODE (synthetic)             | 3      | ~8        | 4                               | #3         |
+| Three-Party Arms Race                   | 3      | ~18       | 8                               | #4         |
+| Market Growth (Forrester, 1968)         | 10     | 48        | 19 (or 23 with macro expansion) | #2, #4, #5 |
+| Service Quality (Oliva & Sterman, 2001) | ~15    | ~50       | 104+                            | #4         |
+| Economic Cycles (Mass, 1975)            | 17     | 163       | 494                             | #4, #5     |
+| Simple Population                       | 1      | ~4        | 1-3                             | #5         |
+| Workforce Training (discrete)           | 2      | ~10       | 2-4                             | #5         |
+| Urban Dynamics (Forrester, 1969)        | ~20    | ~100+     | 43,722,744                      | #4         |
+| World 3-03 (Meadows, 2004)              | ~30    | ~200+     | 330,574                         | #4         |
 
 ---
 
 ## 12. Terminology Reference
 
-| Term | Definition |
-|------|-----------|
-| **Link score** | Dimensionless measure of contribution and polarity of a link between independent and dependent variable at a point in time |
-| **Loop score** | Product of all link scores in a feedback loop; measures loop's contribution to model behavior |
-| **Relative loop score** | Loop score normalized by sum of absolute loop scores in the cycle partition; range [-1, 1] |
-| **Partial change** (delta_xz) | Change in z that would occur if only x changed (ceteris paribus) |
-| **Relative link score** | Link score normalized across all determinants of the dependent variable |
-| **Relative link variance** | max - min of the absolute relative link score over the simulation; measures link dynamism |
-| **Composite link score** | Path score of the expanded pathway through a macro with the largest magnitude |
-| **Composite relative loop score** | Sum of relative loop scores of all full loops mapping to a simplified loop |
-| **Link inclusion threshold** | [0,1] parameter filtering variables by maximum relative link variance of incoming links |
-| **Loop inclusion threshold** | [0,1] parameter filtering loops by average magnitude of relative loop score |
-| **Polarity confidence** | |r - |b|| / (r + |b|); measures whether a simplified link has consistent polarity |
-| **Cycle partition** | Subset of model where all stocks are connected by feedback loops |
-| **Dominant loop** | Loop (or set) contributing >= 50% of observed change across all stocks |
-| **Strongest path algorithm** | Dijkstra-like heuristic for finding high-scoring feedback loops |
-| **FSNN** | Feedback System Neural Network -- ODE system with neural net derivatives for causal inference |
-| **ILS** | Independent Loop Set (Kampmann, 2012) |
-| **SILS** | Shortest Independent Loop Set (Oliva, 2004) |
-| **EEA** | Eigenvalue Elasticity Analysis |
-| **PPM** | Pathway Participation Metric |
-| **LoopX** | Web-based LTM visualization tool (prototype, precursor to Stella integration) |
-| **Universal approximator** | Property of neural networks (Cybenko, 1989): a single hidden layer with enough neurons can approximate any continuous function to arbitrary precision |
-| **Manifold** | In FSNN context: the n-dimensional surface in state space traced by the derivative function of a state variable as the system evolves; training data samples points on this surface |
-| **Degenerate payoff surface** | In FSNN context: multiple weight configurations score equally well during optimization, making the specific causal structure found by the optimizer non-unique |
-| **BOBYQA** | Bound Optimization BY Quadratic Approximation (Powell); derivative-free optimization algorithm used for FSNN training |
-| **Ceteris paribus** | "All other things being equal"; the LTM method for computing partial changes by varying one input while holding others at previous-timestep values |
+| Term                              | Definition                                                                                                                                                                          |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --- | --- | ------ | --- | ------------------------------------------------------------- |
+| **Link score**                    | Dimensionless measure of contribution and polarity of a link between independent and dependent variable at a point in time                                                          |
+| **Loop score**                    | Product of all link scores in a feedback loop; measures loop's contribution to model behavior                                                                                       |
+| **Relative loop score**           | Loop score normalized by sum of absolute loop scores in the cycle partition; range [-1, 1]                                                                                          |
+| **Partial change** (delta_xz)     | Change in z that would occur if only x changed (ceteris paribus)                                                                                                                    |
+| **Relative link score**           | Link score normalized across all determinants of the dependent variable                                                                                                             |
+| **Relative link variance**        | max - min of the absolute relative link score over the simulation; measures link dynamism                                                                                           |
+| **Composite link score**          | Path score of the expanded pathway through a macro with the largest magnitude                                                                                                       |
+| **Composite relative loop score** | Sum of relative loop scores of all full loops mapping to a simplified loop                                                                                                          |
+| **Link inclusion threshold**      | [0,1] parameter filtering variables by maximum relative link variance of incoming links                                                                                             |
+| **Loop inclusion threshold**      | [0,1] parameter filtering loops by average magnitude of relative loop score                                                                                                         |
+| **Polarity confidence**           |                                                                                                                                                                                     | r - | b   |     | / (r + | b   | ); measures whether a simplified link has consistent polarity |
+| **Cycle partition**               | Subset of model where all stocks are connected by feedback loops                                                                                                                    |
+| **Dominant loop**                 | Loop (or set) contributing >= 50% of observed change across all stocks                                                                                                              |
+| **Strongest path algorithm**      | Dijkstra-like heuristic for finding high-scoring feedback loops                                                                                                                     |
+| **FSNN**                          | Feedback System Neural Network -- ODE system with neural net derivatives for causal inference                                                                                       |
+| **ILS**                           | Independent Loop Set (Kampmann, 2012)                                                                                                                                               |
+| **SILS**                          | Shortest Independent Loop Set (Oliva, 2004)                                                                                                                                         |
+| **EEA**                           | Eigenvalue Elasticity Analysis                                                                                                                                                      |
+| **PPM**                           | Pathway Participation Metric                                                                                                                                                        |
+| **LoopX**                         | Web-based LTM visualization tool (prototype, precursor to Stella integration)                                                                                                       |
+| **Universal approximator**        | Property of neural networks (Cybenko, 1989): a single hidden layer with enough neurons can approximate any continuous function to arbitrary precision                               |
+| **Manifold**                      | In FSNN context: the n-dimensional surface in state space traced by the derivative function of a state variable as the system evolves; training data samples points on this surface |
+| **Degenerate payoff surface**     | In FSNN context: multiple weight configurations score equally well during optimization, making the specific causal structure found by the optimizer non-unique                      |
+| **BOBYQA**                        | Bound Optimization BY Quadratic Approximation (Powell); derivative-free optimization algorithm used for FSNN training                                                               |
+| **Ceteris paribus**               | "All other things being equal"; the LTM method for computing partial changes by varying one input while holding others at previous-timestep values                                  |

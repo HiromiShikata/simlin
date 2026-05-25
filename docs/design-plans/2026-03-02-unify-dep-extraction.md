@@ -13,11 +13,13 @@ Replace the duplicated ad-hoc AST-walk logic for PREVIOUS/INIT dependency catego
 ## Acceptance Criteria
 
 ### unify-dep-extraction.AC0: Regression Safety
+
 - **AC0.1 Success:** All existing simulation tests (`tests/simulate.rs`) pass at each phase boundary
 - **AC0.2 Success:** All existing engine unit tests (`cargo test` in `src/simlin-engine`) pass at each phase boundary
 - **AC0.3 Success:** Full integration test suite passes after each phase -- no behavioral regressions introduced
 
 ### unify-dep-extraction.AC1: Single unified dependency analysis pass
+
 - **AC1.1 Success:** `classify_dependencies()` on a scalar equation with mixed references (`PREVIOUS(a) + INIT(b) + c`) returns correct `all`, `previous_only`, `init_only`, `init_referenced`, `previous_referenced` sets in one call
 - **AC1.2 Success:** `classify_dependencies()` handles `ApplyToAll` and `Arrayed` AST variants, walking all element expressions and default expressions
 - **AC1.3 Success:** `IsModuleInput` branch selection works correctly when `module_inputs` is provided -- only the active branch's deps are collected
@@ -26,20 +28,24 @@ Replace the duplicated ad-hoc AST-walk logic for PREVIOUS/INIT dependency catego
 - **AC1.6 Edge:** Nested `PREVIOUS(PREVIOUS(x))` correctly classifies `x` as previous_only at both nesting levels
 
 ### unify-dep-extraction.AC2: Simplified db.rs consumption
+
 - **AC2.1 Success:** `variable_direct_dependencies_impl` calls `classify_dependencies` exactly twice (dt AST + init AST) and populates `VariableDeps` from the results
 - **AC2.2 Success:** `extract_implicit_var_deps` calls `classify_dependencies` exactly twice and populates `ImplicitVarDeps` from the results
 - **AC2.3 Success:** Pruning logic in `model_dependency_graph_impl` produces identical dependency graphs before and after the refactoring (verified by existing integration tests passing)
 
 ### unify-dep-extraction.AC3: Authoritative module-backed classifier
+
 - **AC3.1 Success:** `collect_module_idents()` and `builtins_visitor` PREVIOUS/INIT routing use the same predicate function for stdlib-call detection
 - **AC3.2 Success:** No duplicated logic for determining whether an equation expands to a module
 
 ### unify-dep-extraction.AC4: Table-driven invariant tests
+
 - **AC4.1 Success:** Matrix test covers all combinations: phase (dt/initial) x reference form (direct/PREVIOUS/INIT/mixed/both-lagged) x context (scalar/isModuleInput/ApplyToAll/subscript range)
 - **AC4.2 Success:** Each matrix cell asserts all 5 fields of `DepClassification`
 - **AC4.3 Success:** All 7 prior bug-fix edge cases have corresponding matrix entries (PREVIOUS feedback, mixed current+lagged, split by phase, INIT-only, fragment context, PREVIOUS+INIT combined, nested PREVIOUS)
 
 ### unify-dep-extraction.AC5: Differential checks
+
 - **AC5.1 Success:** For every variable in every integration test model, the phases `compile_var_fragment` produces bytecodes for match the phases the variable appears in across dep graph runlists
 - **AC5.2 Success:** Synthetic models exercising PREVIOUS feedback, INIT-only deps, nested builtins, and module-backed vars pass the differential check
 - **AC5.3 Failure:** If a new variable is added that causes fragment/graph phase disagreement, the differential test catches it
@@ -76,6 +82,7 @@ A `ClassifyVisitor` struct walks the `Expr2` AST once, maintaining two boolean f
 - `non_init: BTreeSet<String>` -- idents found outside `INIT()`/`PREVIOUS()` context
 
 After the walk, derived sets are computed via set difference:
+
 - `previous_only = previous_referenced - non_previous` (replaces `lagged_only_previous_idents_with_module_inputs`)
 - `init_only = init_referenced - non_init` (replaces `init_only_referenced_idents_with_module_inputs`)
 
@@ -127,11 +134,13 @@ Salsa-tracked function boundaries (`variable_direct_dependencies_impl`, `model_d
 ## Implementation Phases
 
 <!-- START_PHASE_1 -->
+
 ### Phase 1: Unified Walker and DepClassification
 
 **Goal:** Replace the 5 overlapping AST-walk functions with a single `classify_dependencies()` function returning `DepClassification`.
 
 **Components:**
+
 - `DepClassification` struct and `classify_dependencies()` in `src/simlin-engine/src/variable.rs`
 - `ClassifyVisitor` internal struct combining `IdentifierSetVisitor` state with `in_previous`/`in_init` flags
 - Remove `init_referenced_idents`, `previous_referenced_idents`, `lagged_only_previous_idents_with_module_inputs`, `init_only_referenced_idents_with_module_inputs`
@@ -140,14 +149,17 @@ Salsa-tracked function boundaries (`variable_direct_dependencies_impl`, `model_d
 **Dependencies:** None (first phase)
 
 **Done when:** `classify_dependencies()` returns correct results for all existing test cases from `test_identifier_sets`, `test_init_only_referenced_idents`, and `test_range_end_expressions_are_walked_in_init_previous_helpers`. All existing callers compile. Covers `unify-dep-extraction.AC1.*`.
+
 <!-- END_PHASE_1 -->
 
 <!-- START_PHASE_2 -->
+
 ### Phase 2: Simplify db.rs and db_implicit_deps.rs Consumption
 
 **Goal:** Replace the multiple walker calls in `variable_direct_dependencies_impl()` and `extract_implicit_var_deps()` with calls to `classify_dependencies()`.
 
 **Components:**
+
 - `variable_direct_dependencies_impl()` in `src/simlin-engine/src/db.rs` -- call `classify_dependencies` twice (dt + init AST), populate `VariableDeps` from results
 - `extract_implicit_var_deps()` in `src/simlin-engine/src/db_implicit_deps.rs` -- same simplification for implicit variable deps
 - `VariableDeps` struct in `src/simlin-engine/src/db.rs` -- field names may be adjusted to align with `DepClassification` terminology
@@ -155,14 +167,17 @@ Salsa-tracked function boundaries (`variable_direct_dependencies_impl`, `model_d
 **Dependencies:** Phase 1
 
 **Done when:** `variable_direct_dependencies_impl` and `extract_implicit_var_deps` each make exactly 2 calls to `classify_dependencies` (dt + init). All existing tests pass. Pruning logic in `model_dependency_graph_impl` unchanged. Covers `unify-dep-extraction.AC2.*`.
+
 <!-- END_PHASE_2 -->
 
 <!-- START_PHASE_3 -->
+
 ### Phase 3: Module-Backed Classifier Unification
 
 **Goal:** Extract the shared module-classification predicate so `collect_module_idents()` and `builtins_visitor` routing use the same function.
 
 **Components:**
+
 - Extract `equation_is_stdlib_call()` from `src/simlin-engine/src/model.rs` into a shared location (either a standalone function in `model.rs` re-exported, or a small utility)
 - `builtins_visitor.rs` routing decision in `src/simlin-engine/src/builtins_visitor.rs` -- use the shared predicate where applicable
 - Document `self.vars` runtime extension in `builtins_visitor.rs` as incremental additions using the same rule
@@ -170,14 +185,17 @@ Salsa-tracked function boundaries (`variable_direct_dependencies_impl`, `model_d
 **Dependencies:** Phase 1 (shared classifier may inform walker behavior for module-backed vars)
 
 **Done when:** `collect_module_idents()` and `builtins_visitor`'s PREVIOUS/INIT routing use the same predicate function. No duplicated classification logic. Covers `unify-dep-extraction.AC3.*`.
+
 <!-- END_PHASE_3 -->
 
 <!-- START_PHASE_4 -->
+
 ### Phase 4: Table-Driven Invariant Tests
 
 **Goal:** Add comprehensive matrix tests covering phase x reference form x context for `classify_dependencies()`.
 
 **Components:**
+
 - `DepTestCase` struct and parameterized test in `src/simlin-engine/src/variable.rs` (or a dedicated test file)
 - Matrix dimensions: phase (dt/initial), reference form (direct/PREVIOUS/INIT/mixed/both-lagged), context (scalar root/isModuleInput branch/ApplyToAll/subscript range)
 - Replace existing scattered tests (`test_identifier_sets`, `test_init_only_referenced_idents`, `test_range_end_expressions_are_walked_in_init_previous_helpers`) with the unified matrix
@@ -186,14 +204,17 @@ Salsa-tracked function boundaries (`variable_direct_dependencies_impl`, `model_d
 **Dependencies:** Phase 1
 
 **Done when:** Matrix test covers all combinations from the 7 prior bug-fix commits (PREVIOUS feedback, mixed current+lagged, split by phase, INIT-only, fragment context, PREVIOUS+INIT combined, nested PREVIOUS). Covers `unify-dep-extraction.AC4.*`.
+
 <!-- END_PHASE_4 -->
 
 <!-- START_PHASE_5 -->
+
 ### Phase 5: Differential Checks (Fragment vs Full Compile)
 
 **Goal:** Assert that fragment compilation and full model compilation agree on dependency classifications and phase membership for every variable.
 
 **Components:**
+
 - `assert_fragment_phase_agreement()` helper in `src/simlin-engine/src/db_prev_init_tests.rs` (or `db_differential_tests.rs`)
 - For each variable: compare phases that `compile_var_fragment` produces bytecodes for vs phases the dep graph's runlists include the variable in
 - Run over all existing integration test models in `test/`
@@ -202,6 +223,7 @@ Salsa-tracked function boundaries (`variable_direct_dependencies_impl`, `model_d
 **Dependencies:** Phases 1-2 (unified walker and simplified db consumption must be in place)
 
 **Done when:** Differential check passes for all integration test models and synthetic edge cases. Covers `unify-dep-extraction.AC5.*`.
+
 <!-- END_PHASE_5 -->
 
 ## Additional Considerations

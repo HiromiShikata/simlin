@@ -30,11 +30,13 @@ Specifically:
 ## Acceptance Criteria
 
 ### simlin-mcp.AC1: Async Transport
+
 - **simlin-mcp.AC1.1 Success:** Server starts, completes MCP initialize handshake, and responds to ping over stdio
 - **simlin-mcp.AC1.2 Success:** Server processes multiple sequential JSON-RPC requests without restarting
 - **simlin-mcp.AC1.3 Success:** Server shuts down cleanly when stdin reaches EOF (no hanging tasks or zombie processes)
 
 ### simlin-mcp.AC2: ReadModel Tool
+
 - **simlin-mcp.AC2.1 Success:** ReadModel returns model snapshot with loop dominance data for a model with known feedback loops
 - **simlin-mcp.AC2.2 Success:** ReadModel returns time array, per-loop importance arrays, and dominant periods consistent with simulation results
 - **simlin-mcp.AC2.3 Success:** ReadModel defaults modelName to "main" when omitted
@@ -44,6 +46,7 @@ Specifically:
 - **simlin-mcp.AC2.7 Failure:** ReadModel returns isError when file does not exist
 
 ### simlin-mcp.AC3: CreateModel and EditModel Tools
+
 - **simlin-mcp.AC3.1 Success:** CreateModel creates a `.simlin.json` file with "main" model and default sim specs (start=0, end=100, dt=1)
 - **simlin-mcp.AC3.2 Success:** CreateModel accepts custom simSpecs and uses them
 - **simlin-mcp.AC3.3 Failure:** CreateModel returns isError when target file already exists
@@ -57,11 +60,13 @@ Specifically:
 - **simlin-mcp.AC3.11 Failure:** EditModel returns isError when target file does not exist
 
 ### simlin-mcp.AC4: Error Handling
+
 - **simlin-mcp.AC4.1 Success:** Tool execution errors return CallToolResult with isError=true and descriptive text content
 - **simlin-mcp.AC4.2 Success:** Malformed JSON-RPC requests return standard JSON-RPC error codes (-32700, -32600)
 - **simlin-mcp.AC4.3 Success:** Unknown method calls return JSON-RPC method-not-found error (-32601)
 
 ### simlin-mcp.AC5: npm Package
+
 - **simlin-mcp.AC5.1 Success:** JS entry point detects platform and resolves the correct platform-specific binary
 - **simlin-mcp.AC5.2 Success:** Platform packages have correct `os` and `cpu` fields in package.json
 - **simlin-mcp.AC5.3 Success:** `node bin/simlin-mcp.js` spawns the native binary with stdin/stdout/stderr forwarding and exit code propagation
@@ -131,6 +136,7 @@ trait Transport {
 ### MCP Protocol
 
 JSON-RPC 2.0 over newline-delimited JSON (same as current prototype). Protocol dispatch routes:
+
 - `initialize` -- server capabilities and version handshake
 - `ping` -- health check
 - `tools/list` -- returns tool definitions with auto-derived JSON schemas
@@ -154,16 +160,19 @@ pub trait Tool: Send + Sync {
 ### Tool Contracts
 
 **CreateModel**:
+
 - Input: `{ projectPath: string, simSpecs?: SimSpecs }`
 - Output: `{ projectPath: string, simSpecs: SimSpecs, modelName: string }`
 - Creates a new `.simlin.json` file with a single "main" model. Errors if file exists. Defaults: start=0, end=100, dt=1.
 
 **ReadModel**:
+
 - Input: `{ projectPath: string, modelName?: string }`
 - Output: `{ model: Model, time: number[], loopDominance: LoopDominanceSummary[], dominantLoopsByPeriod: DominantPeriod[] }`
 - Opens file (XMILE, Vensim, or Simlin JSON), calls `analyze_model()`, returns model snapshot with loop analysis. `modelName` defaults to "main". Views omitted from model output.
 
 **EditModel**:
+
 - Input: `{ projectPath: string, modelName?: string, dryRun?: bool, simSpecs?: SimSpecs, operations?: EditOperation[] }`
 - Output: ReadModel fields + `{ dryRun: bool }`
 - Applies sim specs first, then variable operations. Non-dry-run edits save to disk. Returns refreshed model snapshot and loop analysis.
@@ -198,6 +207,7 @@ pub struct ModelAnalysis {
 ```
 
 `analyze_model(project: &Project, model_name: &str) -> Result<ModelAnalysis>` pipeline:
+
 1. Augment project with LTM synthetic variables (`generate_ltm_variables_all_links`)
 2. Compile augmented project (`compile_project`)
 3. Simulate (`run_to_end`)
@@ -210,12 +220,14 @@ pub struct ModelAnalysis {
 If simulation fails (equation errors), returns model snapshot with empty loop data rather than failing entirely.
 
 `calculate_dominant_periods()` ported from Go `engine/model_impl.go`:
+
 - For each timestep: collect loop scores, sort by absolute score, greedily accumulate loops of dominant polarity until cumulative importance >= 0.5
 - Group consecutive timesteps with identical dominant loop sets into periods
 
 ### npm Package Distribution
 
 Main package `@simlin/mcp` with `optionalDependencies` pointing to platform packages:
+
 - `@simlin/mcp-darwin-arm64` (macOS Apple Silicon)
 - `@simlin/mcp-darwin-x64` (macOS Intel)
 - `@simlin/mcp-linux-x64` (Linux x86_64)
@@ -244,10 +256,13 @@ A `build-npm-packages.sh` script generates platform `package.json` files with co
 ## Implementation Phases
 
 <!-- START_PHASE_1 -->
+
 ### Phase 1: Engine Analysis API
+
 **Goal**: Add `analyze_model()` and `calculate_dominant_periods()` to simlin-engine as a reusable public API.
 
 **Components**:
+
 - `src/simlin-engine/src/analysis.rs` -- `ModelAnalysis`, `LoopSummary`, `DominantPeriod` types, `analyze_model()` function composing existing primitives, `calculate_dominant_periods()` ported from Go
 - `src/simlin-engine/src/lib.rs` -- `pub mod analysis` export
 
@@ -256,13 +271,17 @@ A `build-npm-packages.sh` script generates platform `package.json` files with co
 **Covers**: simlin-mcp.AC2.1, simlin-mcp.AC2.2, simlin-mcp.AC2.5, simlin-mcp.AC2.6
 
 **Done when**: `analyze_model()` compiles a model, simulates, returns loop dominance data with correct dominant periods. Tests verify the full pipeline on a test model with known feedback loops.
+
 <!-- END_PHASE_1 -->
 
 <!-- START_PHASE_2 -->
+
 ### Phase 2: Async Transport
+
 **Goal**: Replace synchronous stdio loop with tokio-based async transport.
 
 **Components**:
+
 - `src/simlin-mcp/Cargo.toml` -- add tokio dependency
 - `src/simlin-mcp/src/transport.rs` -- `Transport` trait, `StdioTransport` with three tokio tasks (stdin reader, processor, stdout writer) and MPSC channels
 - `src/simlin-mcp/src/main.rs` -- `#[tokio::main]`, wire transport to protocol handler
@@ -272,13 +291,17 @@ A `build-npm-packages.sh` script generates platform `package.json` files with co
 **Covers**: simlin-mcp.AC1.1, simlin-mcp.AC1.2, simlin-mcp.AC1.3
 
 **Done when**: MCP server starts, accepts JSON-RPC messages via stdin, returns responses via stdout, shuts down cleanly on EOF. Existing protocol tests adapted for async.
+
 <!-- END_PHASE_2 -->
 
 <!-- START_PHASE_3 -->
+
 ### Phase 3: Protocol and Error Handling Updates
+
 **Goal**: Adapt protocol layer for async dispatch and MCP-standard error handling.
 
 **Components**:
+
 - `src/simlin-mcp/src/protocol.rs` -- async `dispatch()`, `CallToolResult` with `isError` field, error handling convention change
 
 **Dependencies**: Phase 2 (async transport)
@@ -286,13 +309,17 @@ A `build-npm-packages.sh` script generates platform `package.json` files with co
 **Covers**: simlin-mcp.AC4.1, simlin-mcp.AC4.2, simlin-mcp.AC4.3
 
 **Done when**: Protocol dispatch is async. Tool errors return `isError: true` with descriptive text. JSON-RPC errors used only for protocol failures. Tests verify both error paths.
+
 <!-- END_PHASE_3 -->
 
 <!-- START_PHASE_4 -->
+
 ### Phase 4: Tool Handlers -- CreateModel
+
 **Goal**: Implement CreateModel matching Go input/output contract.
 
 **Components**:
+
 - `src/simlin-mcp/src/tools/create_model.rs` -- `CreateModelInput` (`projectPath`, optional `simSpecs`), `CreateModelOutput` (`projectPath`, `simSpecs`, `modelName`), handler logic
 
 **Dependencies**: Phase 3 (async protocol)
@@ -300,13 +327,17 @@ A `build-npm-packages.sh` script generates platform `package.json` files with co
 **Covers**: simlin-mcp.AC3.1, simlin-mcp.AC3.2, simlin-mcp.AC3.3
 
 **Done when**: CreateModel creates `.simlin.json` files with correct defaults, returns matching output shape, rejects existing files. Tests verify creation, defaults, and error cases.
+
 <!-- END_PHASE_4 -->
 
 <!-- START_PHASE_5 -->
+
 ### Phase 5: Tool Handlers -- ReadModel
+
 **Goal**: Implement ReadModel with loop dominance analysis matching Go output contract.
 
 **Components**:
+
 - `src/simlin-mcp/src/tools/read_model.rs` -- `ReadModelInput` (`projectPath`, optional `modelName`), output with model snapshot + loop dominance data, calls `analyze_model()`
 
 **Dependencies**: Phase 1 (engine analysis API), Phase 3 (async protocol)
@@ -314,13 +345,17 @@ A `build-npm-packages.sh` script generates platform `package.json` files with co
 **Covers**: simlin-mcp.AC2.1, simlin-mcp.AC2.2, simlin-mcp.AC2.3, simlin-mcp.AC2.4, simlin-mcp.AC2.5, simlin-mcp.AC2.6
 
 **Done when**: ReadModel opens files in all supported formats, returns model snapshot (views omitted) with loop dominance data and dominant periods. Tests verify output shape, format detection, and model name defaulting.
+
 <!-- END_PHASE_5 -->
 
 <!-- START_PHASE_6 -->
+
 ### Phase 6: Tool Handlers -- EditModel
+
 **Goal**: Implement EditModel with curated operation types and loop dominance in response.
 
 **Components**:
+
 - `src/simlin-mcp/src/tools/edit_model.rs` -- `EditModelInput` with `operations` (upsertStock, upsertFlow, upsertAuxiliary, removeVariable), `simSpecs`, `dryRun`, `modelName`; LLM-curated field sets; conversion to engine patch types; calls `apply_patch()` then `analyze_model()`
 
 **Dependencies**: Phase 1 (engine analysis API), Phase 3 (async protocol)
@@ -328,13 +363,17 @@ A `build-npm-packages.sh` script generates platform `package.json` files with co
 **Covers**: simlin-mcp.AC3.4, simlin-mcp.AC3.5, simlin-mcp.AC3.6, simlin-mcp.AC3.7, simlin-mcp.AC3.8, simlin-mcp.AC3.9, simlin-mcp.AC3.10, simlin-mcp.AC3.11
 
 **Done when**: EditModel applies patches (sim specs and variable operations), returns refreshed model + loop dominance, respects dry-run flag, excludes internal fields from schema. Tests verify all operation types, dry-run behavior, field filtering, and error cases.
+
 <!-- END_PHASE_6 -->
 
 <!-- START_PHASE_7 -->
+
 ### Phase 7: npm Package Structure
+
 **Goal**: Create npm packaging for cross-platform binary distribution.
 
 **Components**:
+
 - `src/simlin-mcp/package.json` -- `@simlin/mcp` with `optionalDependencies` for platform packages, `bin` entry
 - `src/simlin-mcp/bin/simlin-mcp.js` -- platform detection, binary resolution, spawn with signal forwarding
 - `src/simlin-mcp/build-npm-packages.sh` -- generates platform `package.json` files with `os`/`cpu` fields
@@ -344,6 +383,7 @@ A `build-npm-packages.sh` script generates platform `package.json` files with co
 **Covers**: simlin-mcp.AC5.1, simlin-mcp.AC5.2, simlin-mcp.AC5.3
 
 **Done when**: `node bin/simlin-mcp.js` resolves and spawns the correct platform binary. Platform package.json files have correct `os`/`cpu` fields. Build script generates all platform variants.
+
 <!-- END_PHASE_7 -->
 
 ## Additional Considerations

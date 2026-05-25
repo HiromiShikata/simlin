@@ -25,12 +25,16 @@ module.exports = mergeRsbuildConfig(
     html: {
       inject: 'body',
       // Content Security Policy will be added via plugin if needed
-      meta: isProduction ? {
-        'Content-Security-Policy': {
-          'http-equiv': 'Content-Security-Policy',
-          content: process.env.CSP_CONTENT || "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.simlin.com wss://api.simlin.com https://firestore.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://www.googleapis.com; worker-src 'self' blob:;",
-        },
-      } : undefined,
+      meta: isProduction
+        ? {
+            'Content-Security-Policy': {
+              'http-equiv': 'Content-Security-Policy',
+              content:
+                process.env.CSP_CONTENT ||
+                "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.simlin.com wss://api.simlin.com https://firestore.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://www.googleapis.com; worker-src 'self' blob:;",
+            },
+          }
+        : undefined,
     },
     performance: {
       chunkSplit: {
@@ -54,5 +58,5 @@ module.exports = mergeRsbuildConfig(
         });
       },
     },
-  })
+  }),
 );

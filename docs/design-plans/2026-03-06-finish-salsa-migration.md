@@ -46,23 +46,27 @@ only re-parse variables that actually reference the affected dimensions.
 ## Acceptance Criteria
 
 ### finish-salsa-migration.AC1: Incremental path handles all model types
+
 - **finish-salsa-migration.AC1.1 Success:** Models with module variables compile through `compile_project_incremental` and produce identical simulation results to the monolithic path.
 - **finish-salsa-migration.AC1.2 Success:** Models with SMOOTH/DELAY/TREND builtins compile through the incremental path with correct layout slots for implicit variables.
 - **finish-salsa-migration.AC1.3 Success:** Multiple instances of the same sub-model with different input wirings produce distinct compiled module entries.
 - **finish-salsa-migration.AC1.4 Success:** `test_incremental_compile_smooth_over_module_output` and `test_incremental_compile_distinguishes_module_input_sets` pass (existing coverage).
 
 ### finish-salsa-migration.AC2: Incremental path never panics on malformed models
+
 - **finish-salsa-migration.AC2.1 Success:** Compiling a model with unknown builtins (e.g., Vensim macros) through `compile_project_incremental` returns `Err(NotSimulatable)`, not a panic.
 - **finish-salsa-migration.AC2.2 Success:** Compiling a model with missing module references returns `Err`, not a panic.
 - **finish-salsa-migration.AC2.3 Success:** `catch_unwind` wrappers removed from benchmarks (`benches/compiler.rs`), tests (`tests/simulate.rs`), and incremental layout paths (`layout/mod.rs`).
 - **finish-salsa-migration.AC2.4 Success:** `compile_project_incremental` docstring accurately describes current behavior (no stale monolithic-fallback claim).
 
 ### finish-salsa-migration.AC3: Module-aware parse context unified
+
 - **finish-salsa-migration.AC3.1 Success:** Only `parse_source_variable_with_module_context` exists; the plain `parse_source_variable` variant is deleted.
 - **finish-salsa-migration.AC3.2 Success:** `PREVIOUS(x)` where `x = SMTH1(input, 1)` compiles to module expansion (not `LoadPrev`) through the salsa incremental path.
 - **finish-salsa-migration.AC3.3 Success:** Editing an unrelated variable does not trigger re-parse of variables in the same model (salsa cache stability preserved).
 
 ### finish-salsa-migration.AC4: Monolithic compilation path removed
+
 - **finish-salsa-migration.AC4.1 Success:** `compile_project` (free function in interpreter.rs) does not exist.
 - **finish-salsa-migration.AC4.2 Success:** `Simulation::compile()` does not exist.
 - **finish-salsa-migration.AC4.3 Success:** `set_dependencies_cached`, `set_dependencies`, `all_deps` do not exist in model.rs.
@@ -71,20 +75,24 @@ only re-parse variables that actually reference the affected dimensions.
 - **finish-salsa-migration.AC4.6 Success:** `Simulation::new()` + `run_to_end()` (AST interpreter) still works for cross-validation.
 
 ### finish-salsa-migration.AC5: Dependency analysis routed through salsa
+
 - **finish-salsa-migration.AC5.1 Success:** All dependency analysis in the compilation pipeline goes through `variable_direct_dependencies` and `model_dependency_graph` tracked functions.
 - **finish-salsa-migration.AC5.2 Success:** No production or test code calls `all_deps` or `set_dependencies`.
 
 ### finish-salsa-migration.AC6: Single sync path
+
 - **finish-salsa-migration.AC6.1 Success:** No production caller invokes `sync_from_datamodel` directly; all go through `sync_from_datamodel_incremental`.
 - **finish-salsa-migration.AC6.2 Success:** `sync_from_datamodel` remains as an internal bootstrap function called by `sync_from_datamodel_incremental` when `prev_state` is `None`.
 
 ### finish-salsa-migration.AC7: All existing tests pass
+
 - **finish-salsa-migration.AC7.1 Success:** All tests in `tests/simulate*.rs` pass with identical numerical results.
 - **finish-salsa-migration.AC7.2 Success:** All LTM tests pass with identical results.
 - **finish-salsa-migration.AC7.3 Success:** All libsimlin integration tests pass.
 - **finish-salsa-migration.AC7.4 Success:** `cargo test -p simlin-engine` and `cargo test -p libsimlin` both pass cleanly.
 
 ### finish-salsa-migration.AC8: Dimension-granularity invalidation (TD18)
+
 - **finish-salsa-migration.AC8.1 Success:** Changing dimension A does not trigger re-parse of a scalar variable.
 - **finish-salsa-migration.AC8.2 Success:** Changing dimension A does not trigger re-parse of a variable that only references dimension B.
 - **finish-salsa-migration.AC8.3 Success:** Changing dimension A does trigger re-parse of a variable that references dimension A (including via `maps_to` chains).
@@ -204,12 +212,14 @@ only changed fields, triggering minimal invalidation.
 ## Implementation Phases
 
 <!-- START_PHASE_1 -->
+
 ### Phase 1: Verify and Close Already-Fixed Issues
 
 **Goal:** Confirm that #290 and #295 are resolved in the current codebase and
 close them.
 
 **Components:**
+
 - Issue #290: Verify `sync_from_datamodel_incremental` in
   `src/simlin-engine/src/db.rs` uses salsa setters for in-place updates and
   is used by `apply_project_patch_internal` in
@@ -229,15 +239,18 @@ close them.
 
 **Done when:** Both issues confirmed resolved with evidence from existing
 tests. Commit closes them with `Fix #290` and `Fix #295`.
+
 <!-- END_PHASE_1 -->
 
 <!-- START_PHASE_2 -->
+
 ### Phase 2: Remove Vestigial `catch_unwind` Wrappers
 
 **Goal:** Remove `catch_unwind` from paths where the incremental compiler
 returns clean errors, confirming #363 is resolved.
 
 **Components:**
+
 - `src/simlin-engine/benches/compiler.rs:75` -- remove `catch_unwind` around
   `sync_from_datamodel_incremental` + `compile_project_incremental`; let
   `Result` propagate
@@ -250,6 +263,7 @@ returns clean errors, confirming #363 is resolved.
   that incorrectly claims monolithic fallback
 
 **Deferred to Phase 4:**
+
 - `src/simlin-engine/src/layout/mod.rs:1874` (wraps monolithic `Project::from`)
 - `src/simlin-engine/src/layout/mod.rs:2129` (wraps monolithic LTM pipeline)
 - `src/simlin-engine/src/analysis.rs:124` (wraps monolithic LTM pipeline)
@@ -259,9 +273,11 @@ returns clean errors, confirming #363 is resolved.
 **Done when:** 4 `catch_unwind` sites removed. Benchmarks, tests, and
 incremental layout paths handle errors via `Result`. Commit closes #363
 with `Fix #363`.
+
 <!-- END_PHASE_2 -->
 
 <!-- START_PHASE_3 -->
+
 ### Phase 3: Unify Parse Context
 
 **Goal:** Replace `parse_source_variable` (no module context) with
@@ -269,6 +285,7 @@ with `Fix #363`.
 plain variant. Close #372 and TD20.
 
 **Components:**
+
 - `src/simlin-engine/src/db.rs` -- delete `parse_source_variable` (the
   variant that passes `module_idents = None`); update all callers to use
   `parse_source_variable_with_module_context`
@@ -283,23 +300,26 @@ plain variant. Close #372 and TD20.
 
 **Done when:** Only `parse_source_variable_with_module_context` exists. TD20
 test passes. Commit closes #372 with `Fix #372`.
+
 <!-- END_PHASE_3 -->
 
 <!-- START_PHASE_4 -->
+
 ### Phase 4: Migrate Remaining Monolithic Callers
 
 **Goal:** All production callers use the incremental path. No production code
 calls `Project::from`, `with_ltm()`, or `Simulation::compile()`.
 
 **Components:**
+
 - `src/simlin-engine/src/layout/mod.rs` -- delete
   `try_detect_ltm_loops_monolithic` and `try_compile_model` (the monolithic
   fallbacks); ensure `try_detect_ltm_loops_incremental` is the sole LTM path;
   remove remaining `catch_unwind` wrappers (deferred from Phase 2)
 - `src/simlin-engine/src/analysis.rs` -- `analyze_model` gains `db: &dyn Db`
-  + `SourceProject` parameters; uses salsa causal graph functions
-  (`model_causal_edges`, `model_detected_loops`) instead of `Project::from`;
-  remove `catch_unwind`
+  - `SourceProject` parameters; uses salsa causal graph functions
+    (`model_causal_edges`, `model_detected_loops`) instead of `Project::from`;
+    remove `catch_unwind`
 - `src/simlin-cli/src/main.rs` -- `run_datamodel_with_errors` uses
   `sync_from_datamodel` + `collect_all_diagnostics` for error reporting;
   `simulate()` with LTM uses incremental path; `--equations` mode walks
@@ -315,15 +335,18 @@ calls `Project::from`, `with_ltm()`, or `Simulation::compile()`.
 `Simulation::compile()`, `with_ltm()`, or `with_ltm_all_links()`. All
 layout, analysis, and CLI functionality works via incremental path. Commit
 closes #292 with `Fix #292`.
+
 <!-- END_PHASE_4 -->
 
 <!-- START_PHASE_5 -->
+
 ### Phase 5: Migrate Tests to Incremental Path
 
 **Goal:** All test code uses the incremental compilation path. No test calls
 `Simulation::compile()` or `Project::from` for compilation.
 
 **Components:**
+
 - `src/simlin-engine/src/test_common.rs` -- add `TestProject::compile_incremental()`
   method that creates a `SimlinDb`, syncs, and calls
   `compile_project_incremental`; add `TestProject::assert_compiles_incremental()`
@@ -348,15 +371,18 @@ closes #292 with `Fix #292`.
 
 **Done when:** Zero test callers of `Simulation::compile()` or
 `compile_project` remain. All tests pass with identical numerical results.
+
 <!-- END_PHASE_5 -->
 
 <!-- START_PHASE_6 -->
+
 ### Phase 6: Delete Monolithic Compilation Path
 
 **Goal:** Remove all monolithic compilation code, dependency analysis, and
 legacy error fields. Close #294 and TD17.
 
 **Components:**
+
 - `src/simlin-engine/src/interpreter.rs` -- delete `compile_project` free
   function, `Simulation::compile()`, `calc_flattened_offsets`; retain
   `Simulation::new()` + `run_to_end()` (AST interpreter) and `Module::new`
@@ -384,15 +410,18 @@ legacy error fields. Close #294 and TD17.
 `set_dependencies_cached`, `set_dependencies`, `all_deps` no longer exist.
 Legacy error fields removed. `cargo build` succeeds with no dead code
 warnings. All tests pass. Commit closes #294 with `Fix #294`.
+
 <!-- END_PHASE_6 -->
 
 <!-- START_PHASE_7 -->
+
 ### Phase 7: Dimension-Granularity Invalidation (TD18)
 
 **Goal:** Narrow salsa invalidation so dimension changes only re-parse
 variables that reference the changed dimensions.
 
 **Components:**
+
 - `src/simlin-engine/src/db.rs` -- add `variable_relevant_dimensions`
   tracked function that extracts dimension names from `SourceEquation`
   variants; returns `BTreeSet<String>` (empty for `Scalar`)
@@ -413,6 +442,7 @@ re-parse of scalar variables or variables referencing only other dimensions.
 Verified by test: model with dimensions A and B, change dimension A, confirm
 variable using only B is not re-parsed (salsa event logging or cache-hit
 assertion).
+
 <!-- END_PHASE_7 -->
 
 ## Additional Considerations

@@ -1,5 +1,4 @@
-Test Unicode Characters
-=========
+# Test Unicode Characters
 
 This model tests a parser's ability to read unicode characters in variables and comments, such as:
 
@@ -11,11 +10,9 @@ this is a french variable with é à è=
 	|
 ```
 
+## Contributions
 
-Contributions
--------------
-
-| Component                         | Author          | Contact                    | Date    | Software Version        |
-|:--------------------------------- |:--------------- |:-------------------------- |:------- |:----------------------- |
-| `test_variable_range.mdl`                     | Stefan Katz  |  | 7/19/17 | Vensim PLE  |
-| `output.tab`                        | Stefan Katz  |  | 8/08/17 | Vensim PLE  |
+| Component                 | Author      | Contact | Date    | Software Version |
+| :------------------------ | :---------- | :------ | :------ | :--------------- |
+| `test_variable_range.mdl` | Stefan Katz |         | 7/19/17 | Vensim PLE       |
+| `output.tab`              | Stefan Katz |         | 8/08/17 | Vensim PLE       |

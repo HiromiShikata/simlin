@@ -17,11 +17,13 @@
 This phase implements and tests:
 
 ### unify-dep-extraction.AC5: Differential checks
+
 - **unify-dep-extraction.AC5.1 Success:** For every variable in every integration test model, the phases `compile_var_fragment` produces bytecodes for match the phases the variable appears in across dep graph runlists
 - **unify-dep-extraction.AC5.2 Success:** Synthetic models exercising PREVIOUS feedback, INIT-only deps, nested builtins, and module-backed vars pass the differential check
 - **unify-dep-extraction.AC5.3 Failure:** If a new variable is added that causes fragment/graph phase disagreement, the differential test catches it
 
 ### unify-dep-extraction.AC0: Regression Safety
+
 - **unify-dep-extraction.AC0.1 Success:** All existing simulation tests (`tests/simulate.rs`) pass at each phase boundary
 - **unify-dep-extraction.AC0.2 Success:** All existing engine unit tests (`cargo test` in `src/simlin-engine`) pass at each phase boundary
 - **unify-dep-extraction.AC0.3 Success:** Full integration test suite passes after each phase -- no behavioral regressions introduced
@@ -31,10 +33,12 @@ This phase implements and tests:
 ## Reference files
 
 Read these CLAUDE.md files for project conventions before implementing:
+
 - `/home/bpowers/src/simlin/CLAUDE.md` (project root)
 - `/home/bpowers/src/simlin/src/simlin-engine/CLAUDE.md` (engine crate)
 
 Key source files to understand before implementing:
+
 - `src/simlin-engine/src/db.rs` -- `compile_var_fragment` (line 3254), `model_dependency_graph` (line 1522), `ModelDepGraphResult` (line 1101), `VarFragmentResult` (line 3249)
 - `src/simlin-engine/src/compiler/symbolic.rs` -- `CompiledVarFragment` (line 307): `initial_bytecodes`, `flow_bytecodes`, `stock_bytecodes` (all `Option<PerVarBytecodes>`)
 - `src/simlin-engine/src/db_prev_init_tests.rs` -- existing test patterns for dep graph testing
@@ -51,11 +55,13 @@ Phases 1-2 must be complete (unified walker and simplified db consumption).
 
 <!-- START_SUBCOMPONENT_A (tasks 1-3) -->
 <!-- START_TASK_1 -->
+
 ### Task 1: Create `db_differential_tests.rs` with the `assert_fragment_phase_agreement` helper
 
 **Verifies:** unify-dep-extraction.AC5.1, unify-dep-extraction.AC5.3
 
 **Files:**
+
 - Create: `src/simlin-engine/src/db_differential_tests.rs`
 - Modify: `src/simlin-engine/src/db.rs` -- add `#[cfg(test)] #[path = "db_differential_tests.rs"] mod db_differential_tests;` (following the pattern of `db_prev_init_tests.rs` at line 5910)
 
@@ -150,6 +156,7 @@ The helper itself is tested through Tasks 2 and 3 which call it on real and synt
 ```bash
 cargo test -p simlin-engine --lib
 ```
+
 Expected: compiles without errors.
 
 **Commit:** `engine: add db_differential_tests with fragment-phase agreement helper`
@@ -157,11 +164,13 @@ Expected: compiles without errors.
 <!-- END_TASK_1 -->
 
 <!-- START_TASK_2 -->
+
 ### Task 2: Run differential check over all integration test models
 
 **Verifies:** unify-dep-extraction.AC5.1
 
 **Files:**
+
 - Modify: `src/simlin-engine/src/db_differential_tests.rs` -- add integration test
 
 **Implementation:**
@@ -245,6 +254,7 @@ unify-dep-extraction.AC5.1: Every variable in every selected model has consisten
 ```bash
 cargo test -p simlin-engine --features file_io test_fragment_phase_agreement_integration
 ```
+
 Expected: all models pass the differential check.
 
 **Commit:** `engine: add differential check over integration test models`
@@ -252,11 +262,13 @@ Expected: all models pass the differential check.
 <!-- END_TASK_2 -->
 
 <!-- START_TASK_3 -->
+
 ### Task 3: Add synthetic models for differential check edge cases
 
 **Verifies:** unify-dep-extraction.AC5.2, unify-dep-extraction.AC5.3
 
 **Files:**
+
 - Modify: `src/simlin-engine/src/db_differential_tests.rs` -- add synthetic model tests
 
 **Implementation:**
@@ -278,6 +290,7 @@ Each model exercises a specific combination that could expose dependency classif
 5. **Mixed PREVIOUS+INIT+current:** `x = TIME`, `y = PREVIOUS(x) + INIT(x) + x` -- `x` is referenced in all three contexts. The dep graph should have `x` as a same-step dep of `y` (because of the bare `x` reference).
 
 For each synthetic model:
+
 1. Construct `datamodel::Project` with `datamodel::SimSpecs` defaults, a `datamodel::Model` named "main" containing the variables
 2. Call `sync_from_datamodel(&db, &project)`
 3. Call `assert_fragment_phase_agreement(&db, model, project)`
@@ -293,16 +306,19 @@ For each synthetic model:
 ```bash
 cargo test -p simlin-engine test_fragment_phase_agreement_synthetic
 ```
+
 Expected: all synthetic models pass.
 
 ```bash
 cargo test -p simlin-engine
 ```
+
 Expected: all tests pass.
 
 ```bash
 cargo test -p simlin-engine --features file_io
 ```
+
 Expected: full integration suite passes.
 
 **Commit:** `engine: add synthetic differential check models`

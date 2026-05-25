@@ -43,6 +43,7 @@ the model.
 ## Acceptance Criteria
 
 ### incremental-compilation.AC1: Incremental compilation via salsa
+
 - **incremental-compilation.AC1.1 Success:** Changing a variable's equation text (same dependencies) only reparses, relowers, and recompiles that variable's fragment. No other variables' fragments recompute.
 - **incremental-compilation.AC1.2 Success:** Changing a variable's equation text (different dependencies) triggers dependency graph and runlist recomputation for the affected model, plus recompilation of the changed variable's fragment.
 - **incremental-compilation.AC1.3 Success:** Adding a variable triggers layout recomputation and assembly, but all existing variables' cached fragments are reused.
@@ -51,6 +52,7 @@ the model.
 - **incremental-compilation.AC1.6 Success:** Changing module connections triggers dependency graph updates for the affected model only.
 
 ### incremental-compilation.AC2: LTM integration
+
 - **incremental-compilation.AC2.1 Success:** Equation edit with unchanged dependency set does not trigger causal graph reconstruction, loop detection, or cycle partition recomputation.
 - **incremental-compilation.AC2.2 Success:** Equation edit with changed dependency set triggers causal graph and loop detection recomputation, but only link score equations for affected links regenerate.
 - **incremental-compilation.AC2.3 Success:** Link score equation for a link targeting variable Z only recomputes when Z's equation text or dependency set changes.
@@ -59,17 +61,20 @@ the model.
 - **incremental-compilation.AC2.6 Success:** Post-simulation discover_loops() algorithm is unchanged and produces identical results.
 
 ### incremental-compilation.AC3: libsimlin integration
+
 - **incremental-compilation.AC3.1 Success:** apply_patch followed by sim_new triggers only one compilation pass (not two).
 - **incremental-compilation.AC3.2 Success:** FFI function signatures are unchanged. Existing TypeScript, Python, and C callers work without modification.
 - **incremental-compilation.AC3.3 Success:** Multiple sequential patches each trigger only incremental recomputation of affected portions.
 - **incremental-compilation.AC3.4 Success:** Running simulations are isolated from subsequent patches (snapshot semantics).
 
 ### incremental-compilation.AC4: Correctness preserved
-- **incremental-compilation.AC4.1 Success:** All tests in tests/simulate*.rs pass with identical numerical results.
+
+- **incremental-compilation.AC4.1 Success:** All tests in tests/simulate\*.rs pass with identical numerical results.
 - **incremental-compilation.AC4.2 Success:** All LTM integration tests in tests/simulate_ltm.rs pass with identical results.
 - **incremental-compilation.AC4.3 Success:** Incrementally compiled bytecode produces identical output to full recompilation for the same model state.
 
 ### incremental-compilation.AC5: Performance
+
 - **incremental-compilation.AC5.1 Success:** Single equation edit on a 100-variable model completes in less time than full recompilation (measurable via benchmark).
 - **incremental-compilation.AC5.2 Success:** Variable add/remove on a 100-variable model completes in less time than full recompilation.
 
@@ -189,12 +194,12 @@ the same symbolic-reference-then-resolve pattern.
 
 **Edit impact by type:**
 
-| Edit type | What reruns |
-|-----------|-------------|
+| Edit type                 | What reruns                                   |
+| ------------------------- | --------------------------------------------- |
 | Equation edit (same deps) | Fragment for that variable. Assembly (cheap). |
-| Equation edit (new deps) | Fragment, dep graph, runlists. Assembly. |
-| Variable add/remove | Layout. Assembly. All fragments cached. |
-| Dimension change | Affected fragments, layout. Assembly. |
+| Equation edit (new deps)  | Fragment, dep graph, runlists. Assembly.      |
+| Variable add/remove       | Layout. Assembly. All fragments cached.       |
+| Dimension change          | Affected fragments, layout. Assembly.         |
 
 ### LTM Integration
 
@@ -227,9 +232,9 @@ variable's equation changes from `a + b` to `a * b`, the dependency set
 `{a, b}` is unchanged, so the causal graph, loops, and most synthetic variables
 are cached.
 
-Per-link score equations depend on the *target variable's equation text* (for
+Per-link score equations depend on the _target variable's equation text_ (for
 ceteris-paribus substitution) and its dependency set. When a variable's equation
-changes, only link score equations where that variable is the *target*
+changes, only link score equations where that variable is the _target_
 recompute.
 
 Module composite scores for stdlib dynamic modules (SMOOTH, DELAY, TREND) are
@@ -337,12 +342,14 @@ accumulators, which separate error collection from computation results.
 ## Implementation Phases
 
 <!-- START_PHASE_1 -->
+
 ### Phase 1: Remove `F: SimFloat` Generic
 
 **Goal:** Hardcode `f64` throughout simlin-engine, eliminating the generic
 parameter that complicates salsa integration.
 
 **Components:**
+
 - `SimFloat` trait in `src/simlin-engine/src/float.rs` -- remove trait, replace
   all `F: SimFloat` with `f64`
 - `Module<F>`, `Var<F>`, `Compiler<F>` in `src/simlin-engine/src/compiler/` --
@@ -360,15 +367,18 @@ parameter that complicates salsa integration.
 
 **Done when:** All tests pass with f64. No `SimFloat` trait or generic `F`
 parameter remains in the compilation/simulation pipeline.
+
 <!-- END_PHASE_1 -->
 
 <!-- START_PHASE_2 -->
+
 ### Phase 2: Introduce Salsa Database and Interned Identifiers
 
 **Goal:** Add salsa as a dependency, define the database and interned types,
 and wire the db into libsimlin without changing compilation behavior.
 
 **Components:**
+
 - `salsa` dependency in `src/simlin-engine/Cargo.toml` (from crates.io, not
   third_party/)
 - `SimlinDb` struct in `src/simlin-engine/src/db.rs` (new) -- database
@@ -385,9 +395,11 @@ and wire the db into libsimlin without changing compilation behavior.
 **Done when:** `SimlinDb` compiles, interned identifiers work, libsimlin holds
 a db instance. Compilation still uses the old pipeline; the db is populated but
 not yet read.
+
 <!-- END_PHASE_2 -->
 
 <!-- START_PHASE_3 -->
+
 ### Phase 3: Per-Variable Parsing and Lowering
 
 **Goal:** Decompose `ModelStage0::new` and `ModelStage1::new` into per-variable
@@ -395,6 +407,7 @@ salsa tracked functions so equation edits only reparse/relower the affected
 variable.
 
 **Components:**
+
 - `parse_variable` tracked function in `src/simlin-engine/src/model.rs` or new
   module -- takes `SourceVariable`, returns parsed `Expr0` AST wrapped in a
   tracked struct
@@ -411,15 +424,18 @@ variable.
 **Done when:** Parsing and lowering use salsa tracked functions. Changing one
 variable's equation only reparses/relowers that variable (verifiable via salsa
 event logging). All tests pass.
+
 <!-- END_PHASE_3 -->
 
 <!-- START_PHASE_4 -->
+
 ### Phase 4: Dependency Analysis and Runlists
 
 **Goal:** Extract dependency analysis into tracked functions so equation edits
 that don't change dependencies skip dependency recomputation.
 
 **Components:**
+
 - `variable_dependencies` tracked function in `src/simlin-engine/src/model.rs`
   -- per-variable, extracts direct `DependencySet` from `LoweredVariable`
 - `model_dependency_graph` tracked function -- per-model, aggregates
@@ -435,15 +451,18 @@ that don't change dependencies skip dependency recomputation.
 **Done when:** Dependency analysis uses salsa tracked functions. Changing an
 equation from `a + b` to `a * b` (same deps) does not trigger dependency
 recomputation (verifiable via salsa event logging). All tests pass.
+
 <!-- END_PHASE_4 -->
 
 <!-- START_PHASE_5 -->
+
 ### Phase 5: Symbolic Bytecode and Layout Separation
 
 **Goal:** Introduce symbolic opcodes and late offset resolution so per-variable
 bytecode fragments are layout-independent.
 
 **Components:**
+
 - `SymbolicOpcode` enum in `src/simlin-engine/src/compiler/` -- mirrors
   `Opcode` but uses `VariableId` instead of integer offsets for variable
   references, symbolic IDs for graphical functions, module declarations, and
@@ -454,7 +473,7 @@ bytecode fragments are layout-independent.
 - `compile_variable` tracked function -- takes `LoweredVariable` and produces
   `CompiledVarFragment`. Replaces `Var::new` + per-variable codegen
 - `compute_layout` tracked function -- per-model, maps `VariableId ->
-  (offset, size)`. Depends on the set of variable names and their sizes, NOT
+(offset, size)`. Depends on the set of variable names and their sizes, NOT
   on equations
 - `assemble_module` tracked function -- per-module-instance, takes fragments +
   layout + runlists, resolves symbolic references to concrete offsets,
@@ -468,15 +487,18 @@ bytecode fragments are layout-independent.
 variable does not invalidate cached fragments (verifiable via salsa event
 logging). Assembly produces identical bytecode to the old pipeline. All tests
 pass.
+
 <!-- END_PHASE_5 -->
 
 <!-- START_PHASE_6 -->
+
 ### Phase 6: LTM Integration
 
 **Goal:** Decompose LTM analysis into tracked functions that chain off the
 dependency analysis pipeline.
 
 **Components:**
+
 - `causal_graph` tracked function in `src/simlin-engine/src/ltm.rs` --
   per-model, builds `CausalGraph` from variable dependency sets. Replaces
   `CausalGraph::from_model()`
@@ -503,15 +525,18 @@ dependency analysis pipeline.
 equation without changing its dependencies does not trigger loop redetection
 (verifiable via salsa event logging). All LTM integration tests pass
 (`tests/simulate_ltm.rs`).
+
 <!-- END_PHASE_6 -->
 
 <!-- START_PHASE_7 -->
+
 ### Phase 7: Eliminate Double Compilation in libsimlin
 
 **Goal:** Make `apply_patch` and `sim_new` share the salsa database so
 compilation results are reused across FFI calls.
 
 **Components:**
+
 - `SimlinProject` in `src/libsimlin/src/lib.rs` -- restructure to hold
   `SimlinDb` as primary compilation state
 - `apply_patch` in `src/libsimlin/src/patch.rs` -- after modifying the
@@ -528,14 +553,17 @@ compilation results are reused across FFI calls.
 **Done when:** A patch followed by `sim_new` triggers only one compilation (not
 two). Verifiable by logging salsa recomputations during the patch+sim sequence.
 All libsimlin tests and integration tests pass.
+
 <!-- END_PHASE_7 -->
 
 <!-- START_PHASE_8 -->
+
 ### Phase 8: Error Accumulator Migration
 
 **Goal:** Move all compilation errors from struct fields to salsa accumulators.
 
 **Components:**
+
 - Remove `errors` field from model and variable structs across
   `src/simlin-engine/src/model.rs`
 - Remove `unit_errors` and `unit_warnings` fields
@@ -552,6 +580,7 @@ All libsimlin tests and integration tests pass.
 **Done when:** No compilation errors stored as struct fields. All errors
 collected via salsa accumulators. Error reporting in libsimlin produces
 identical results. All tests pass.
+
 <!-- END_PHASE_8 -->
 
 ## Additional Considerations

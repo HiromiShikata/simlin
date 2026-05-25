@@ -8,11 +8,11 @@ LTM method itself, see the [reference document](../reference/ltm--loops-that-mat
 
 The implementation is split across three modules in `src/simlin-engine/src/`:
 
-| Module | Responsibility |
-|--------|---------------|
-| `ltm.rs` | Causal graph construction, loop detection (Johnson's algorithm), static polarity analysis, cycle partitions |
-| `ltm_augment.rs` | Synthetic variable generation: link score, loop score, and relative loop score equations |
-| `ltm_finding.rs` | Strongest-path loop discovery algorithm for models too large for exhaustive enumeration |
+| Module           | Responsibility                                                                                              |
+| ---------------- | ----------------------------------------------------------------------------------------------------------- |
+| `ltm.rs`         | Causal graph construction, loop detection (Johnson's algorithm), static polarity analysis, cycle partitions |
+| `ltm_augment.rs` | Synthetic variable generation: link score, loop score, and relative loop score equations                    |
+| `ltm_finding.rs` | Strongest-path loop discovery algorithm for models too large for exhaustive enumeration                     |
 
 The entry points are two methods on `Project` (in `project.rs`):
 
@@ -195,13 +195,13 @@ augmented model.
 All LTM synthetic variables use a `$` prefix and U+205A (TWO DOT PUNCTUATION, `⁚`)
 as a separator:
 
-| Variable | Pattern |
-|----------|---------|
-| Link score | `$⁚ltm⁚link_score⁚{from}→{to}` |
-| Internal link score | `$⁚ltm⁚ilink⁚{from}→{to}` |
-| Pathway score | `$⁚ltm⁚path⁚{port}⁚{index}` |
-| Composite score | `$⁚ltm⁚composite⁚{port}` |
-| Loop score | `$⁚ltm⁚loop_score⁚{loop_id}` |
+| Variable            | Pattern                          |
+| ------------------- | -------------------------------- |
+| Link score          | `$⁚ltm⁚link_score⁚{from}→{to}`   |
+| Internal link score | `$⁚ltm⁚ilink⁚{from}→{to}`        |
+| Pathway score       | `$⁚ltm⁚path⁚{port}⁚{index}`      |
+| Composite score     | `$⁚ltm⁚composite⁚{port}`         |
+| Loop score          | `$⁚ltm⁚loop_score⁚{loop_id}`     |
 | Relative loop score | `$⁚ltm⁚rel_loop_score⁚{loop_id}` |
 
 The `$` prefix prevents collisions with user-defined variables. The Unicode
@@ -400,7 +400,7 @@ AST (`Ast<Expr2>`) at compile time. The recursive analysis
   (checked via `expr_references_var`), uses the other operand's polarity
 - **Subtraction**: Left operand preserves polarity; right operand flips. Same
   independence check as addition.
-- **Multiplication**: Combines polarities (positive * negative = negative). When
+- **Multiplication**: Combines polarities (positive \* negative = negative). When
   one operand has unknown polarity, checks if the other is a positive or negative
   constant (`is_positive_constant` / `is_negative_constant`) or a variable with
   a constant equation (`is_positive_variable` / `is_negative_variable`)
@@ -430,6 +430,7 @@ classified as `Undetermined` (`calculate_polarity`).
 
 `LoopPolarity::from_runtime_scores()` in `ltm.rs` classifies polarity based
 on actual simulation results. It filters out NaN and zero values, then:
+
 - All remaining scores positive -> `Reinforcing`
 - All remaining scores negative -> `Balancing`
 - Mix of positive and negative -> `Undetermined`
@@ -617,6 +618,6 @@ computational interval" strategy.
 
 - Eberlein, R. and Schoenberg, W. (2020). "Finding the loops that matter."
 - Schoenberg, W., Davidsen, P., and Eberlein, R. (2020). "Understanding model
-  behavior using the loops that matter method." *System Dynamics Review* 36(2).
+  behavior using the loops that matter method." _System Dynamics Review_ 36(2).
 - Schoenberg, W., Hayward, J., and Eberlein, R. (2023). "Improving loops that
-  matter." *System Dynamics Review* 39(2).
+  matter." _System Dynamics Review_ 39(2).

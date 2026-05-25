@@ -14,7 +14,6 @@ All values are little-endian. All offsets in this document are byte offsets.
 
 The parser is implemented in `src/simlin-engine/src/vdf.rs`.
 
-
 ## High-level structure
 
 A VDF file contains:
@@ -51,10 +50,9 @@ The overall file layout, from lowest to highest offset:
   +---------------------------+
 ```
 
-The sections *after* the name table section (sections 3-7) appear to contain
+The sections _after_ the name table section (sections 3-7) appear to contain
 display/graph settings and other Vensim UI metadata. Their content is not
 needed for data extraction.
-
 
 ## 1. File header
 
@@ -71,12 +69,12 @@ needed for data extraction.
 ```
 
 The `time_point_count` is the number of output time points stored. Examples:
+
 - bact model (t=0..60, saveper=1): 61
 - pop model (t=0..100, saveper=1): 101
 - WRLD3-03 (t=1900..2100, dt=0.5): 401
 
 The bitmap size used in data blocks is `ceil(time_point_count / 8)` bytes.
-
 
 ## 2. Sections
 
@@ -118,27 +116,29 @@ though the `field4` values vary across files and do NOT form a reliable type
 identifier.
 
 Observed field4 sequences:
+
 - **water** (small): `[18, 2, 55, 0, 8, 0, 1, 0]`
 - **WRLD3** (medium): `[19, 42, 3546, 0, 152, 0, 2, 1065353216]`
 - **Ref** (large): `[18, 473, 8284, 32, 387, 1, 1, 1156005888]`
 
 The `field3` values are more consistent:
+
 - Sections 0, 1, 2, 4, 5, 7: field3 = 500 (0x1F4)
 - Section 3: field3 = 135 (0x87)
 - Section 6: field3 = 100 (0x64)
 
 ### Section roles by position
 
-| Index | Role | field3 | Notes |
-|-------|------|--------|-------|
-| 0 | Model info / settings | 500 | ~39-40 bytes; contains simulation command string |
-| 1 | Variable slot table | 500 | One 16-byte slot per variable; size grows with model |
-| 2 | Name table | 500 | Variable names; identified by field5 high bits |
-| 3 | Unknown (all zeros) | 135 | Always 32 bytes of zeros |
-| 4 | Unknown metadata | 500 | Variable-length; content unclear |
-| 5 | Degenerate/marker | 500 | Degenerate in small files; in array-heavy files contains set-like `n,0,refs...` entries |
-| 6 | Unknown metadata | 100 | Starts with a parseable `count + slot-ref list` stream in all observed files |
-| 7 | Display settings | 500 | Graph/display configuration data |
+| Index | Role                  | field3 | Notes                                                                                   |
+| ----- | --------------------- | ------ | --------------------------------------------------------------------------------------- |
+| 0     | Model info / settings | 500    | ~39-40 bytes; contains simulation command string                                        |
+| 1     | Variable slot table   | 500    | One 16-byte slot per variable; size grows with model                                    |
+| 2     | Name table            | 500    | Variable names; identified by field5 high bits                                          |
+| 3     | Unknown (all zeros)   | 135    | Always 32 bytes of zeros                                                                |
+| 4     | Unknown metadata      | 500    | Variable-length; content unclear                                                        |
+| 5     | Degenerate/marker     | 500    | Degenerate in small files; in array-heavy files contains set-like `n,0,refs...` entries |
+| 6     | Unknown metadata      | 100    | Starts with a parseable `count + slot-ref list` stream in all observed files            |
+| 7     | Display settings      | 500    | Graph/display configuration data                                                        |
 
 **Note on section 5**: In small models, this is a degenerate section where
 the next section's header starts before this section's data offset, yielding
@@ -157,6 +157,7 @@ where each `refs[i]` is a valid section-1 offset (and usually a slotted name
 offset). This stream terminates before trailing non-stream metadata bytes.
 
 Observed entry counts (best alignment):
+
 - water: 7
 - pop: 8
 - econ: 79
@@ -206,6 +207,7 @@ zambaqui (baserun.vdf, 369470 bytes):
 ```
 
 Consistent patterns:
+
 - **Section 0** always at 0xa8, f3=500, f4 is a small integer (19-22), f5 high 16 bits = 0x001a
 - **Section 1** f3=500, f4 is a small integer (2-192)
 - **Section 2** (name table) f3=500, f5=0x00060000 (high 16 bits = 6 = length of "Time\0\0")
@@ -214,14 +216,12 @@ Consistent patterns:
 - **Section 6** always f3=100 (not 500)
 - **Section 7** field4/field5 are f32 values in zambaqui (15.0 and 20.0), zero/1.0 in smaller files
 
-
 ## 3. Section 0: Model info
 
 A small section (~39-40 bytes) that appears to contain simulation run
 parameters. The first few u32 values include what looks like a command
 string offset and length. The section data contains an ASCII substring like
 `sim bact -I` or `sim 16-2 -I` (the Vensim simulation command).
-
 
 ## 4. Section 1: Variable slot table
 
@@ -240,13 +240,12 @@ The slot data's purpose remains unknown.
 
 ### Observed sizes
 
-| Model | sec[1] size | Slot count | Slot stride |
-|-------|-------------|------------|-------------|
-| bact  | 204 bytes   | 10         | 16          |
-| water | 268 bytes   | 14         | 16          |
-| pop   | 300 bytes   | 16         | 16          |
+| Model | sec[1] size | Slot count | Slot stride               |
+| ----- | ----------- | ---------- | ------------------------- |
+| bact  | 204 bytes   | 10         | 16                        |
+| water | 268 bytes   | 14         | 16                        |
+| pop   | 300 bytes   | 16         | 16                        |
 | WRLD3 | 6764 bytes  | 404        | mostly 16 (some 32/48/64) |
-
 
 ## 5. Name table (section 2)
 
@@ -293,13 +292,12 @@ table immediately before section 2 (typically followed by marker
 ### Observed counts
 
 | Model | Slotted names | Total names | System | Groups | Units | Builtins | Model vars |
-|-------|--------------|-------------|--------|--------|-------|----------|------------|
-| bact  | 10           | 10          | 5      | 2      | 0     | 2        | 3          |
-| water | 14           | 14          | 5      | 2      | 2     | 1        | 5          |
-| pop   | 16           | 16          | 5      | 2      | 1     | 0        | 8          |
-| econ  | 94           | 100         | 5      | 2      | 5     | 6         | 83         |
-| WRLD3 | 404          | 404         | 5      | 20     | 14    | 13        | 352        |
-
+| ----- | ------------- | ----------- | ------ | ------ | ----- | -------- | ---------- |
+| bact  | 10            | 10          | 5      | 2      | 0     | 2        | 3          |
+| water | 14            | 14          | 5      | 2      | 2     | 1        | 5          |
+| pop   | 16            | 16          | 5      | 2      | 1     | 0        | 8          |
+| econ  | 94            | 100         | 5      | 2      | 5     | 6        | 83         |
+| WRLD3 | 404           | 404         | 5      | 20     | 14    | 13       | 352        |
 
 ## 6. Variable metadata records
 
@@ -316,7 +314,7 @@ positions. All records at the same 64-byte alignment are included regardless.
 ### Record counts
 
 | Model | Records | OT entries | f[12] groups |
-|-------|---------|------------|--------------|
+| ----- | ------- | ---------- | ------------ |
 | bact  | 7       | 8          | 2            |
 | water | 12      | 10         | 3            |
 | pop   | 16      | 13         | 2            |
@@ -412,17 +410,16 @@ deterministic OT partition:
 
 Observed counts on key files:
 
-| Model | OT entries | Range count | Coverage of OT[1..] |
-|-------|------------|-------------|-----------------------|
-| water | 10         | 8           | 9 / 9                 |
-| econ  | 78         | 61          | 77 / 77               |
-| WRLD3 | 297        | 234         | 296 / 296             |
-| zambaqui | 1276    | 306         | 1275 / 1275           |
+| Model    | OT entries | Range count | Coverage of OT[1..] |
+| -------- | ---------- | ----------- | ------------------- |
+| water    | 10         | 8           | 9 / 9               |
+| econ     | 78         | 61          | 77 / 77             |
+| WRLD3    | 297        | 234         | 296 / 296           |
+| zambaqui | 1276       | 306         | 1275 / 1275         |
 
 For array-heavy files, large range lengths (e.g., 82/164/328 in zambaqui)
 indicate multi-entry blocks (array/table-like regions), even though exact
 name/element decoding remains unresolved.
-
 
 ## 7. Slot table
 
@@ -438,6 +435,7 @@ varies (variable-length slot metadata per entry).
 
 The slot table is identified by scanning backward from section 2 and choosing
 the **largest** N whose u32 values satisfy:
+
 - Are all unique (no duplicates)
 - Are all 4-byte aligned (`value % 4 == 0`)
 - Are all within section 1's data size
@@ -457,7 +455,6 @@ the **largest** N whose u32 values satisfy:
 Extensive testing confirmed that slot data does NOT contain offset table
 indices. All 4 u32 words within each 16-byte slot were checked against
 empirically known OT indices -- no consistent mapping was found.
-
 
 ## 8. Offset table
 
@@ -483,12 +480,11 @@ comparing against the known first_data_block_offset.
 ### Observed counts
 
 | Model | OT entries | Data blocks | Constants |
-|-------|------------|-------------|-----------|
+| ----- | ---------- | ----------- | --------- |
 | bact  | 8          | ~5          | ~3        |
 | water | 10         | ~7          | ~3        |
 | pop   | 13         | ~9          | ~4        |
 | WRLD3 | 297        | ~200+       | ~90+      |
-
 
 ## 9. Data blocks
 
@@ -520,11 +516,11 @@ Block 0 is always the time series itself (e.g., `[0.0, 1.0, 2.0, ...]` or
 
 The first data block is found by scanning the file (starting at offset 0x100)
 for a location where:
+
 1. The u16 count equals `time_point_count`
 2. The bitmap has exactly `time_point_count` bits set
 3. The first f32 value is a plausible simulation start time
    (year in 1800-2200, or 0.0)
-
 
 ## 10. Name-to-data mapping
 
@@ -578,7 +574,6 @@ series values at sample points. This is used to validate hypotheses about the
 metadata chain and to verify the deterministic mapping against ground truth.
 It is not a production decoding strategy since it requires running a simulation
 first.
-
 
 ## 11. Deep dive: f[10] analysis
 
@@ -662,7 +657,6 @@ Within a single VDF file, f[10] values are globally unique across all records
 that have f[10] > 0. No two records share the same non-zero f[10] value.
 Records with f[10] = 0 are padding or structural entries.
 
-
 ## 12. f[12] grouping
 
 f[12] groups records into clusters that share the same byte offset into
@@ -684,7 +678,6 @@ sectors.
 f[12] does NOT provide a name-to-record mapping. The group structure
 reflects Vensim's internal model organization (views/sectors), not a
 lookup table for resolving variable names.
-
 
 ## 13. Known pitfalls and edge cases
 
@@ -745,7 +738,6 @@ serve a different purpose (perhaps subscript dimension metadata or internal
 bookkeeping) and must be excluded from name-to-OT matching by checking
 `f[11] < offset_table_count`.
 
-
 ## 14. Section 7: display settings
 
 Section 7 contains graph/display configuration data. In some files, the
@@ -757,7 +749,6 @@ header field4 and field5 contain f32 values rather than integer metadata:
 The data immediately following contains sequences of round floats (graph axis
 values). The header format is not fully consistent across sections -- field4
 and field5 meaning changes based on section position.
-
 
 ## 15. Open questions
 
@@ -785,7 +776,6 @@ and field5 meaning changes based on section position.
    extent is now decoded reliably, but the full deterministic
    name/element-to-OT mapping is still unresolved for large models.
 
-
 ## 16. Additional hypotheses ruled out (2026-02-23)
 
 Exploratory `debug_*` tests were used and then removed to keep
@@ -811,7 +801,6 @@ Implication: the unresolved name/element->OT mapping likely lives in the
 remaining undecoded metadata, not in any simple reinterpretation of the
 already-decoded slot/record fields.
 
-
 ## 17. Section 7 pre-OT region: graph/display data (2026-02-23)
 
 The region between section 7's data start and the offset table start was
@@ -820,15 +809,15 @@ only graph axis values and lookup table data points (packed f32 arrays),
 not mapping metadata.**
 
 Evidence:
+
 - All values in the pre-OT region decode as plausible f32 graph data
   (axis tick values, lookup x/y pairs)
 - The region ends with 4-5 zero u32s padding before the offset table
-- Section 7 header field1 * 4 = pre_OT_bytes + 28 consistently, suggesting
+- Section 7 header field1 \* 4 = pre_OT_bytes + 28 consistently, suggesting
   field1 counts the number of f32 graph data values (plus a 7-word header)
 
 The pre-OT region is confirmed to be graph/display settings, not mapping
 metadata. This was a dead end.
-
 
 ## 18. Slot blob analysis: static data (2026-02-23)
 
@@ -848,7 +837,6 @@ The slot blob data appears to be a structural layout artifact of section 1,
 not variable metadata. The slot table maps names to positions in this static
 structure, but the data at those positions is the same regardless of which
 variable occupies the slot.
-
 
 ## 19. Compilation-order hypothesis: confirmed (2026-02-23)
 
@@ -895,6 +883,7 @@ which depends on:
 - Dependency ordering with alphabetical tie-breaking within each view
 
 This explains why:
+
 - No open-source VDF parser exists (all tools use the Vensim DLL)
 - PySD, EMAworkbench, and SDEverywhere require the Vensim DLL for VDF
   reading
@@ -917,19 +906,19 @@ and the indices increase monotonically (8, 11, 14, 19, 23, ... for
 WRLD3). This appears to encode view/sector structure, not the name→OT
 mapping itself.
 
-
 ## 20. Practical strategies for VDF reading
 
 Given that the VDF does not store an explicit mapping:
 
-| Scenario | Strategy | Status |
-|----------|----------|--------|
-| Small models (no SMOOTH/DELAY) | f[10] deterministic mapping | **Working** |
-| Large models + reference sim | Time-series correlation | **Working** |
-| Large models + .mdl file | Model-guided structural allocator (`build_model_guided_ot_map` / `to_results_with_model`) | **Baseline implemented; ordering accuracy still open** |
-| Standalone VDF (no model, no sim) | Relaxed f[10] heuristic + user assistance | **Future** |
+| Scenario                          | Strategy                                                                                  | Status                                                 |
+| --------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Small models (no SMOOTH/DELAY)    | f[10] deterministic mapping                                                               | **Working**                                            |
+| Large models + reference sim      | Time-series correlation                                                                   | **Working**                                            |
+| Large models + .mdl file          | Model-guided structural allocator (`build_model_guided_ot_map` / `to_results_with_model`) | **Baseline implemented; ordering accuracy still open** |
+| Standalone VDF (no model, no sim) | Relaxed f[10] heuristic + user assistance                                                 | **Future**                                             |
 
 The priority path for reading WRLD3 golden output:
+
 1. Parse the .mdl file to get model structure
 2. Simulate the model to get reference results
 3. Use `build_empirical_ot_map()` to match VDF entries to simulation variables
@@ -938,19 +927,18 @@ The priority path for reading WRLD3 golden output:
 For eventual standalone VDF reading, implementing Vensim's compilation
 ordering from the .mdl model structure is the most promising approach.
 
-
 ## 21. Inversion analysis: OT ordering breakdown (2026-02-23)
 
 When the 252 empirically matched WRLD3 variable names are sorted by OT
 index and checked for alphabetical ordering, 210 are in order and 50
 show inversions. These 50 inversions classify as:
 
-| Category | Count | Description |
-|----------|-------|-------------|
-| View boundary resets | 23 | Next view starts at lower alphabetical value |
-| Table displacement | 15 | Lookup tables grouped with parent variable |
-| Suffix swaps (`_2`/`_1`/base) | 9 | Vensim orders `_2` before `_1` before base |
-| Other (minor) | 3 | Near-alphabetical pairs |
+| Category                      | Count | Description                                  |
+| ----------------------------- | ----- | -------------------------------------------- |
+| View boundary resets          | 23    | Next view starts at lower alphabetical value |
+| Table displacement            | 15    | Lookup tables grouped with parent variable   |
+| Suffix swaps (`_2`/`_1`/base) | 9     | Vensim orders `_2` before `_1` before base   |
+| Other (minor)                 | 3     | Near-alphabetical pairs                      |
 
 **Key implications for the .mdl-based mapping algorithm**:
 
@@ -986,6 +974,7 @@ for each view (in .mdl sketch order):
 ```
 
 This algorithm requires:
+
 - Parsing the .mdl sketch to determine view membership
 - Building the dependency graph from equations
 - Topological sort with specific tie-breaking
@@ -994,7 +983,6 @@ This algorithm requires:
 Our engine already has all these capabilities in the MDL parser and
 compiler pipeline. The implementation effort is connecting them to
 the VDF mapping problem.
-
 
 ## 22. .mdl-guided ordering experiments (historical, 2026-02-24)
 
@@ -1010,13 +998,13 @@ removed, but the core findings remain:
 These experiments narrowed the problem: we need a deterministic model-guided
 allocator using VDF anchors, then progressively add compilation-order rules.
 
-
 ## 23. Reproducibility and deterministic fixes (2026-02-24)
 
 The earlier drift in percentage metrics was caused by hash-map iteration order
 inside the empirical/oracle matching path.
 
 Implemented fixes:
+
 - `build_empirical_ot_map()` now iterates model variables in stable order
   (sorted by model offset, then canonical name).
 - `build_vdf_results()` now uses the same stable ordering.
@@ -1024,9 +1012,9 @@ Implemented fixes:
   different `HashMap` insertion histories.
 
 Implication:
+
 - empirical matching is now reproducible run-to-run and can be used as a
   stable oracle while non-correlation mapping is improved.
-
 
 ## 24. Section 5 sets match model subscript cardinalities (2026-02-24)
 
@@ -1053,13 +1041,13 @@ from the model, with matching multiplicities for shared families
 (`46`) is not present in section 5.
 
 The same pattern appears across old-run zambaqui files:
+
 - `Pop-1.vdf`: subset of the same family (no 66/6/2 sets)
 - `land-1.vdf`: full family
 - `Current.vdf`: only one set (`83`, i.e. `82+1`)
 
 Implication: section 5 is not random metadata; it likely carries subscript
 set/dimension descriptors that are directly useful for array OT decoding.
-
 
 ## 25. Record OT ranges in array files show dimension-scale blocks (2026-02-24)
 
@@ -1069,9 +1057,10 @@ zambaqui, the largest ranges are:
 - 328, 164, 164, 82, 82 (plus smaller blocks)
 
 These are dimension-scale values:
+
 - 82 (full age-like axis)
-- 164 (= 2 * 82)
-- 328 (= 4 * 82)
+- 164 (= 2 \* 82)
+- 328 (= 4 \* 82)
 
 The starts of these large ranges are anchored by records whose `f[12]`
 slot reference points to the dominant array-axis slot (`adult age` in
@@ -1079,11 +1068,11 @@ baserun). This is a strong clue that record starts + section-5 set sizes can
 be combined to recover array block structure without time-series correlation.
 
 Implication:
+
 - for arrayed models, the likely path is:
   1. decode section-5 sets (dimension cardinalities),
   2. decode record-derived OT spans,
   3. map variable elements to spans using model-side dimension structure.
-
 
 ## 26. Section 6 remains weak as a direct mapping source (2026-02-24)
 
@@ -1097,7 +1086,6 @@ Section-6 stream parsing is stable and useful for structural diagnostics
 Section 6 should currently be treated as contextual metadata, not the primary
 name/element -> OT mapping source.
 
-
 ## 27. Section-5 parsing implementation status (2026-02-24)
 
 Section-5 parsing now preserves the explicit count field as:
@@ -1109,6 +1097,7 @@ u32 refs[n+1];
 ```
 
 via `VdfSection5SetEntry { n, refs, ... }`, with helpers:
+
 - `set_size() == refs.len()`
 - `dimension_size() == set_size() - 1`
 
@@ -1116,9 +1105,9 @@ via `VdfSection5SetEntry { n, refs, ... }`, with helpers:
 section-5 set entry, making dimension-signal debugging straightforward.
 
 Validation status:
+
 - zambaqui `baserun.vdf` section-5 set sizes are asserted to equal model
   dimension sizes + 1 from `ZamMod1.mdl`.
-
 
 ## 28. Non-correlation model-guided OT baseline (2026-02-24)
 
@@ -1136,6 +1125,7 @@ This is a baseline allocator, not full Vensim compilation-order replication.
 It is intended to be improved incrementally with explicit ordering rules.
 
 Current implementation detail:
+
 - it maps only model groups visible in the slotted VDF name prefix (plus `time`)
   rather than forcing all flattened model internals into OT space.
 - unresolved groups are skipped instead of hard-failing the entire map.
@@ -1144,7 +1134,6 @@ Current implementation detail:
 `Results` value directly from that structural map (no simulation correlation),
 enabling deterministic VDF ingestion for scalar and arrayed files with a
 loaded `.mdl` project.
-
 
 ## 29. Array-model parser/compiler unblocks (2026-02-24)
 
@@ -1158,16 +1147,17 @@ gaps were closed:
 
 Unsupported/non-constant orders remain explicit compile errors.
 
-
 ## 30. Current gaps and likely payoff path (2026-02-24)
 
 Still open:
+
 1. full WRLD3-quality mapping requires explicit compilation-order rules
    (per-view dependency ordering, suffix/table/internal-variable placement),
 2. array-heavy models remain partially blocked by unrelated builtin coverage
    gaps (e.g. `SHIFT_IF_TRUE`).
 
 Highest-payoff next steps:
+
 1. strengthen model-guided allocator with compiler-order tie-break rules,
 2. add array block assignment using section-5 dimension sizes + record OT spans,
 3. use empirical matching only as a deterministic oracle in tests, not at

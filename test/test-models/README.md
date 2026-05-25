@@ -1,48 +1,49 @@
-Models for testing system dynamics translation, simulation, and display software
-================================================================================
+# Models for testing system dynamics translation, simulation, and display software
 
 This repository is a resource for testing system dynamics software and translation tools.
-It provides a standard set of simple test cases in various formats, with a proposed canonical 
-output for that test. 
+It provides a standard set of simple test cases in various formats, with a proposed canonical
+output for that test.
 
-Folders within the [Test](https://github.com/SDXorg/test-models/tree/master/tests/) directory 
-contain models that exercise a minimal amount of functionality (such as lookup tables) for doing 
+Folders within the [Test](https://github.com/SDXorg/test-models/tree/master/tests/) directory
+contain models that exercise a minimal amount of functionality (such as lookup tables) for doing
 unit-style testing on translation and simulation pathways.
 
-Folders within the [Samples](https://github.com/SDXorg/test-models/tree/master/samples/) 
+Folders within the [Samples](https://github.com/SDXorg/test-models/tree/master/samples/)
 directory contain complete models that can be used for integration tests, benchmarking, and demos.
 
 Each model folder contains:
 
-- a single model concept, with its canonical output (named `output.csv` or `output.tab`) containing (at least) 
-the stock values over the standard timeseries in the model files
+- a single model concept, with its canonical output (named `output.csv` or `output.tab`) containing (at least)
+  the stock values over the standard timeseries in the model files
 - Model files that produce said output (.mdl, .xmile, .stmx(stella), pysd, etc)
 - A text file entitled `README.md` containing:
- - The purpose of the test model (what functionality it executes)
- - The version of software that the canonical output was originally prepared by
- - The author of the test model and contact info
- - Submission Date
+- The purpose of the test model (what functionality it executes)
+- The version of software that the canonical output was originally prepared by
+- The author of the test model and contact info
+- Submission Date
 - Screenshots of model construction programs (optional)
 
-For a demonstration, see the 
+For a demonstration, see the
 [teacup example](https://github.com/SDXorg/test-models/tree/master/samples/teacup)
 
-
 ## Contributing:
-All members of the SD community are invited to contribute to this repository. To do so, create a 
-fork, add your contribution using one of the following methods, add yourself to the
-[AUTHORS](AUTHORS) file, then submit a pull request. 
 
-To request that a specific test be added, create an issue on the 
+All members of the SD community are invited to contribute to this repository. To do so, create a
+fork, add your contribution using one of the following methods, add yourself to the
+[AUTHORS](AUTHORS) file, then submit a pull request.
+
+To request that a specific test be added, create an issue on the
 [issues](https://github.com/SDXorg/test-models/issues) page of this repository.
 
 #### Expanding existing cases
+
 Many of these cases have model files for some modeling formats but not others. To add a model file
-in another format, check that your model output replicates the 'canonical example' to reasonable 
+in another format, check that your model output replicates the 'canonical example' to reasonable
 fidelity, preferably using identical variabale names, and add an entry to the contributions table
 in the directory's `README.md` file.
 
 #### Adding new cases
+
 To add a new case, in your local clone add a folder in either the `tests` or `benchmarks` directory
 as appropriate, copy an example `README.md` file from another folder, and edit to suit your needs.
 
@@ -63,14 +64,14 @@ expected by tools that interact with this repository.
 3. From the Edit menu, choose Export Data
 4. In the `Export Data` modal dialog, choose `One Time` as the Export Type
 5. In the `Export Data Source`, make sure both the `Export all model
-   variables` and `Every DT - Export every intermediate value during the
-   run` are selected
+variables` and `Every DT - Export every intermediate value during the
+run` are selected
 6. For `Export Destination`, choose Browse and name the file
    `output.csv`, and make sure the left-most checkbox below Browse is
-   selected.  You may have to create an empty file named `output.csv`
-   manually beforehand in your operating system's file browser.  Ensure
+   selected. You may have to create an empty file named `output.csv`
+   manually beforehand in your operating system's file browser. Ensure
    that of the two `Data` styles (columnar on the left, horizontal on the
-   right) the left-most (columnar results) is selected.  This is the default.
+   right) the left-most (columnar results) is selected. This is the default.
 7. Click `OK` at the bottom right to perform the export
 
 #### Getting model results from Vensim
@@ -99,7 +100,7 @@ around floating point comparisions.
 `regression-test.py` can be used to compare a specific modeling tool's
 output against the accepted, canonical output for a given model (which
 is stored in `output.csv` in all the subdirectories of this
-repository).  It can be run with external tools with the current
+repository). It can be run with external tools with the current
 working directory as the root of this project:
 
     $ ./regression-test.py ~/src/libsd/mdl .
@@ -116,7 +117,7 @@ The main requirement is that the given command
 ([`mdl`](https://github.com/sdlabs/libsd/blob/master/mdl.c) and
 [`mdl.js`](https://github.com/sdlabs/sd.js/blob/master/mdl.js) above)
 accept the path to a model as an argument, and output model results to
-`stdout` in either TSV or CSV format.  If your tool requires
+`stdout` in either TSV or CSV format. If your tool requires
 additional commandline args, you can specify them with quoting:
 
     $ ./regression-test.py "~/path/to/tool --arg1 --arg2" .
@@ -129,4 +130,3 @@ models rather than xmile, you can change the model-file suffix:
 
     # test Stella v10 XMILE-variant model files
     $ ./regression-test.py --ext stmx ~/path/to/tool .
-

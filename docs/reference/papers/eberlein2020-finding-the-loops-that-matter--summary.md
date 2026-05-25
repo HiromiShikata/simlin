@@ -44,11 +44,13 @@ The LTM method uses a **link score** that measures the contribution of a changin
 ### The Three-Party Arms Race Model (Figure 1)
 
 A simple model with three parties (A, B, C), each with:
+
 - A stock representing their arms level
 - A flow representing their rate of change
 - A target based on the other two parties' arms levels
 
 **Setup:**
+
 - A wants parity with B and 90% of C
 - B wants parity with A and 110% of C
 - C wants 110% of A and 90% of B
@@ -59,6 +61,7 @@ A simple model with three parties (A, B, C), each with:
 ### Feedback Loops in This Model
 
 The model contains **8 feedback loops**:
+
 1. **3 balancing stock-adjustment loops** (each stock adjusting toward its own target -- the standard balancing loop in the arms race archetype)
 2. **3 pairwise reinforcing loops** (A to B's target to B to A's target, etc. -- the standard reinforcing loops in the archetype)
 3. **2 reinforcing loops involving all three players**:
@@ -74,6 +77,7 @@ However, the **pairwise reinforcing loops all have gain <= 1**, meaning if only 
 ### Behavior (Figure 2)
 
 **Figure 2** shows the behavior of the three stocks over 100 years:
+
 - **B's Arms** (solid pink): Starts at 100, dips initially, then rises exponentially to ~200
 - **A's Arms** (dash-dot blue): Starts at 50, rises and converges toward B, then rises exponentially
 - **C's Arms** (dotted gray): Starts at 150, drops initially, converges with A and B, then all rise together in an arms race
@@ -107,6 +111,7 @@ Flow_2 = IF Stock_1 > 10 AND Stock_1 < 20 THEN Stock_1/DT ELSE Stock_2/DT
 ```
 
 Both stocks start at 1. The model has:
+
 - Two **minor loops** (Stock_1 -> Flow_1 -> Stock_1 and Stock_2 -> Flow_2 -> Stock_2)
 - One **major loop** (Stock_1 -> Flow_2 -> Stock_2 -> Flow_1 -> Stock_1)
 
@@ -128,10 +133,12 @@ This demonstrates that every link is active at some point but not at others. To 
 The authors tried two approaches to create a single "composite" network from which to discover loops:
 
 **Approach 1: Maximum link score magnitude over all times**
+
 - For this model, gives 1 for every link.
 - **Problem:** Composite loop scores always >= actual loop scores. For big models, longer loops get bigger composite scores (bias toward long loops). Numeric overflow: scores can exceed 1.0E300.
 
 **Approach 2: Average link score magnitude over all times**
+
 - For this model: flows average to 1; Stock_1->Flow_1 averages 0.5; Stock_2->Flow_2 averages 0.9; Stock_1->Flow_2 averages 0.1; Stock_2->Flow_1 averages 0.5.
 - Minor loop 1 score: 0.5; Minor loop 2 score: 0.9; Major loop score: 0.05.
 - **Problem:** Longer loops get systematically lower composite scores (bias toward short loops). Nice numeric properties but biased.
@@ -153,6 +160,7 @@ The composite feedback structure is still used for an **initial identification p
 ### Analogy to Dijkstra's Algorithm
 
 The algorithm is inspired by Dijkstra's shortest path algorithm (1959):
+
 - In Dijkstra: if going from a to b, and route through c costs 10km, any route through c costing more than 10km can be pruned.
 - In loop discovery: instead of minimizing distance (additive), we **maximize link score products (multiplicative)**. When reaching variable c, if a previous path had a bigger score, we don't explore further from c on the current path.
 
@@ -161,6 +169,7 @@ The algorithm is inspired by Dijkstra's shortest path algorithm (1959):
 The maximization (rather than minimization) means the approach does **not guarantee finding the optimal solution**. The specific failure mode:
 
 **Figure 7** demonstrates the problem with a 4-node graph (a, b, c, d):
+
 - The direct branch from `a` to `b` is weaker initially than going from `a` to `d`.
 - The search therefore prunes the direct `a -> b` path after reaching `b` via a higher-scoring intermediate path.
 - As stated in the paper, this can cause the algorithm to miss loop `a -> b -> c -> a` (score 1000) and instead find `a -> d -> c -> a` (score 100).
@@ -229,6 +238,7 @@ End for
 ```
 
 **Key details of the pseudocode:**
+
 - `STACK` tracks the current path for loop recording and cycle detection.
 - `variable.visiting` is a boolean flag for detecting cycles on the current DFS path (set true on entry, false on exit).
 - `variable.best_score` tracks the highest score with which this variable has been visited across all paths from the current TARGET. Initialized to 0 before each stock's search.
@@ -260,30 +270,30 @@ The authors compared the strongest path algorithm against exhaustive enumeration
 
 The 4th loop (found by both methods) and the 8th loop (missed by strongest path) are nearly identical:
 
-| 4th Loop (found) | 8th Loop (missed) |
-|---|---|
-| experience rate | experience rate |
-| Experienced Personnel | Experienced Personnel |
-| total labor | total labor |
-| on office service capacity | on office service capacity |
-| service capacity | service capacity |
-| work pressure | work pressure |
-| work intensity | work intensity |
+| 4th Loop (found)            | 8th Loop (missed)           |
+| --------------------------- | --------------------------- |
+| experience rate             | experience rate             |
+| Experienced Personnel       | Experienced Personnel       |
+| total labor                 | total labor                 |
+| on office service capacity  | on office service capacity  |
+| service capacity            | service capacity            |
+| work pressure               | work pressure               |
+| work intensity              | work intensity              |
 | potential order fulfillment | potential order fulfillment |
-| order fulfillment | order fulfillment |
-| Service Backlog | Service Backlog |
-| desired service capacity | desired service capacity |
-| Change Desired Labor | Change Desired Labor |
-| Desired Labor | Desired Labor |
-| labor correction | labor correction |
-| desired hiring | desired hiring |
-| **desired vacancies** | *(skipped)* |
-| **vacancies correction** | *(skipped)* |
-| indicated labor order rate | indicated labor order rate |
-| labor order rate | labor order rate |
-| Vacancies | Vacancies |
-| hiring rate | hiring rate |
-| Rookies | Rookies |
+| order fulfillment           | order fulfillment           |
+| Service Backlog             | Service Backlog             |
+| desired service capacity    | desired service capacity    |
+| Change Desired Labor        | Change Desired Labor        |
+| Desired Labor               | Desired Labor               |
+| labor correction            | labor correction            |
+| desired hiring              | desired hiring              |
+| **desired vacancies**       | _(skipped)_                 |
+| **vacancies correction**    | _(skipped)_                 |
+| indicated labor order rate  | indicated labor order rate  |
+| labor order rate            | labor order rate            |
+| Vacancies                   | Vacancies                   |
+| hiring rate                 | hiring rate                 |
+| Rookies                     | Rookies                     |
 
 The loops are identical through "desired hiring", then the 4th loop goes through two extra variables (desired vacancies, vacancies correction) before rejoining at "indicated labor order rate". This is a **very typical miss pattern**: the algorithm finds one of two sibling loops that share most of their path but differ by a few links (one being slightly shorter or longer than the other).
 
@@ -332,7 +342,7 @@ The authors describe several abandoned approaches, sharing failures to benefit f
 
 - Trace strongest links out of each node until hitting a terminal or detecting a loop.
 - Use the biggest score along that forward path as the node's "potential" to contribute to a loop.
-- Abandon search when current score * remaining potential falls below threshold (based on already-discovered loops).
+- Abandon search when current score \* remaining potential falls below threshold (based on already-discovered loops).
 - **Why it failed:** Picking only the strongest outbound link is at best modestly correlated with real potential. The forward path might include already-visited variables.
 
 ### Failed Approach 2: Total Potential Score Remaining
@@ -347,8 +357,10 @@ The authors describe several abandoned approaches, sharing failures to benefit f
 ### Failed Approach 3: Trimming the Feedback Structure (Removing Links)
 
 Two sub-approaches:
+
 1. **Remove links after they appear in enough loops** (assuming strongest loops found first).
 2. **Remove all weak links** to reduce connectivity.
+
 - **Why it failed:** Removed links might be necessary to complete a high-scoring loop even though the link itself scores low individually. While the sibling-loop pattern (similar loops with a few more/fewer links) suggests this might not be fatal, the authors could not convince themselves it was safe, nor could they guarantee performance across different model sizes.
 
 ### Failed Approach 4: Stock-to-Stock Network Compaction
@@ -386,30 +398,30 @@ Two sub-approaches:
 
 ## 11. Figures Summary
 
-| Figure | Description |
-|--------|-------------|
-| **Figure 1** | Stock-and-flow diagram of the three-party arms race model (A, B, C) with stocks, flows, targets, and cross-connections. |
+| Figure       | Description                                                                                                                                                                                                                                           |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Figure 1** | Stock-and-flow diagram of the three-party arms race model (A, B, C) with stocks, flows, targets, and cross-connections.                                                                                                                               |
 | **Figure 2** | Time series of A's Arms, B's Arms, C's Arms over 100 years. Shows initial adjustment then exponential growth driven by the three-party loop. B starts at 100 and rises, A starts at 50 and converges upward, C starts at 150 and drops before rising. |
-| **Figure 3** | Relative loop scores (%) for all 8 loops over 100 years. Short-term: self-correction and pairwise loops dominate (scores range -80% to +60%). Long-term: the two three-party loops dominate (converging to ~+/-50%). |
-| **Figure 4** | Stock-and-flow diagram of a simple two-stock model with conditional IF-THEN-ELSE equations creating decoupled feedback loops that activate at different times. |
-| **Figure 5** | Behavior of the two-stock model over 10 months. Shows Stock Flow 1, Stock Flow 2, and "From 1 to 2 loop" activity. Triangular/piecewise behavior as different loops activate and deactivate. |
-| **Figure 6** | Link scores for all 4 variable-to-flow links over 10 months. Flow-to-stock always 1. Stock_1->Flow_2 is 1 at time 5 only. Stock_2->Flow_1 is 0 until time 7 then 1. Demonstrates time-varying link activity. |
-| **Figure 7** | A 4-node directed graph (a, b, c, d) with labeled link scores demonstrating the failure case of directly applying Dijkstra's algorithm to loop finding. The algorithm finds a->d->c->a (score 100) but misses a->b->c->a (score 1000). |
+| **Figure 3** | Relative loop scores (%) for all 8 loops over 100 years. Short-term: self-correction and pairwise loops dominate (scores range -80% to +60%). Long-term: the two three-party loops dominate (converging to ~+/-50%).                                  |
+| **Figure 4** | Stock-and-flow diagram of a simple two-stock model with conditional IF-THEN-ELSE equations creating decoupled feedback loops that activate at different times.                                                                                        |
+| **Figure 5** | Behavior of the two-stock model over 10 months. Shows Stock Flow 1, Stock Flow 2, and "From 1 to 2 loop" activity. Triangular/piecewise behavior as different loops activate and deactivate.                                                          |
+| **Figure 6** | Link scores for all 4 variable-to-flow links over 10 months. Flow-to-stock always 1. Stock_1->Flow_2 is 1 at time 5 only. Stock_2->Flow_1 is 0 until time 7 then 1. Demonstrates time-varying link activity.                                          |
+| **Figure 7** | A 4-node directed graph (a, b, c, d) with labeled link scores demonstrating the failure case of directly applying Dijkstra's algorithm to loop finding. The algorithm finds a->d->c->a (score 100) but misses a->b->c->a (score 1000).                |
 
 ---
 
 ## 12. Bibliography
 
-- Dijkstra, E. W. (1959). A note on two problems in connexion with graphs. *Numerische Mathematik*, 1(1), 269-271.
-- Forrester, J. W. (1968). Market Growth as Influenced by Capital Investment. *Industrial Management Rev. (MIT)*, 9(2), 83-105.
-- Forrester, J. W. (1969). *Urban dynamics*. Cambridge, Mass: M.I.T. Press.
-- Guneralp, B. (2006). Towards coherent loop dominance analysis: progress in eigenvalue elasticity analysis. *System Dynamics Review*, 22(3), 263-289.
-- Huang, J., Howley, E., and Duggan, J. (2012). Observations on the shortest independent loop set algorithm. *System Dynamics Review*, 28(3), 276-280.
-- Kampmann CE. (2012). Feedback loop gains and system behaviour (1996). *System Dynamics Review* 28(4): 370-395.
-- Mass, NJ. (1975). *Economic Cycles: An Analysis of Underlying Causes*, Cambridge, Massachusetts.
-- Meadows, DH., Randers, J., & Meadows, DL. (2004). *The limits to growth: The 30-year update*.
-- Morecroft, JDW. (1983). System Dynamics: Portraying Bounded Rationality. *Omega*, 11(2), 131-142.
-- Oliva, R. (2004). Model structure analysis through graph theory: partition heuristics and feedback structure decomposition. *System Dynamics Review*, 20(4): 313-336.
-- Oliva R, Sterman JD. (2001). Cutting corners and working overtime: quality erosion in the service industry. *Management Science* 47(7): 894-914.
-- Schoenberg, W., Davidsen, P., & Eberlein, R. (2019). Understanding model behavior using loops that matter. *arXiv preprint arXiv:1908.11434*.
-- Tarjan, R. (1973). Enumeration of the Elementary Circuits of a Directed Graph. *SIAM J. Comput.*, 2(3), 211-216.
+- Dijkstra, E. W. (1959). A note on two problems in connexion with graphs. _Numerische Mathematik_, 1(1), 269-271.
+- Forrester, J. W. (1968). Market Growth as Influenced by Capital Investment. _Industrial Management Rev. (MIT)_, 9(2), 83-105.
+- Forrester, J. W. (1969). _Urban dynamics_. Cambridge, Mass: M.I.T. Press.
+- Guneralp, B. (2006). Towards coherent loop dominance analysis: progress in eigenvalue elasticity analysis. _System Dynamics Review_, 22(3), 263-289.
+- Huang, J., Howley, E., and Duggan, J. (2012). Observations on the shortest independent loop set algorithm. _System Dynamics Review_, 28(3), 276-280.
+- Kampmann CE. (2012). Feedback loop gains and system behaviour (1996). _System Dynamics Review_ 28(4): 370-395.
+- Mass, NJ. (1975). _Economic Cycles: An Analysis of Underlying Causes_, Cambridge, Massachusetts.
+- Meadows, DH., Randers, J., & Meadows, DL. (2004). _The limits to growth: The 30-year update_.
+- Morecroft, JDW. (1983). System Dynamics: Portraying Bounded Rationality. _Omega_, 11(2), 131-142.
+- Oliva, R. (2004). Model structure analysis through graph theory: partition heuristics and feedback structure decomposition. _System Dynamics Review_, 20(4): 313-336.
+- Oliva R, Sterman JD. (2001). Cutting corners and working overtime: quality erosion in the service industry. _Management Science_ 47(7): 894-914.
+- Schoenberg, W., Davidsen, P., & Eberlein, R. (2019). Understanding model behavior using loops that matter. _arXiv preprint arXiv:1908.11434_.
+- Tarjan, R. (1973). Enumeration of the Elementary Circuits of a Directed Graph. _SIAM J. Comput._, 2(3), 211-216.

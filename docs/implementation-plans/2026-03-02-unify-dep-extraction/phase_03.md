@@ -17,10 +17,12 @@
 This phase implements and tests:
 
 ### unify-dep-extraction.AC3: Authoritative module-backed classifier
+
 - **unify-dep-extraction.AC3.1 Success:** `collect_module_idents()` and `builtins_visitor` PREVIOUS/INIT routing use the same predicate function for stdlib-call detection
 - **unify-dep-extraction.AC3.2 Success:** No duplicated logic for determining whether an equation expands to a module
 
 ### unify-dep-extraction.AC0: Regression Safety
+
 - **unify-dep-extraction.AC0.1 Success:** All existing simulation tests (`tests/simulate.rs`) pass at each phase boundary
 - **unify-dep-extraction.AC0.2 Success:** All existing engine unit tests (`cargo test` in `src/simlin-engine`) pass at each phase boundary
 
@@ -29,6 +31,7 @@ This phase implements and tests:
 ## Reference files
 
 Read these CLAUDE.md files for project conventions before implementing:
+
 - `/home/bpowers/src/simlin/CLAUDE.md` (project root)
 - `/home/bpowers/src/simlin/src/simlin-engine/CLAUDE.md` (engine crate)
 
@@ -44,12 +47,13 @@ Phase 1 must be complete.
 
 The investigation revealed that `equation_is_stdlib_call()` and `contains_stdlib_call()` are NOT simple duplicates -- they serve structurally different purposes:
 
-| Function | Location | Level | Purpose |
-|---|---|---|---|
-| `equation_is_stdlib_call()` | model.rs:831-850 | Top-level only | "Does this equation's outermost call expand to a module?" Pre-scan for classifying variable NAMES. |
-| `contains_stdlib_call()` | builtins_visitor.rs:31-54 | Recursive | "Does this expression contain any stdlib call needing per-element A2A expansion?" Walk-time decision. |
+| Function                    | Location                  | Level          | Purpose                                                                                               |
+| --------------------------- | ------------------------- | -------------- | ----------------------------------------------------------------------------------------------------- |
+| `equation_is_stdlib_call()` | model.rs:831-850          | Top-level only | "Does this equation's outermost call expand to a module?" Pre-scan for classifying variable NAMES.    |
+| `contains_stdlib_call()`    | builtins_visitor.rs:31-54 | Recursive      | "Does this expression contain any stdlib call needing per-element A2A expansion?" Walk-time decision. |
 
 Key differences:
+
 - `equation_is_stdlib_call` handles PREVIOUS specially: 1-arg = false (LoadPrev), 2+ args = true (module)
 - `contains_stdlib_call` includes `"init"` as a trigger (INIT needs per-element temp vars in A2A context) but `equation_is_stdlib_call` does not
 - `contains_stdlib_call` recurses into nested expressions; `equation_is_stdlib_call` only checks the top-level
@@ -59,11 +63,13 @@ The shared core is the NAME SET check: "is this function name (lowercased) one t
 ---
 
 <!-- START_TASK_1 -->
+
 ### Task 1: Extract `is_stdlib_module_function()` predicate
 
 **Verifies:** unify-dep-extraction.AC3.1, unify-dep-extraction.AC3.2
 
 **Files:**
+
 - Modify: `src/simlin-engine/src/builtins.rs` -- add `pub(crate) fn is_stdlib_module_function()`
 - Modify: `src/simlin-engine/src/model.rs:831-850` -- update `equation_is_stdlib_call()` to use the shared predicate
 - Modify: `src/simlin-engine/src/builtins_visitor.rs:31-54` -- update `contains_stdlib_call()` to use the shared predicate
@@ -92,6 +98,7 @@ pub(crate) fn is_stdlib_module_function(func_name: &str) -> bool {
 **Step 2: Update `equation_is_stdlib_call()` in model.rs (line 831-850).**
 
 Currently (lines 842-849):
+
 ```rust
 match &ast {
     Expr0::App(crate::builtins::UntypedBuiltinFn(func, args), _) => {
@@ -107,6 +114,7 @@ match &ast {
 ```
 
 Replace the match body with:
+
 ```rust
 match &ast {
     Expr0::App(crate::builtins::UntypedBuiltinFn(func, args), _) => {
@@ -127,6 +135,7 @@ Also promote `equation_is_stdlib_call` from `fn` (private) to `pub(crate) fn` so
 **Step 3: Update `contains_stdlib_call()` in builtins_visitor.rs (lines 31-54).**
 
 Currently (lines 36-41):
+
 ```rust
 App(UntypedBuiltinFn(func, args), _) => {
     if crate::stdlib::MODEL_NAMES.contains(&func.as_str())
@@ -139,6 +148,7 @@ App(UntypedBuiltinFn(func, args), _) => {
 ```
 
 Replace with:
+
 ```rust
 App(UntypedBuiltinFn(func, args), _) => {
     // INIT is included because it needs per-element temp vars in A2A
@@ -161,6 +171,7 @@ Add a doc comment to the `vars` field (line 124 of builtins_visitor.rs) or to `i
 **Testing:**
 
 Existing tests exercise both code paths:
+
 - `collect_module_idents` is tested through the full compilation pipeline (all simulation tests use it)
 - `builtins_visitor` PREVIOUS/INIT routing is tested through every model that uses SMOOTH, DELAY, PREVIOUS, INIT, TREND
 - The `test_identifier_sets` test in variable.rs exercises IsModuleInput handling which depends on correct module_idents classification
@@ -176,6 +187,7 @@ cargo test -p simlin-engine
 ```bash
 cargo test -p simlin-engine --features file_io
 ```
+
 Expected: all tests pass.
 
 **Commit:** `engine: extract shared is_stdlib_module_function predicate`

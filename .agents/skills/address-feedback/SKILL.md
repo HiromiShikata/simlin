@@ -3,7 +3,7 @@ name: address-feedback-local
 description: Improve the current branch's changes by getting code reviews in a loop until all feedback is addressed
 ---
 
-You are performing iterative code review and improvement using local review tools.  This skill takes no arguments (if any were given, ignore).  You are operating on the local checkout.  If the current branch is `main`, your task is reviewing the changes between `origin/main..HEAD` (or `master` and `origin/master` respectively if that is the convention in the repo).
+You are performing iterative code review and improvement using local review tools. This skill takes no arguments (if any were given, ignore). You are operating on the local checkout. If the current branch is `main`, your task is reviewing the changes between `origin/main..HEAD` (or `master` and `origin/master` respectively if that is the convention in the repo).
 
 ## Prerequisites (verify before starting)
 
@@ -19,11 +19,13 @@ Execute this loop until the reviewer reports no actionable feedback in the same 
 ### Step 0: Sync with origin/main
 
 Run at the START of every iteration:
+
 ```bash
 git fetch origin && git merge-base --is-ancestor origin/main HEAD && echo "origin/main is ancestor" || echo "diverged or behind"
 ```
 
-If the current branch has diverged from or is behind `origin/main`, rebase, carefully resolving merge conflicts.  After a successful rebase make sure the remote branch is updated:
+If the current branch has diverged from or is behind `origin/main`, rebase, carefully resolving merge conflicts. After a successful rebase make sure the remote branch is updated:
+
 ```bash
 git push --force-with-lease
 ```
@@ -31,6 +33,7 @@ git push --force-with-lease
 ### Step 1: Run review
 
 Push the current state:
+
 ```bash
 git push
 ```
@@ -38,6 +41,7 @@ git push
 Then run the review command and collect its output:
 
 **Codex review** -- run with a 30-minute timeout:
+
 ```bash
 codex -c 'model="gpt-5.3-codex"' -c 'model_reasoning_effort="xhigh"' exec review --json --base origin/main | tee /tmp/codex.stdout | jq -r 'select(.type=="item.completed" and .item.type=="agent_message") | .item.text'
 ```
@@ -45,20 +49,23 @@ codex -c 'model="gpt-5.3-codex"' -c 'model_reasoning_effort="xhigh"' exec review
 ### Step 2: Evaluate feedback
 
 Think CRITICALLY about the output. Your job is to extract feedback that would GENUINELY IMPROVE the work. Implement feedback that:
+
 - Improves correctness, robustness, or edge case handling
 - Improves test coverage or test quality
 - Improves code clarity or maintainability
 - Fixes actual bugs or issues
 
 Ignore suggestions that:
+
 - Are based on misunderstanding the code or requirements
 - Would add significant unnecessary complexity
 
 If ANY feedback would genuinely improve the code:
+
 - Think deeply about each piece of feedback
 - Identify the ROOT CAUSE, not just the symptom
 - Follow Test-Driven Development:
-  1. Write failing test(s) that capture the expected behavior.  If there is refactoring needed to enable writing good tests that is ok -- this improves the codebase.
+  1. Write failing test(s) that capture the expected behavior. If there is refactoring needed to enable writing good tests that is ok -- this improves the codebase.
   2. Implement the fix to make the tests pass
   3. Refactor if needed while keeping tests green
 - Create ONE commit for all feedback from this review cycle
@@ -73,6 +80,7 @@ Only if there is ZERO actionable feedback should you proceed to Step 3.
 Reviewer found no actionable issues in the same iteration. The review cycle is complete.
 
 1. Ensure all changes are pushed:
+
    ```bash
    git push
    ```
@@ -82,7 +90,6 @@ Reviewer found no actionable issues in the same iteration. The review cycle is c
    - NOT a concatenation of commit messages
    - Focus on what was improved and why it matters
    - Mention the number of review iterations if more than one
-
 
 ## Important Guidelines
 

@@ -11,7 +11,7 @@ const pc = require('picocolors');
  */
 function checkRequiredFiles(files) {
   try {
-    files.forEach(filePath => {
+    files.forEach((filePath) => {
       fs.accessSync(filePath, fs.constants.F_OK);
     });
     return true;
@@ -47,7 +47,7 @@ function removeFileNameHash(fileName) {
     .replace(/\\/g, '/')
     .replace(
       /\/?(.*)(\.[0-9a-f]+)(\.chunk)?(\.js|\.css)/,
-      (match, p1, p2, p3, p4) => p1 + p4
+      (match, p1, p2, p3, p4) => p1 + p4,
     );
 }
 
@@ -101,10 +101,10 @@ function printFileSizesAfterBuild(
   previousSizeMap,
   buildFolder,
   maxBundleGzipSize,
-  maxChunkGzipSize
+  maxChunkGzipSize,
 ) {
   const sizes = previousSizeMap.sizes;
-  const statsData = (stats.stats || [stats]);
+  const statsData = stats.stats || [stats];
   const assets = [];
 
   for (const s of statsData) {
@@ -141,7 +141,8 @@ function printFileSizesAfterBuild(
           difference = pc.green(formatBytes(diff));
         }
       }
-      const sizeLabel = formatBytes(size) + (difference ? ' (' + difference + ')' : '');
+      const sizeLabel =
+        formatBytes(size) + (difference ? ' (' + difference + ')' : '');
 
       assets.push({
         folder: path.join(path.basename(buildFolder), path.dirname(asset.name)),
@@ -157,7 +158,9 @@ function printFileSizesAfterBuild(
   let hasOversizedAsset = false;
   for (const asset of assets) {
     const isMainBundle = asset.name.indexOf('main.') === 0;
-    const maxRecommendedSize = isMainBundle ? maxBundleGzipSize : maxChunkGzipSize;
+    const maxRecommendedSize = isMainBundle
+      ? maxBundleGzipSize
+      : maxChunkGzipSize;
     const isLarge = maxRecommendedSize && asset.size > maxRecommendedSize;
     if (isLarge) hasOversizedAsset = true;
 
@@ -166,13 +169,15 @@ function printFileSizesAfterBuild(
         (isLarge ? pc.yellow(asset.sizeLabel) : asset.sizeLabel) +
         '  ' +
         pc.dim(asset.folder + path.sep) +
-        pc.cyan(asset.name)
+        pc.cyan(asset.name),
     );
   }
 
   if (hasOversizedAsset) {
     console.log();
-    console.log(pc.yellow('The bundle size is significantly larger than recommended.'));
+    console.log(
+      pc.yellow('The bundle size is significantly larger than recommended.'),
+    );
   }
 }
 

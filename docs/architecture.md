@@ -9,7 +9,9 @@ This is a monorepo without external users -- breaking changes are OK as long as 
 ## Component Descriptions
 
 ### `src/simlin-engine` (Rust)
+
 Core simulation engine. Compiles, type-checks, unit-checks, and simulates SD models.
+
 - Projects consist of 1 or more models, compiled to bytecode (`compiler/`)
 - Primary compilation path is `db::compile_project_incremental()` using salsa tracked functions for fine-grained incrementality (`db.rs`, `db_analysis.rs`, `db_ltm.rs`)
 - Equation text is parsed via recursive descent parser (`parser/mod.rs`)
@@ -19,37 +21,49 @@ Core simulation engine. Compiles, type-checks, unit-checks, and simulates SD mod
 - Native Vensim MDL parser in `mdl/` (replaces C++ xmutil); see [docs/design/mdl-parser.md](/docs/design/mdl-parser.md)
 
 ### `src/libsimlin` (Rust)
+
 Flat "C" FFI wrapper around simlin-engine. Used from TypeScript (WASM), Go (CGo), and C/C++ (`simlin.h`).
+
 - **API design**: keep the FFI surface small and orthogonal. Prefer composable primitives over bulk endpoints. Each FFI function is individually thread-safe.
 
 ### `src/engine` (TypeScript)
+
 TypeScript API for WASM libsimlin. Promise-based; in browser, WASM runs in a Web Worker.
 
 ### `src/core` (TypeScript)
+
 Shared data models and utilities. Protobuf-based `datamodel.ts`, `canonicalize.ts` for variable name handling.
 
 ### `src/diagram` (TypeScript)
+
 React components for model visualization and editing. General-purpose SD model editor toolkit without Simlin app dependencies. `Editor.tsx` handles user interaction; `drawing/` contains rendering components.
 
 ### `src/app` (TypeScript)
+
 Full-featured SD application. Browse, create, import models; login/logout.
 
 ### `src/server` (TypeScript)
+
 Express.js backend. Firebase Auth (`authn.ts`), Firestore persistence (`models/db-firestore.ts`) in protobuf form.
 
 ### `src/xmutil` (C++ and Rust)
+
 Rust wrapper around Bob Eberlein's xmutil C++ tool for converting Vensim models to XMILE. Only used for testing -- `src/simlin-engine/src/mdl` now fully implements this in Rust.
 
 ### `src/simlin-mcp` (Rust)
+
 MCP (Model Context Protocol) server exposing the simulation engine as tools for AI assistants. Pure Rust, stdio JSON-RPC 2.0. Tools: `read_model`, `edit_model`, `create_model`. JSON schemas auto-derived via schemars.
 
 ### `src/simlin-cli` (Rust)
+
 CLI for simulating and converting models, mostly for testing/debugging.
 
 ### `src/pysimlin` (Python/Rust)
+
 Python bindings for the simulation engine via CFFI. Thread-safe wrapper classes for free-threaded Python (PEP 703). Tooling: `ruff`, `mypy` strict, `pytest` + `hypothesis`, `uv`.
 
 ### `website` (TypeScript)
+
 Rspress-based documentation and website package.
 
 ## Dependency Graph
@@ -108,6 +122,7 @@ The `test/` directory contains model files (XMILE, Vensim `.mdl`) with expected 
 ## Generated/Noise Paths
 
 Treat these as generated output unless the task explicitly targets them:
+
 - `src/*/lib/**`, `src/*/lib.browser/**`, `src/*/lib.module/**`
 - `src/app/build/**`, `website/build/**`
 - `node_modules/**`, `target/**`, `playwright-report/**`, `test-results/**`

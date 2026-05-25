@@ -82,19 +82,27 @@ describe('canReadAsset', () => {
 
 describe('removeFileNameHash', () => {
   test('strips content hash from JS filenames', () => {
-    expect(removeFileNameHash('static/js/main.abc12345.js')).toBe('static/js/main.js');
+    expect(removeFileNameHash('static/js/main.abc12345.js')).toBe(
+      'static/js/main.js',
+    );
   });
 
   test('strips content hash from chunk JS filenames', () => {
-    expect(removeFileNameHash('static/js/2.abc12345.chunk.js')).toBe('static/js/2.js');
+    expect(removeFileNameHash('static/js/2.abc12345.chunk.js')).toBe(
+      'static/js/2.js',
+    );
   });
 
   test('strips content hash from CSS filenames', () => {
-    expect(removeFileNameHash('static/css/main.abc12345.css')).toBe('static/css/main.css');
+    expect(removeFileNameHash('static/css/main.abc12345.css')).toBe(
+      'static/css/main.css',
+    );
   });
 
   test('returns filename unchanged when there is no hash', () => {
-    expect(removeFileNameHash('static/js/runtime.js')).toBe('static/js/runtime.js');
+    expect(removeFileNameHash('static/js/runtime.js')).toBe(
+      'static/js/runtime.js',
+    );
   });
 });
 
@@ -112,10 +120,9 @@ describe('walkDir', () => {
     fs.writeFileSync(path.join(tmpDir, 'b.css'), 'b');
 
     const result = walkDir(tmpDir);
-    expect(result.sort()).toEqual([
-      path.join(tmpDir, 'a.js'),
-      path.join(tmpDir, 'b.css'),
-    ].sort());
+    expect(result.sort()).toEqual(
+      [path.join(tmpDir, 'a.js'), path.join(tmpDir, 'b.css')].sort(),
+    );
   });
 
   test('returns files recursively', () => {
@@ -125,10 +132,9 @@ describe('walkDir', () => {
     fs.writeFileSync(path.join(sub, 'nested.js'), 'n');
 
     const result = walkDir(tmpDir);
-    expect(result.sort()).toEqual([
-      path.join(tmpDir, 'root.js'),
-      path.join(sub, 'nested.js'),
-    ].sort());
+    expect(result.sort()).toEqual(
+      [path.join(tmpDir, 'root.js'), path.join(sub, 'nested.js')].sort(),
+    );
   });
 
   test('returns empty array for empty directory', () => {
@@ -233,19 +239,28 @@ describe('printFileSizesAfterBuild', () => {
 
   function makeStats(assetNames) {
     return {
-      assets: assetNames.map(name => ({ name })),
+      assets: assetNames.map((name) => ({ name })),
     };
   }
 
   test('prints sizes for build assets', () => {
     const jsDir = path.join(tmpDir, 'static', 'js');
     fs.mkdirSync(jsDir, { recursive: true });
-    fs.writeFileSync(path.join(jsDir, 'main.abc12345.js'), 'console.log("hi");');
+    fs.writeFileSync(
+      path.join(jsDir, 'main.abc12345.js'),
+      'console.log("hi");',
+    );
 
     const stats = makeStats(['static/js/main.abc12345.js']);
     const previousSizes = { root: tmpDir, sizes: {} };
 
-    printFileSizesAfterBuild(stats, previousSizes, tmpDir, 512 * 1024, 1024 * 1024);
+    printFileSizesAfterBuild(
+      stats,
+      previousSizes,
+      tmpDir,
+      512 * 1024,
+      1024 * 1024,
+    );
 
     // Should have printed at least one line with the asset name
     const output = logOutput.join('\n');
@@ -258,7 +273,13 @@ describe('printFileSizesAfterBuild', () => {
 
     // Should not throw even though the file doesn't exist
     expect(() => {
-      printFileSizesAfterBuild(stats, previousSizes, tmpDir, 512 * 1024, 1024 * 1024);
+      printFileSizesAfterBuild(
+        stats,
+        previousSizes,
+        tmpDir,
+        512 * 1024,
+        1024 * 1024,
+      );
     }).not.toThrow();
   });
 
@@ -272,7 +293,13 @@ describe('printFileSizesAfterBuild', () => {
     // Pretend the previous size was 1 byte (virtually everything will be "larger")
     const previousSizes = { root: tmpDir, sizes: { 'static/js/main.js': 1 } };
 
-    printFileSizesAfterBuild(stats, previousSizes, tmpDir, 512 * 1024, 1024 * 1024);
+    printFileSizesAfterBuild(
+      stats,
+      previousSizes,
+      tmpDir,
+      512 * 1024,
+      1024 * 1024,
+    );
 
     const output = logOutput.join('\n');
     // Should contain a "+" diff indicator
@@ -289,7 +316,13 @@ describe('printFileSizesAfterBuild', () => {
     const previousSizes = { root: tmpDir, sizes: {} };
 
     // Set both limits very high so nothing exceeds them
-    printFileSizesAfterBuild(stats, previousSizes, tmpDir, 10 * 1024 * 1024, 10 * 1024 * 1024);
+    printFileSizesAfterBuild(
+      stats,
+      previousSizes,
+      tmpDir,
+      10 * 1024 * 1024,
+      10 * 1024 * 1024,
+    );
 
     const output = logOutput.join('\n');
     expect(output).not.toContain('significantly larger');
@@ -299,7 +332,8 @@ describe('printFileSizesAfterBuild', () => {
     const jsDir = path.join(tmpDir, 'static', 'js');
     fs.mkdirSync(jsDir, { recursive: true });
     // Write enough content so gzipped size exceeds our tiny limit
-    const bigContent = 'console.log(' + JSON.stringify('x'.repeat(1000)) + ');\n';
+    const bigContent =
+      'console.log(' + JSON.stringify('x'.repeat(1000)) + ');\n';
     fs.writeFileSync(path.join(jsDir, 'main.abc12345.js'), bigContent);
 
     const stats = makeStats(['static/js/main.abc12345.js']);
@@ -315,7 +349,8 @@ describe('printFileSizesAfterBuild', () => {
   test('warns when a chunk exceeds the chunk limit but not the bundle limit', () => {
     const jsDir = path.join(tmpDir, 'static', 'js');
     fs.mkdirSync(jsDir, { recursive: true });
-    const bigContent = 'console.log(' + JSON.stringify('x'.repeat(1000)) + ');\n';
+    const bigContent =
+      'console.log(' + JSON.stringify('x'.repeat(1000)) + ');\n';
     fs.writeFileSync(path.join(jsDir, 'vendor.abc12345.js'), bigContent);
 
     const stats = makeStats(['static/js/vendor.abc12345.js']);

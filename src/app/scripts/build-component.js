@@ -3,7 +3,7 @@
 process.env.BABEL_ENV = 'production';
 process.env.NODE_ENV = 'production';
 
-process.on('unhandledRejection', err => {
+process.on('unhandledRejection', (err) => {
   throw err;
 });
 
@@ -57,7 +57,10 @@ async function build() {
     const warnings = stats.warnings || [];
 
     if (errors.length) {
-      const msg = typeof errors[0] === 'string' ? errors[0] : errors[0].message || String(errors[0]);
+      const msg =
+        typeof errors[0] === 'string'
+          ? errors[0]
+          : errors[0].message || String(errors[0]);
       console.log(pc.red('Failed to compile.\n'));
       console.log(msg + '\n');
       process.exit(1);
@@ -79,16 +82,18 @@ async function build() {
       previousFileSizes,
       paths.componentBuild,
       WARN_AFTER_BUNDLE_GZIP_SIZE,
-      WARN_AFTER_CHUNK_GZIP_SIZE
+      WARN_AFTER_CHUNK_GZIP_SIZE,
     );
     console.log();
 
-    console.log(pc.green('The web component bundle is ready to be embedded.\n'));
+    console.log(
+      pc.green('The web component bundle is ready to be embedded.\n'),
+    );
     console.log(
       `Add the following script tag to your HTML:\n` +
-      pc.cyan(`  <script src="/static/js/sd-component.js"></script>\n`) +
-      `\nThen use the component:\n` +
-      pc.cyan(`  <sd-model username="..." projectName="..."></sd-model>`)
+        pc.cyan(`  <script src="/static/js/sd-component.js"></script>\n`) +
+        `\nThen use the component:\n` +
+        pc.cyan(`  <sd-model username="..." projectName="..."></sd-model>`),
     );
   } catch (err) {
     console.log(pc.red('Failed to compile.\n'));
@@ -97,7 +102,7 @@ async function build() {
   }
 }
 
-build().catch(err => {
+build().catch((err) => {
   if (err && err.message) {
     console.log(err.message);
   }

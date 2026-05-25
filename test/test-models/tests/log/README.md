@@ -1,5 +1,4 @@
-test_exp
-=========
+# test_exp
 
 This model tests the `LOG` logarithm function with change of base.
 
@@ -9,11 +8,9 @@ Vensim Syntax is `LOG(X, base)` documented [here](https://www.vensim.com/documen
 
 ![Vensim screenshot](vensim_screenshot.png)
 
+## Contributions
 
-Contributions
--------------
-
-| Component                         | Author          | Contact                    | Date    | Software Version        |
-|:--------------------------------- |:--------------- |:-------------------------- |:------- |:----------------------- |
-| test_log.mdl                       | James Houghton  | james.p.houghton@gmail.com | 7/07/17 | Vensim DSS 6.4E for Mac  |
-| output.csv                        | James Houghton  | james.p.houghton@gmail.com | 7/07/17 | Vensim DSS 6.4E for Mac  |
+| Component    | Author         | Contact                    | Date    | Software Version        |
+| :----------- | :------------- | :------------------------- | :------ | :---------------------- |
+| test_log.mdl | James Houghton | james.p.houghton@gmail.com | 7/07/17 | Vensim DSS 6.4E for Mac |
+| output.csv   | James Houghton | james.p.houghton@gmail.com | 7/07/17 | Vensim DSS 6.4E for Mac |

@@ -19,6 +19,7 @@ The authors also explicitly frame LTM as a practicality improvement: they note i
 ### Definition of Loop Dominance
 
 The paper defines loop dominance as a concept applying to the **entirety of a model**, not just a single stock. Requirements:
+
 - All stocks must be connected to each other by the network of feedback loops.
 - For models with disconnected stock groups, each subcomponent (cycle partition) has a separate loop dominance profile.
 - Dominance is specific to a particular time period.
@@ -66,6 +67,7 @@ The paper defines loop dominance as a concept applying to the **entirety of a mo
 LTM is categorized (per Duggan and Oliva, 2013) as algorithmically performing a "formal assessment of dominant structure and behavior" for models of any size, complexity, or dimensionality.
 
 Key properties:
+
 - Like PPM: calculations done directly on original model equations, walking causal pathways between stocks through intermediate variables.
 - Unlike EEA: no model transformation; no canonical form (eigenvalues/eigenvectors).
 - Uses only values computed during a regular simulation.
@@ -74,6 +76,7 @@ Key properties:
 - Does NOT affect model validity.
 
 LTM introduces **two metrics**:
+
 1. **Link score** -- measures contribution and polarity of a link between an independent and dependent variable
 2. **Loop score** -- measures contribution of a feedback loop to model behavior, indicative of feedback polarity
 
@@ -100,20 +103,23 @@ LS(x -> z)  =  | -------- | * sign(delta_xz / delta_x)       if delta_z != 0 AND
 **Equation 1** (discrete form, computed each dt)
 
 Where:
+
 - `delta_z` = change in z from previous time to current time = z(t) - z(t-dt)
 - `delta_x` = change in x over that interval = x(t) - x(t-dt)
-- `delta_xz` = **partial change in z with respect to x** -- the amount z *would have changed* if x changed by the amount it did, but y had *not* changed (ceteris paribus). Computed as: f(x_current, y_previous) - z_previous.
+- `delta_xz` = **partial change in z with respect to x** -- the amount z _would have changed_ if x changed by the amount it did, but y had _not_ changed (ceteris paribus). Computed as: f(x_current, y_previous) - z_previous.
 
 The link score has two components:
 
 **Magnitude:** `|delta_xz / delta_z|`
+
 - Dimensionless.
-- Describes the *force* that input x exerts on output z, relative to the total effect on z.
-- Unlike a partial derivative (sensitivity), this describes how much the change in x *contributed* to the total change in z.
+- Describes the _force_ that input x exerts on output z, relative to the total effect on z.
+- Unlike a partial derivative (sensitivity), this describes how much the change in x _contributed_ to the total change in z.
 - For linear equations (addition/subtraction only), values are always in [0, 1].
 - For nonlinear equations with mixed polarities, can take very large values -- but this doesn't jeopardize analysis since relative values are compared.
 
 **Polarity:** `sign(delta_xz / delta_x)`
+
 - Same formulation as Richardson (1995) polarity definition.
 - Uses partial difference notation for consistency with magnitude.
 - The delta_xz value is reused for both magnitude and polarity computation.
@@ -134,6 +140,7 @@ Outflow:  LS(o -> s) = |o / (i - o)| * (-1)
 **Equation 2**
 
 Correspondence to Equation 1:
+
 - Flow value (`i` or `o`) corresponds to `delta_xz` (partial change) -- the amount the stock would change if no other flows were active (times dt).
 - Denominator `(i - o)` corresponds to `delta_z` -- the total change in the stock (times dt).
 - Polarity is fixed: +1 for inflows, -1 for outflows.
@@ -149,23 +156,23 @@ If net flow `(i - o) = 0`: link score is defined as 0. This is safe because any 
 **Example 1 (Table 1): Linear equation `z = 2x + y`**
 
 | Variable | Time 1 | Time 2 | delta | Partial change | Link score magnitude |
-|----------|--------|--------|-------|----------------|---------------------|
-| x        | 5      | 7      | 2     | delta_xz = 4   | 4/5 = 0.8           |
-| y        | 4      | 5      | 1     | delta_yz = 1   | 1/5 = 0.2           |
+| -------- | ------ | ------ | ----- | -------------- | -------------------- |
+| x        | 5      | 7      | 2     | delta_xz = 4   | 4/5 = 0.8            |
+| y        | 4      | 5      | 1     | delta_yz = 1   | 1/5 = 0.2            |
 | z = 2x+y | 14     | 19     | 5     | --             | --                   |
 
-Computation for delta_xz: f(x_current=7, y_previous=4) - z_previous = 2*7+4 - 14 = 18 - 14 = 4.
+Computation for delta_xz: f(x_current=7, y_previous=4) - z_previous = 2\*7+4 - 14 = 18 - 14 = 4.
 
 Four-fifths of the change in z is caused by the change in x.
 
 **Example 2 (Table 2): Nonlinear equation `z = (w + x) / y`**
 
-| Variable | Time 1 | Time 2 | delta | Partial change | LS magnitude | Polarity | Link score |
-|----------|--------|--------|-------|----------------|-------------|----------|------------|
-| w        | 7      | 10     | 3     | delta_wz = 1   | 5           | +1       | 5          |
-| x        | 2      | 4      | 2     | delta_xz = 0.67| 3.33        | +1       | 3.33       |
-| y        | 3      | 5      | 2     | delta_yz = -1.2| 6           | -1       | -6         |
-| z=(w+x)/y| 3      | 2.8    | -0.2  | --             | --          | --       | --         |
+| Variable  | Time 1 | Time 2 | delta | Partial change  | LS magnitude | Polarity | Link score |
+| --------- | ------ | ------ | ----- | --------------- | ------------ | -------- | ---------- |
+| w         | 7      | 10     | 3     | delta_wz = 1    | 5            | +1       | 5          |
+| x         | 2      | 4      | 2     | delta_xz = 0.67 | 3.33         | +1       | 3.33       |
+| y         | 3      | 5      | 2     | delta_yz = -1.2 | 6            | -1       | -6         |
+| z=(w+x)/y | 3      | 2.8    | -0.2  | --              | --           | --       | --         |
 
 This example demonstrates why absolute value and sign are separated: delta_z is negative while delta_xz for x is positive. Without absolute value in magnitude, incorrect polarities would result.
 
@@ -182,12 +189,14 @@ Loop Score(L_x) = LS(s1 -> t1) * LS(s2 -> t2) * ... * LS(sn -> tn)
 **Equation 3**
 
 Where:
+
 - `s_i -> t_i` are the links in the loop
 - `t_n = s_1` (the loop closes)
 - Both magnitude and sign are multiplied
 - Odd number of negative links -> negative loop; even number -> positive loop
 
 Properties:
+
 - Dimensionless.
 - Can be thought of as the "force" a feedback loop applies to behavior of all stocks it connects.
 - Multiplication is consistent with the **chain rule of differentiation** (proven in Appendix B).
@@ -209,6 +218,7 @@ Relative Loop Score(L_X) = Loop Score(L_X) / sum_Y(|Loop Score(L_Y)|)
 Where the sum is over all loops Y in the same cycle partition.
 
 Properties:
+
 - Normalized to range [-1, 1].
 - Sign still represents feedback polarity.
 - Reports polarity and fractional contribution of a loop to the change in value of all stocks at a point in time.
@@ -267,6 +277,7 @@ Key implementation detail: equations must be re-evaluated once for each independ
 ### 7.1 Model Structure (Figure 2)
 
 Standard Bass diffusion model variant:
+
 - Time: 0 to 15
 - Market Size: 1,000,000 people
 - Initial adopters: 1
@@ -278,9 +289,11 @@ Standard Bass diffusion model variant:
 ### 7.2 Feedback Loops
 
 **Balancing loop B1:**
+
 - probability of contact with potentials -> potentials contacts with adopters -> adoption from word of mouth -> adopting -> potential adopters -> probability of contact with potentials
 
 **Reinforcing loop R1:**
+
 - adopter contacts -> potentials contacts with adopters -> adoption from word of mouth -> adopting -> adopters -> adopter contacts
 
 ### 7.3 Results (Table 3, Figure 3)
@@ -291,16 +304,17 @@ The LTM analysis reproduces the standard explanation (Richardson 1995, Kampmann 
 
 Table 3 shows link scores and loop scores at five time points (T=1, 9.5, 9.5625, 9.625, 15):
 
-| Metric | T=1 | T=9.5 | T=9.5625 | T=9.625 | T=15 |
-|--------|-----|-------|----------|---------|------|
-| B1 loop score | 0.000 | -9.958 | -9358 | -10.91 | -1.000 |
-| B1 relative score | 0.000 | -0.465 | -0.488 | -0.512 | -1.000 |
-| R1 loop score | 1.000 | 11.46 | 9806 | 10.41 | 0.000 |
-| R1 relative score | 1.000 | 0.535 | 0.512 | 0.488 | 0.000 |
+| Metric            | T=1   | T=9.5  | T=9.5625 | T=9.625 | T=15   |
+| ----------------- | ----- | ------ | -------- | ------- | ------ |
+| B1 loop score     | 0.000 | -9.958 | -9358    | -10.91  | -1.000 |
+| B1 relative score | 0.000 | -0.465 | -0.488   | -0.512  | -1.000 |
+| R1 loop score     | 1.000 | 11.46  | 9806     | 10.41   | 0.000  |
+| R1 relative score | 1.000 | 0.535  | 0.512    | 0.488   | 0.000  |
 
 The dominance shift occurs between T=9.5625 and T=9.625 (where the inflection occurs). Both relative scores pass through 0.5.
 
 **Link score analysis:** Most links have score 1.000 (single input). The only changing links are:
+
 - B1: "probability of contact with potentials -> potentials contacts with adopters" (the key link)
 - R1: "adopter contacts -> potentials contacts with adopters" (counterpart)
 
@@ -322,9 +336,10 @@ These two links are at the junction between the reinforcing and balancing loops 
 ### 8.1 Model Structure (Figure 5)
 
 Model equations:
-- `B = C * (1.1 - 0.1 * A) / b1`  (birth rate)
-- `D = C * EXP(A - 11) / d1`  (death rate)
-- `dA/dt = p * C`  (alcohol production)
+
+- `B = C * (1.1 - 0.1 * A) / b1` (birth rate)
+- `D = C * EXP(A - 11) / d1` (death rate)
+- `dA/dt = p * C` (alcohol production)
 
 Initial conditions: A = 0, B = 1, b1 = 16, d1 = 30, p = 0.01
 dt = 0.5
@@ -344,18 +359,19 @@ Note: There is a known **formulation flaw** -- B can take negative values and R'
 
 Four behavioral phases identified:
 
-| Phase | Time Range | Dominant Loop | Description |
-|-------|-----------|---------------|-------------|
-| 1     | 0-51.5    | R             | Exponential growth of C |
-| 2     | 52-66     | B2            | Slowing growth due to alcohol |
-| 3     | 66.5-75   | B3            | Collapse from alcohol toxicity |
-| 4     | 75.5-100  | B1            | Natural death dominates at low C |
+| Phase | Time Range | Dominant Loop | Description                      |
+| ----- | ---------- | ------------- | -------------------------------- |
+| 1     | 0-51.5     | R             | Exponential growth of C          |
+| 2     | 52-66      | B2            | Slowing growth due to alcohol    |
+| 3     | 66.5-75    | B3            | Collapse from alcohol toxicity   |
+| 4     | 75.5-100   | B1            | Natural death dominates at low C |
 
 ### 8.4 Comparison with Other Methods
 
 **vs. Ford's behavioral approach (Phaff et al., 2006):** LTM identifies the same four phases. Only disagreement: Phase 3 -- LTM says B3 alone dominates, Ford says B2 and B3 together. (PPM and Loop Impact also identify B3 alone.)
 
 **vs. EEA (Phaff et al., 2006):**
+
 - Phase 1: Both agree R dominant, B2 restraining.
 - Phase 2: Both agree B2 dominant, R still significant.
 - Phase 3: EEA points to B1 and B3 together; LTM finds B3 solely dominant (caveat noted).
@@ -377,6 +393,7 @@ Four behavioral phases identified:
 ### 9.1 Model Structure (Figure 7)
 
 Version from Goncalves (2009), based on Mass and Senge (1975). Oscillatory two-stock model.
+
 - Time: 0 to 60
 - Stocks: Inventory, Workers
 - External demand signal: graphical function acting as step function (increase between times 1 and 2), triggering dampened oscillation.
@@ -384,10 +401,12 @@ Version from Goncalves (2009), based on Mass and Senge (1975). Oscillatory two-s
 ### 9.2 Feedback Loops (Two cycle partitions)
 
 **Cycle Partition 1:**
+
 - **B1 (Major balancing):** Inventory -> inventory gap -> desired change in inventory -> desired production -> desired workers -> workers gap -> hiring or firing -> Workers -> producing (back to Inventory)
 - **B2 (Minor balancing):** Workers -> workers gap -> hiring or firing (back to Workers)
 
 **Cycle Partition 2:**
+
 - **B3 (Expected demand loop):** Expected demand -> changing expected (back to Expected demand)
 
 B3 is in a separate partition because expected demand is driven only by demand itself, not coupled with inventory/workforce.
@@ -397,6 +416,7 @@ B3 is in a separate partition because expected demand is driven only by demand i
 Three parameterizations analyzed (varying "time to hire or fire"):
 
 **Key findings:**
+
 - B1 dominates the oscillatory behavior in all parameterizations.
 - B2 has a contribution dependent on the "time to hire or fire" parameter.
 - Before the demand shock: model is in equilibrium, all link scores are 0, LTM cannot inform analysis.
@@ -408,6 +428,7 @@ Three parameterizations analyzed (varying "time to hire or fire"):
 **vs. EEA (Goncalves, 2009):** Matches -- oscillatory mode from B1 loop gains, damping from B2.
 
 **vs. PPM (Mojtahedzadeh, 2008; Hayward and Roach, 2017):**
+
 - PPM shows behavior dominated by both B1 and B2 in a cyclical process (shifting dominance).
 - Mojtahedzadeh acknowledges PPM's loop dominance pattern is "not suitable for analyzing causes of oscillation" and uses pathway frequency and stability factors instead.
 - With those additional PPM metrics, same conclusion: B1 is source of oscillation, B2 responsible for dampening.
@@ -434,7 +455,7 @@ Three parameterizations analyzed (varying "time to hire or fire"):
    - Unsatisfactory workaround: introducing minute changes to measure effects -- but this would break discrete/discontinuous model validity.
    - Alternative: model author can use STEP function to offset from equilibrium.
 
-2. **Focus on endogenous behavior only:** Problematic for models where behavior is driven by external forcing functions dominating feedback effects. The inventory workforce model partially exhibits this (external demand signal creates a separate cycle partition). For highly forced models, Loop Impact method (Hayward and Boswell, 2014) is better. Link scores *could* measure exogenous contributions with future work.
+2. **Focus on endogenous behavior only:** Problematic for models where behavior is driven by external forcing functions dominating feedback effects. The inventory workforce model partially exhibits this (external demand signal creates a separate cycle partition). For highly forced models, Loop Impact method (Hayward and Boswell, 2014) is better. Link scores _could_ measure exogenous contributions with future work.
 
 ### 10.3 Future Work
 
@@ -492,30 +513,36 @@ This shows the relationship to partial derivatives (key to PPM and Loop Impact) 
 It should not matter whether we connect two variables with one complicated equation or three variables with two simpler equations.
 
 **Proof sketch:** Consider two formulations:
+
 1. Direct: `z = f(w, x, y)`
 2. Indirect: `z = g(u, y)` where `u = h(w, x)`
 
 Compute link score from x to u (Equation 8):
+
 ```
 LS(x -> u) = |delta_xu / delta_u| * sign(delta_xu / delta_x)
 ```
 
 Compute link score from u to z (Equation 9):
+
 ```
 LS(u -> z) = |delta_uz / delta_z| * sign(delta_uz / delta_u)
 ```
 
 Composite (product):
+
 ```
 LS(x -> z) = |delta_xu / delta_u| * |delta_uz / delta_z| * sign(delta_xu/delta_x) * sign(delta_uz/delta_u)
 ```
 
 Multiply by |delta_x / delta_x| = 1:
+
 ```
 LS(x -> z) = |delta_xu / delta_x| * |delta_uz / delta_u| * |delta_x / delta_z| * sign(...) * sign(...)
 ```
 
 Apply chain rule for partial differences (`delta_xu/delta_x * delta_uz/delta_u = delta_xz/delta_x` when canceling delta_u terms):
+
 ```
 LS(x -> z) = |delta_xz / delta_z| * sign(delta_xu/delta_x) * sign(delta_uz/delta_u)
 ```
@@ -527,6 +554,7 @@ LS(x -> z) = |delta_xz / delta_z| * sign(delta_xu/delta_x) * sign(delta_uz/delta
 For a single positive or negative loop, the loop score will always be +1 or -1, regardless of the gain around the loop.
 
 **Example:** Net population growth model.
+
 - Link score from stock to flow: 1 (only the stock changes the flow).
 - With only a single net flow, link score from flow to stock: also 1.
 - Product = 1.
@@ -542,45 +570,53 @@ For exponential drain: link from flow to stock is -1, so loop score = -1.
 ## 13. Key Figures Summary
 
 ### Figure 1
+
 Pseudocode for calculating all link scores in a model after computing one dt. Shows the for-each-variable loop, stock vs. non-stock branching, and the ceteris paribus recalculation.
 
 ### Figure 2
+
 Stock-and-flow diagram of the Bass diffusion model: two stocks (Potential Adopters, Adopters), one flow (Adopting), auxiliaries (contact rate, adoption fraction, probability of contact, adopter contacts, potentials contacts with adopters, adoption from word of mouth, market size).
 
 ### Figure 3
+
 Bass diffusion relative loop scores plotted over time against Adopters. Shows R1 and B1 crossing at the inflection point (~T=9.6), with R1 dominant early and B1 dominant late.
 
 ### Figure 4
+
 Log-scale plot of absolute loop score values for Bass diffusion. Shows both scores approaching infinity at the inflection point (where the competing links cancel, driving delta_z toward 0).
 
 ### Figure 5
+
 Stock-and-flow diagram of the yeast alcohol model: stock C (yeast cells), stock A (alcohol), flows B (births) and D (deaths), parameters b1, d1, p.
 
 ### Figure 6
+
 Yeast alcohol relative loop scores plotted against C. Shows four-phase behavior with R, B2, B3, and B1 dominating in succession. Shows R becoming negative (balancing) around time 74 due to formulation flaw.
 
 ### Figure 7
+
 Stock-and-flow diagram of the inventory workforce model: stocks Inventory and Workers, plus Expected Demand. Shows demand signal, production, hiring/firing flows, and gap calculations.
 
 ### Figure 8
+
 Three panels showing LTM analysis of inventory workforce model with different "time to hire or fire" values, demonstrating how this parameter affects the relative contributions of B1 and B2 to the oscillatory behavior. B1 dominates in all cases; B2 contribution increases with longer time to hire or fire.
 
 ---
 
 ## 14. Terminology Reference
 
-| Term | Definition |
-|------|-----------|
-| **Link score** | Dimensionless measure of contribution and polarity of a link between independent and dependent variable at a point in time |
-| **Loop score** | Product of all link scores in a feedback loop; measures loop's contribution to model behavior |
-| **Relative loop score** | Loop score normalized by sum of absolute loop scores in the cycle partition; range [-1, 1] |
-| **Partial change** (delta_xz) | Change in z that would occur if only x changed (ceteris paribus) |
-| **Cycle partition** | Subset of model where all stocks are connected by feedback loops |
-| **Dominant loop** | Loop (or set) contributing >= 50% of observed change across all stocks |
-| **ILS** | Independent Loop Set (Kampmann, 2012) |
-| **SILS** | Shortest Independent Loop Set (Oliva, 2004) |
-| **EEA** | Eigenvalue Elasticity Analysis |
-| **PPM** | Pathway Participation Metric |
+| Term                          | Definition                                                                                                                 |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Link score**                | Dimensionless measure of contribution and polarity of a link between independent and dependent variable at a point in time |
+| **Loop score**                | Product of all link scores in a feedback loop; measures loop's contribution to model behavior                              |
+| **Relative loop score**       | Loop score normalized by sum of absolute loop scores in the cycle partition; range [-1, 1]                                 |
+| **Partial change** (delta_xz) | Change in z that would occur if only x changed (ceteris paribus)                                                           |
+| **Cycle partition**           | Subset of model where all stocks are connected by feedback loops                                                           |
+| **Dominant loop**             | Loop (or set) contributing >= 50% of observed change across all stocks                                                     |
+| **ILS**                       | Independent Loop Set (Kampmann, 2012)                                                                                      |
+| **SILS**                      | Shortest Independent Loop Set (Oliva, 2004)                                                                                |
+| **EEA**                       | Eigenvalue Elasticity Analysis                                                                                             |
+| **PPM**                       | Pathway Participation Metric                                                                                               |
 
 ---
 

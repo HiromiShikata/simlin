@@ -28,7 +28,7 @@ goog.exportSymbol('User', null, proto);
  * @extends {jspb.Message}
  * @constructor
  */
-proto.User = function(opt_data) {
+proto.User = function (opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.User, jspb.Message);
@@ -40,67 +40,69 @@ if (goog.DEBUG && !COMPILED) {
   proto.User.displayName = 'proto.User';
 }
 
-
-
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.User.prototype.toObject = function(opt_includeInstance) {
-  return proto.User.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.User} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.User.toObject = function(includeInstance, msg) {
-  var f, obj = {
-id: jspb.Message.getFieldWithDefault(msg, 1, ""),
-email: jspb.Message.getFieldWithDefault(msg, 2, ""),
-displayName: jspb.Message.getFieldWithDefault(msg, 3, ""),
-photoUrl: jspb.Message.getFieldWithDefault(msg, 4, ""),
-provider: jspb.Message.getFieldWithDefault(msg, 5, ""),
-created: (f = msg.getCreated()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
-isAdmin: jspb.Message.getBooleanFieldWithDefault(msg, 6, false),
-isDeactivated: jspb.Message.getBooleanFieldWithDefault(msg, 7, false),
-canCreateProjects: jspb.Message.getBooleanFieldWithDefault(msg, 9, false)
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.User.prototype.toObject = function (opt_includeInstance) {
+    return proto.User.toObject(opt_includeInstance, this);
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.User} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.User.toObject = function (includeInstance, msg) {
+    var f,
+      obj = {
+        id: jspb.Message.getFieldWithDefault(msg, 1, ''),
+        email: jspb.Message.getFieldWithDefault(msg, 2, ''),
+        displayName: jspb.Message.getFieldWithDefault(msg, 3, ''),
+        photoUrl: jspb.Message.getFieldWithDefault(msg, 4, ''),
+        provider: jspb.Message.getFieldWithDefault(msg, 5, ''),
+        created:
+          (f = msg.getCreated()) &&
+          google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
+        isAdmin: jspb.Message.getBooleanFieldWithDefault(msg, 6, false),
+        isDeactivated: jspb.Message.getBooleanFieldWithDefault(msg, 7, false),
+        canCreateProjects: jspb.Message.getBooleanFieldWithDefault(
+          msg,
+          9,
+          false,
+        ),
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.User}
  */
-proto.User.deserializeBinary = function(bytes) {
+proto.User.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.User;
+  var msg = new proto.User();
   return proto.User.deserializeBinaryFromReader(msg, reader);
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -109,69 +111,70 @@ proto.User.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.User}
  */
-proto.User.deserializeBinaryFromReader = function(msg, reader) {
+proto.User.deserializeBinaryFromReader = function (msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readStringRequireUtf8());
-      msg.setId(value);
-      break;
-    case 2:
-      var value = /** @type {string} */ (reader.readStringRequireUtf8());
-      msg.setEmail(value);
-      break;
-    case 3:
-      var value = /** @type {string} */ (reader.readStringRequireUtf8());
-      msg.setDisplayName(value);
-      break;
-    case 4:
-      var value = /** @type {string} */ (reader.readStringRequireUtf8());
-      msg.setPhotoUrl(value);
-      break;
-    case 5:
-      var value = /** @type {string} */ (reader.readStringRequireUtf8());
-      msg.setProvider(value);
-      break;
-    case 8:
-      var value = new google_protobuf_timestamp_pb.Timestamp;
-      reader.readMessage(value,google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader);
-      msg.setCreated(value);
-      break;
-    case 6:
-      var value = /** @type {boolean} */ (reader.readBool());
-      msg.setIsAdmin(value);
-      break;
-    case 7:
-      var value = /** @type {boolean} */ (reader.readBool());
-      msg.setIsDeactivated(value);
-      break;
-    case 9:
-      var value = /** @type {boolean} */ (reader.readBool());
-      msg.setCanCreateProjects(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = /** @type {string} */ (reader.readStringRequireUtf8());
+        msg.setId(value);
+        break;
+      case 2:
+        var value = /** @type {string} */ (reader.readStringRequireUtf8());
+        msg.setEmail(value);
+        break;
+      case 3:
+        var value = /** @type {string} */ (reader.readStringRequireUtf8());
+        msg.setDisplayName(value);
+        break;
+      case 4:
+        var value = /** @type {string} */ (reader.readStringRequireUtf8());
+        msg.setPhotoUrl(value);
+        break;
+      case 5:
+        var value = /** @type {string} */ (reader.readStringRequireUtf8());
+        msg.setProvider(value);
+        break;
+      case 8:
+        var value = new google_protobuf_timestamp_pb.Timestamp();
+        reader.readMessage(
+          value,
+          google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader,
+        );
+        msg.setCreated(value);
+        break;
+      case 6:
+        var value = /** @type {boolean} */ (reader.readBool());
+        msg.setIsAdmin(value);
+        break;
+      case 7:
+        var value = /** @type {boolean} */ (reader.readBool());
+        msg.setIsDeactivated(value);
+        break;
+      case 9:
+        var value = /** @type {boolean} */ (reader.readBool());
+        msg.setCanCreateProjects(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.User.prototype.serializeBinary = function() {
+proto.User.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.User.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -180,254 +183,220 @@ proto.User.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.User.serializeBinaryToWriter = function(message, writer) {
+proto.User.serializeBinaryToWriter = function (message, writer) {
   var f = undefined;
   f = message.getId();
   if (f.length > 0) {
-    writer.writeString(
-      1,
-      f
-    );
+    writer.writeString(1, f);
   }
   f = message.getEmail();
   if (f.length > 0) {
-    writer.writeString(
-      2,
-      f
-    );
+    writer.writeString(2, f);
   }
   f = message.getDisplayName();
   if (f.length > 0) {
-    writer.writeString(
-      3,
-      f
-    );
+    writer.writeString(3, f);
   }
   f = message.getPhotoUrl();
   if (f.length > 0) {
-    writer.writeString(
-      4,
-      f
-    );
+    writer.writeString(4, f);
   }
   f = message.getProvider();
   if (f.length > 0) {
-    writer.writeString(
-      5,
-      f
-    );
+    writer.writeString(5, f);
   }
   f = message.getCreated();
   if (f != null) {
     writer.writeMessage(
       8,
       f,
-      google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter
+      google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter,
     );
   }
   f = message.getIsAdmin();
   if (f) {
-    writer.writeBool(
-      6,
-      f
-    );
+    writer.writeBool(6, f);
   }
   f = message.getIsDeactivated();
   if (f) {
-    writer.writeBool(
-      7,
-      f
-    );
+    writer.writeBool(7, f);
   }
   f = message.getCanCreateProjects();
   if (f) {
-    writer.writeBool(
-      9,
-      f
-    );
+    writer.writeBool(9, f);
   }
 };
-
 
 /**
  * optional string id = 1;
  * @return {string}
  */
-proto.User.prototype.getId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+proto.User.prototype.getId = function () {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ''));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.User} returns this
  */
-proto.User.prototype.setId = function(value) {
+proto.User.prototype.setId = function (value) {
   return jspb.Message.setProto3StringField(this, 1, value);
 };
-
 
 /**
  * optional string email = 2;
  * @return {string}
  */
-proto.User.prototype.getEmail = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+proto.User.prototype.getEmail = function () {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ''));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.User} returns this
  */
-proto.User.prototype.setEmail = function(value) {
+proto.User.prototype.setEmail = function (value) {
   return jspb.Message.setProto3StringField(this, 2, value);
 };
-
 
 /**
  * optional string display_name = 3;
  * @return {string}
  */
-proto.User.prototype.getDisplayName = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+proto.User.prototype.getDisplayName = function () {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ''));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.User} returns this
  */
-proto.User.prototype.setDisplayName = function(value) {
+proto.User.prototype.setDisplayName = function (value) {
   return jspb.Message.setProto3StringField(this, 3, value);
 };
-
 
 /**
  * optional string photo_url = 4;
  * @return {string}
  */
-proto.User.prototype.getPhotoUrl = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+proto.User.prototype.getPhotoUrl = function () {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ''));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.User} returns this
  */
-proto.User.prototype.setPhotoUrl = function(value) {
+proto.User.prototype.setPhotoUrl = function (value) {
   return jspb.Message.setProto3StringField(this, 4, value);
 };
-
 
 /**
  * optional string provider = 5;
  * @return {string}
  */
-proto.User.prototype.getProvider = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
+proto.User.prototype.getProvider = function () {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ''));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.User} returns this
  */
-proto.User.prototype.setProvider = function(value) {
+proto.User.prototype.setProvider = function (value) {
   return jspb.Message.setProto3StringField(this, 5, value);
 };
-
 
 /**
  * optional google.protobuf.Timestamp created = 8;
  * @return {?proto.google.protobuf.Timestamp}
  */
-proto.User.prototype.getCreated = function() {
+proto.User.prototype.getCreated = function () {
   return /** @type{?proto.google.protobuf.Timestamp} */ (
-    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 8));
+    jspb.Message.getWrapperField(
+      this,
+      google_protobuf_timestamp_pb.Timestamp,
+      8,
+    )
+  );
 };
-
 
 /**
  * @param {?proto.google.protobuf.Timestamp|undefined} value
  * @return {!proto.User} returns this
-*/
-proto.User.prototype.setCreated = function(value) {
+ */
+proto.User.prototype.setCreated = function (value) {
   return jspb.Message.setWrapperField(this, 8, value);
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.User} returns this
  */
-proto.User.prototype.clearCreated = function() {
+proto.User.prototype.clearCreated = function () {
   return this.setCreated(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.User.prototype.hasCreated = function() {
+proto.User.prototype.hasCreated = function () {
   return jspb.Message.getField(this, 8) != null;
 };
-
 
 /**
  * optional bool is_admin = 6;
  * @return {boolean}
  */
-proto.User.prototype.getIsAdmin = function() {
-  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 6, false));
+proto.User.prototype.getIsAdmin = function () {
+  return /** @type {boolean} */ (
+    jspb.Message.getBooleanFieldWithDefault(this, 6, false)
+  );
 };
-
 
 /**
  * @param {boolean} value
  * @return {!proto.User} returns this
  */
-proto.User.prototype.setIsAdmin = function(value) {
+proto.User.prototype.setIsAdmin = function (value) {
   return jspb.Message.setProto3BooleanField(this, 6, value);
 };
-
 
 /**
  * optional bool is_deactivated = 7;
  * @return {boolean}
  */
-proto.User.prototype.getIsDeactivated = function() {
-  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 7, false));
+proto.User.prototype.getIsDeactivated = function () {
+  return /** @type {boolean} */ (
+    jspb.Message.getBooleanFieldWithDefault(this, 7, false)
+  );
 };
-
 
 /**
  * @param {boolean} value
  * @return {!proto.User} returns this
  */
-proto.User.prototype.setIsDeactivated = function(value) {
+proto.User.prototype.setIsDeactivated = function (value) {
   return jspb.Message.setProto3BooleanField(this, 7, value);
 };
-
 
 /**
  * optional bool can_create_projects = 9;
  * @return {boolean}
  */
-proto.User.prototype.getCanCreateProjects = function() {
-  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 9, false));
+proto.User.prototype.getCanCreateProjects = function () {
+  return /** @type {boolean} */ (
+    jspb.Message.getBooleanFieldWithDefault(this, 9, false)
+  );
 };
-
 
 /**
  * @param {boolean} value
  * @return {!proto.User} returns this
  */
-proto.User.prototype.setCanCreateProjects = function(value) {
+proto.User.prototype.setCanCreateProjects = function (value) {
   return jspb.Message.setProto3BooleanField(this, 9, value);
 };
-
 
 goog.object.extend(exports, proto);

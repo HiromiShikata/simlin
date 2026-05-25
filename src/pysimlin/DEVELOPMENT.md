@@ -22,6 +22,7 @@ The package uses Python's reference counting with weakref finalizers for automat
 ### Type Safety
 
 Full type hints are provided throughout:
+
 - Runtime type checking with isinstance where needed
 - mypy strict mode compliance
 - TypedDict for structured data
@@ -30,6 +31,7 @@ Full type hints are provided throughout:
 ### Error Handling
 
 Comprehensive error handling with custom exception hierarchy:
+
 - `SimlinError`: Base exception
 - `SimlinImportError`: Model loading errors
 - `SimlinRuntimeError`: Simulation execution errors
@@ -48,6 +50,7 @@ Error codes from C are mapped to Python ErrorCode enum.
 5. Platform-specific C compiler
 
 Install uv:
+
 ```bash
 # macOS/Linux
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -85,6 +88,7 @@ uv run python scripts/build_wheels.py
 ```
 
 This will:
+
 1. Build libsimlin.a for current platform
 2. Copy library to platform-specific directory
 3. Build wheel with correct platform tag
@@ -175,18 +179,21 @@ PYTHONMALLOC=debug uv run pytest tests/test_memory.py -v
 The GitHub Actions workflow `.github/workflows/memory.yml` provides comprehensive automated memory testing:
 
 **AddressSanitizer (ASan) Testing:**
+
 - Builds libsimlin with AddressSanitizer enabled (`-Z sanitizer=address`)
 - Detects memory leaks, use-after-free, and buffer overflows
 - Faster execution than Valgrind with better error reporting
 - Primary memory testing approach
 
 **Valgrind Testing:**
+
 - Comprehensive memory error detection as fallback
 - Uses custom suppression file (`valgrind-python.supp`) for Python internals
 - Detects definite memory leaks while filtering false positives
 - Broader platform compatibility
 
 **macOS Testing:**
+
 - Uses native macOS `leaks` tool when available
 - Tests on Apple Silicon platform
 - Validates memory behavior on different architectures
@@ -194,6 +201,7 @@ The GitHub Actions workflow `.github/workflows/memory.yml` provides comprehensiv
 #### Memory Testing
 
 **Using AddressSanitizer:**
+
 ```bash
 # Build libsimlin with AddressSanitizer
 cd src/libsimlin
@@ -248,12 +256,14 @@ The memory testing framework ensures that pysimlin properly manages C resources 
 ### Version Bumping
 
 Update version in:
+
 - `pyproject.toml`
 - `simlin/__init__.py`
 
 ### Building for Release
 
 1. **Local Testing**:
+
    ```bash
    make clean
    make build
@@ -273,6 +283,7 @@ Update version in:
 ### Publishing to PyPI
 
 1. **Test PyPI** (optional):
+
    ```bash
    twine upload --repository testpypi dist/*
    ```
@@ -287,16 +298,19 @@ Or use GitHub Actions workflow triggered by tags.
 ## Platform Support
 
 ### macOS ARM64
+
 - Built on macOS 14+
 - Platform tag: `macosx_11_0_arm64`
 - Requires Apple Silicon Mac
 
 ### Linux x86_64
+
 - Built on Ubuntu 22.04+
 - Platform tag: `manylinux_2_28_x86_64`
 - Compatible with most modern Linux distributions
 
 ### Linux ARM64
+
 - Built on Ubuntu 22.04+ with QEMU
 - Platform tag: `manylinux_2_28_aarch64`
 - For ARM servers and embedded systems
@@ -342,6 +356,7 @@ Or use GitHub Actions workflow triggered by tags.
 ### Debug Build
 
 For debugging with symbols:
+
 ```bash
 cd src/libsimlin
 cargo build  # Debug build without --release
