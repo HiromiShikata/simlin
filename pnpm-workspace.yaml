@@ -6,4 +6,4 @@ packages:
   - 'src/server'
   - 'website'
 
-minimumReleaseAge: 10080
+minimumReleaseAge: 10080 # 7 days in minutes

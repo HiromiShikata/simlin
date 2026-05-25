@@ -26,6 +26,8 @@ jobs:
 
       - name: Use Node.js
         uses: actions/setup-node@v6
+        with:
+          node-version: 24
 
       - name: Check for DONTMERGE
         run: |
@@ -40,7 +42,7 @@ jobs:
           fi
       - name: Install commitlint
         run: |
-          npm install --save-dev @commitlint/{config-conventional,cli}
+          npm install --no-save @commitlint/{config-conventional,cli}
       - name: Lint commits
         run: |
           npx commitlint --from=origin/main --to=HEAD --config ./.github/workflows/configs/commitlint.config.js
