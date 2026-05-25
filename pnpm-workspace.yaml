@@ -5,3 +5,5 @@ packages:
   - 'src/app'
   - 'src/server'
   - 'website'
+
+minimumReleaseAge: 10080
