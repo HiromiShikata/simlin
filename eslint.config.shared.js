@@ -55,10 +55,7 @@ const baseConfig = {
       },
     ],
     // Fix for ESLint 9 migration issues
-    '@typescript-eslint/no-empty-object-type': [
-      'error',
-      { allowObjectTypes: 'always', allowInterfaces: 'always' },
-    ],
+    '@typescript-eslint/no-empty-object-type': ['error', { allowObjectTypes: 'always', allowInterfaces: 'always' }],
     '@typescript-eslint/no-require-imports': 'off',
     'no-empty': ['error', { allowEmptyCatch: true }],
     'no-prototype-builtins': 'off',
@@ -89,12 +86,7 @@ const reactConfig = {
 };
 
 const jestConfig = {
-  files: [
-    '**/*.test.ts',
-    '**/*.test.tsx',
-    '**/tests/**/*.ts',
-    '**/tests/**/*.tsx',
-  ],
+  files: ['**/*.test.ts', '**/*.test.tsx', '**/tests/**/*.ts', '**/tests/**/*.tsx'],
   languageOptions: {
     globals: {
       describe: 'readonly',
@@ -131,9 +123,7 @@ const createConfig = (options = {}) => {
   configs.push(jestConfig);
 
   if (options.project) {
-    configs[
-      configs.length - (options.react ? 3 : 2)
-    ].languageOptions.parserOptions.project = options.project;
+    configs[configs.length - (options.react ? 3 : 2)].languageOptions.parserOptions.project = options.project;
   }
 
   return configs;

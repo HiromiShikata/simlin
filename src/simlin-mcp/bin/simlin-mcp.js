@@ -38,27 +38,16 @@ const platformKey = `${process.platform}-${process.arch}`;
 const platformInfo = PLATFORM_MAP[platformKey];
 
 if (!platformInfo) {
-  console.error(
-    `simlin-mcp: unsupported platform: ${process.platform} (${process.arch})`,
-  );
-  console.error(
-    'Supported platforms: darwin-arm64, linux-arm64, linux-x64, win32-x64',
-  );
+  console.error(`simlin-mcp: unsupported platform: ${process.platform} (${process.arch})`);
+  console.error('Supported platforms: darwin-arm64, linux-arm64, linux-x64, win32-x64');
   process.exit(1);
 }
 
-const binaryName =
-  process.platform === 'win32' ? 'simlin-mcp.exe' : 'simlin-mcp';
+const binaryName = process.platform === 'win32' ? 'simlin-mcp.exe' : 'simlin-mcp';
 
 // When installed from npm, the binary lives inside the platform package.
 // In development (cargo build), it lives in vendor/<triple>/.
-const vendorBinaryPath = path.join(
-  __dirname,
-  '..',
-  'vendor',
-  platformInfo.triple,
-  binaryName,
-);
+const vendorBinaryPath = path.join(__dirname, '..', 'vendor', platformInfo.triple, binaryName);
 
 let binaryPath = null;
 
@@ -77,12 +66,8 @@ if (!binaryPath) {
   if (existsSync(vendorBinaryPath)) {
     binaryPath = vendorBinaryPath;
   } else {
-    console.error(
-      `simlin-mcp: could not find native binary for ${platformKey}`,
-    );
-    console.error(
-      `Install the platform package: npm install ${platformInfo.package}`,
-    );
+    console.error(`simlin-mcp: could not find native binary for ${platformKey}`);
+    console.error(`Install the platform package: npm install ${platformInfo.package}`);
     console.error(
       `Or for development, build with: cargo build -p simlin-mcp && ` +
         `mkdir -p vendor/${platformInfo.triple} && ` +
@@ -129,9 +114,7 @@ const childResult = await new Promise((resolve) => {
 });
 
 if (childResult.type === 'signal') {
-  ['SIGINT', 'SIGTERM', 'SIGHUP'].forEach((sig) =>
-    process.removeAllListeners(sig),
-  );
+  ['SIGINT', 'SIGTERM', 'SIGHUP'].forEach((sig) => process.removeAllListeners(sig));
   process.kill(process.pid, childResult.signal);
 } else {
   process.exit(childResult.exitCode);

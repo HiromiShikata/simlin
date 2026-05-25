@@ -71,9 +71,7 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
       obj = {
         id: jspb.Message.getFieldWithDefault(msg, 1, ''),
         png: msg.getPng_asB64(),
-        created:
-          (f = msg.getCreated()) &&
-          google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
+        created: (f = msg.getCreated()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
       };
 
     if (includeInstance) {
@@ -118,10 +116,7 @@ proto.Preview.deserializeBinaryFromReader = function (msg, reader) {
         break;
       case 5:
         var value = new google_protobuf_timestamp_pb.Timestamp();
-        reader.readMessage(
-          value,
-          google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader,
-        );
+        reader.readMessage(value, google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader);
         msg.setCreated(value);
         break;
       default:
@@ -161,11 +156,7 @@ proto.Preview.serializeBinaryToWriter = function (message, writer) {
   }
   f = message.getCreated();
   if (f != null) {
-    writer.writeMessage(
-      5,
-      f,
-      google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter,
-    );
+    writer.writeMessage(5, f, google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter);
   }
 };
 
@@ -190,9 +181,7 @@ proto.Preview.prototype.setId = function (value) {
  * @return {!(string|Uint8Array)}
  */
 proto.Preview.prototype.getPng = function () {
-  return /** @type {!(string|Uint8Array)} */ (
-    jspb.Message.getFieldWithDefault(this, 2, '')
-  );
+  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 2, ''));
 };
 
 /**
@@ -229,11 +218,7 @@ proto.Preview.prototype.setPng = function (value) {
  */
 proto.Preview.prototype.getCreated = function () {
   return /** @type{?proto.google.protobuf.Timestamp} */ (
-    jspb.Message.getWrapperField(
-      this,
-      google_protobuf_timestamp_pb.Timestamp,
-      5,
-    )
+    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 5)
   );
 };
 

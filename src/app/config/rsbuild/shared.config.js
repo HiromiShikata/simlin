@@ -76,11 +76,7 @@ const sharedConfig = defineConfig({
       media: 'static/media',
     },
     sourceMap: {
-      js: shouldUseSourceMap
-        ? isProduction
-          ? 'source-map'
-          : 'cheap-module-source-map'
-        : false,
+      js: shouldUseSourceMap ? (isProduction ? 'source-map' : 'cheap-module-source-map') : false,
       css: shouldUseSourceMap,
     },
   },

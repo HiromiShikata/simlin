@@ -17,15 +17,9 @@ function getPublicUrlOrPath(isEnvDevelopment, homepage, envPublicUrl) {
   const stubDomain = 'https://localhost';
 
   if (envPublicUrl) {
-    envPublicUrl = envPublicUrl.endsWith('/')
-      ? envPublicUrl
-      : envPublicUrl + '/';
+    envPublicUrl = envPublicUrl.endsWith('/') ? envPublicUrl : envPublicUrl + '/';
     const validPublicUrl = new URL(envPublicUrl, stubDomain);
-    return isEnvDevelopment
-      ? envPublicUrl.startsWith('.')
-        ? '/'
-        : validPublicUrl.pathname
-      : envPublicUrl;
+    return isEnvDevelopment ? (envPublicUrl.startsWith('.') ? '/' : validPublicUrl.pathname) : envPublicUrl;
   }
 
   if (homepage) {
@@ -67,9 +61,7 @@ const moduleFileExtensions = [
 
 // Resolve file paths in the same order as the bundler
 const resolveModule = (resolveFn, filePath) => {
-  const extension = moduleFileExtensions.find((extension) =>
-    fs.existsSync(resolveFn(`${filePath}.${extension}`)),
-  );
+  const extension = moduleFileExtensions.find((extension) => fs.existsSync(resolveFn(`${filePath}.${extension}`)));
 
   if (extension) {
     return resolveFn(`${filePath}.${extension}`);

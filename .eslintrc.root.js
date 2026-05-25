@@ -33,9 +33,5 @@ module.exports = {
       version: 'detect',
     },
   },
-  ignorePatterns: [
-    'src/engine-v2/',
-    'src/system-dynamics-engine/',
-    'src/schemas/',
-  ],
+  ignorePatterns: ['src/engine-v2/', 'src/system-dynamics-engine/', 'src/schemas/'],
 };

@@ -13,11 +13,7 @@ require('../config/env');
 const fs = require('fs');
 const pc = require('picocolors');
 const { createRsbuild } = require('@rsbuild/core');
-const {
-  checkRequiredFiles,
-  measureFileSizesBeforeBuild,
-  printFileSizesAfterBuild,
-} = require('../config/build-utils');
+const { checkRequiredFiles, measureFileSizesBeforeBuild, printFileSizesAfterBuild } = require('../config/build-utils');
 
 const paths = require('../config/paths');
 
@@ -57,10 +53,7 @@ async function build() {
     const warnings = stats.warnings || [];
 
     if (errors.length) {
-      const msg =
-        typeof errors[0] === 'string'
-          ? errors[0]
-          : errors[0].message || String(errors[0]);
+      const msg = typeof errors[0] === 'string' ? errors[0] : errors[0].message || String(errors[0]);
       console.log(pc.red('Failed to compile.\n'));
       console.log(msg + '\n');
       process.exit(1);
@@ -86,9 +79,7 @@ async function build() {
     );
     console.log();
 
-    console.log(
-      pc.green('The web component bundle is ready to be embedded.\n'),
-    );
+    console.log(pc.green('The web component bundle is ready to be embedded.\n'));
     console.log(
       `Add the following script tag to your HTML:\n` +
         pc.cyan(`  <script src="/static/js/sd-component.js"></script>\n`) +

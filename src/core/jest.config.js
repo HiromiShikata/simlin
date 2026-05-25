@@ -9,8 +9,7 @@ const config = {
   testMatch: ['<rootDir>/tests/**/*.test.ts'],
   moduleFileExtensions: ['ts', 'js'],
   moduleNameMapper: {
-    '^@simlin/engine/internal/wasm$':
-      '<rootDir>/../engine/lib/internal/wasm.node.js',
+    '^@simlin/engine/internal/wasm$': '<rootDir>/../engine/lib/internal/wasm.node.js',
     '^@simlin/engine/(.*)$': '<rootDir>/../engine/lib/$1.js',
     '^@simlin/engine$': '<rootDir>/../engine/lib/index.js',
   },

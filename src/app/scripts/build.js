@@ -13,11 +13,7 @@ require('../config/env');
 const fs = require('fs');
 const pc = require('picocolors');
 const { createRsbuild } = require('@rsbuild/core');
-const {
-  checkRequiredFiles,
-  measureFileSizesBeforeBuild,
-  printFileSizesAfterBuild,
-} = require('../config/build-utils');
+const { checkRequiredFiles, measureFileSizesBeforeBuild, printFileSizesAfterBuild } = require('../config/build-utils');
 
 const paths = require('../config/paths');
 
@@ -58,10 +54,7 @@ async function build() {
 
     if (errors.length) {
       // Only keep the first error to reduce noise.
-      const msg =
-        typeof errors[0] === 'string'
-          ? errors[0]
-          : errors[0].message || String(errors[0]);
+      const msg = typeof errors[0] === 'string' ? errors[0] : errors[0].message || String(errors[0]);
       console.log(pc.red('Failed to compile.\n'));
       console.log(msg + '\n');
       process.exit(1);

@@ -45,10 +45,7 @@ function gzipSize(buf) {
 function removeFileNameHash(fileName) {
   return fileName
     .replace(/\\/g, '/')
-    .replace(
-      /\/?(.*)(\.[0-9a-f]+)(\.chunk)?(\.js|\.css)/,
-      (match, p1, p2, p3, p4) => p1 + p4,
-    );
+    .replace(/\/?(.*)(\.[0-9a-f]+)(\.chunk)?(\.js|\.css)/, (match, p1, p2, p3, p4) => p1 + p4);
 }
 
 /**
@@ -96,13 +93,7 @@ function measureFileSizesBeforeBuild(buildFolder) {
  * Print a table of build file sizes (gzipped), with optional comparison to
  * previous sizes.
  */
-function printFileSizesAfterBuild(
-  stats,
-  previousSizeMap,
-  buildFolder,
-  maxBundleGzipSize,
-  maxChunkGzipSize,
-) {
+function printFileSizesAfterBuild(stats, previousSizeMap, buildFolder, maxBundleGzipSize, maxChunkGzipSize) {
   const sizes = previousSizeMap.sizes;
   const statsData = stats.stats || [stats];
   const assets = [];
@@ -141,8 +132,7 @@ function printFileSizesAfterBuild(
           difference = pc.green(formatBytes(diff));
         }
       }
-      const sizeLabel =
-        formatBytes(size) + (difference ? ' (' + difference + ')' : '');
+      const sizeLabel = formatBytes(size) + (difference ? ' (' + difference + ')' : '');
 
       assets.push({
         folder: path.join(path.basename(buildFolder), path.dirname(asset.name)),
@@ -158,9 +148,7 @@ function printFileSizesAfterBuild(
   let hasOversizedAsset = false;
   for (const asset of assets) {
     const isMainBundle = asset.name.indexOf('main.') === 0;
-    const maxRecommendedSize = isMainBundle
-      ? maxBundleGzipSize
-      : maxChunkGzipSize;
+    const maxRecommendedSize = isMainBundle ? maxBundleGzipSize : maxChunkGzipSize;
     const isLarge = maxRecommendedSize && asset.size > maxRecommendedSize;
     if (isLarge) hasOversizedAsset = true;
 
@@ -175,9 +163,7 @@ function printFileSizesAfterBuild(
 
   if (hasOversizedAsset) {
     console.log();
-    console.log(
-      pc.yellow('The bundle size is significantly larger than recommended.'),
-    );
+    console.log(pc.yellow('The bundle size is significantly larger than recommended.'));
   }
 }
 

@@ -29,14 +29,7 @@ goog.exportSymbol('File', null, proto);
  * @constructor
  */
 proto.File = function (opt_data) {
-  jspb.Message.initialize(
-    this,
-    opt_data,
-    0,
-    -1,
-    proto.File.repeatedFields_,
-    null,
-  );
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.File.repeatedFields_, null);
 };
 goog.inherits(proto.File, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -84,13 +77,10 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
     var f,
       obj = {
         id: jspb.Message.getFieldWithDefault(msg, 1, ''),
-        prevIdList:
-          (f = jspb.Message.getRepeatedField(msg, 2)) == null ? undefined : f,
+        prevIdList: (f = jspb.Message.getRepeatedField(msg, 2)) == null ? undefined : f,
         projectId: jspb.Message.getFieldWithDefault(msg, 3, ''),
         userId: jspb.Message.getFieldWithDefault(msg, 4, ''),
-        created:
-          (f = msg.getCreated()) &&
-          google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
+        created: (f = msg.getCreated()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
         jsonContents: jspb.Message.getFieldWithDefault(msg, 6, ''),
         projectContents: msg.getProjectContents_asB64(),
       };
@@ -145,10 +135,7 @@ proto.File.deserializeBinaryFromReader = function (msg, reader) {
         break;
       case 5:
         var value = new google_protobuf_timestamp_pb.Timestamp();
-        reader.readMessage(
-          value,
-          google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader,
-        );
+        reader.readMessage(value, google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader);
         msg.setCreated(value);
         break;
       case 6:
@@ -204,11 +191,7 @@ proto.File.serializeBinaryToWriter = function (message, writer) {
   }
   f = message.getCreated();
   if (f != null) {
-    writer.writeMessage(
-      5,
-      f,
-      google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter,
-    );
+    writer.writeMessage(5, f, google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter);
   }
   f = message.getJsonContents();
   if (f.length > 0) {
@@ -307,11 +290,7 @@ proto.File.prototype.setUserId = function (value) {
  */
 proto.File.prototype.getCreated = function () {
   return /** @type{?proto.google.protobuf.Timestamp} */ (
-    jspb.Message.getWrapperField(
-      this,
-      google_protobuf_timestamp_pb.Timestamp,
-      5,
-    )
+    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 5)
   );
 };
 
@@ -360,9 +339,7 @@ proto.File.prototype.setJsonContents = function (value) {
  * @return {!(string|Uint8Array)}
  */
 proto.File.prototype.getProjectContents = function () {
-  return /** @type {!(string|Uint8Array)} */ (
-    jspb.Message.getFieldWithDefault(this, 7, '')
-  );
+  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 7, ''));
 };
 
 /**
@@ -371,9 +348,7 @@ proto.File.prototype.getProjectContents = function () {
  * @return {string}
  */
 proto.File.prototype.getProjectContents_asB64 = function () {
-  return /** @type {string} */ (
-    jspb.Message.bytesAsB64(this.getProjectContents())
-  );
+  return /** @type {string} */ (jspb.Message.bytesAsB64(this.getProjectContents()));
 };
 
 /**
@@ -384,9 +359,7 @@ proto.File.prototype.getProjectContents_asB64 = function () {
  * @return {!Uint8Array}
  */
 proto.File.prototype.getProjectContents_asU8 = function () {
-  return /** @type {!Uint8Array} */ (
-    jspb.Message.bytesAsU8(this.getProjectContents())
-  );
+  return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(this.getProjectContents()));
 };
 
 /**

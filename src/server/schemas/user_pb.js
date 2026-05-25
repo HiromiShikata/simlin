@@ -74,16 +74,10 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
         displayName: jspb.Message.getFieldWithDefault(msg, 3, ''),
         photoUrl: jspb.Message.getFieldWithDefault(msg, 4, ''),
         provider: jspb.Message.getFieldWithDefault(msg, 5, ''),
-        created:
-          (f = msg.getCreated()) &&
-          google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
+        created: (f = msg.getCreated()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
         isAdmin: jspb.Message.getBooleanFieldWithDefault(msg, 6, false),
         isDeactivated: jspb.Message.getBooleanFieldWithDefault(msg, 7, false),
-        canCreateProjects: jspb.Message.getBooleanFieldWithDefault(
-          msg,
-          9,
-          false,
-        ),
+        canCreateProjects: jspb.Message.getBooleanFieldWithDefault(msg, 9, false),
       };
 
     if (includeInstance) {
@@ -140,10 +134,7 @@ proto.User.deserializeBinaryFromReader = function (msg, reader) {
         break;
       case 8:
         var value = new google_protobuf_timestamp_pb.Timestamp();
-        reader.readMessage(
-          value,
-          google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader,
-        );
+        reader.readMessage(value, google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader);
         msg.setCreated(value);
         break;
       case 6:
@@ -207,11 +198,7 @@ proto.User.serializeBinaryToWriter = function (message, writer) {
   }
   f = message.getCreated();
   if (f != null) {
-    writer.writeMessage(
-      8,
-      f,
-      google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter,
-    );
+    writer.writeMessage(8, f, google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter);
   }
   f = message.getIsAdmin();
   if (f) {
@@ -313,11 +300,7 @@ proto.User.prototype.setProvider = function (value) {
  */
 proto.User.prototype.getCreated = function () {
   return /** @type{?proto.google.protobuf.Timestamp} */ (
-    jspb.Message.getWrapperField(
-      this,
-      google_protobuf_timestamp_pb.Timestamp,
-      8,
-    )
+    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 8)
   );
 };
 
@@ -350,9 +333,7 @@ proto.User.prototype.hasCreated = function () {
  * @return {boolean}
  */
 proto.User.prototype.getIsAdmin = function () {
-  return /** @type {boolean} */ (
-    jspb.Message.getBooleanFieldWithDefault(this, 6, false)
-  );
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 6, false));
 };
 
 /**
@@ -368,9 +349,7 @@ proto.User.prototype.setIsAdmin = function (value) {
  * @return {boolean}
  */
 proto.User.prototype.getIsDeactivated = function () {
-  return /** @type {boolean} */ (
-    jspb.Message.getBooleanFieldWithDefault(this, 7, false)
-  );
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 7, false));
 };
 
 /**
@@ -386,9 +365,7 @@ proto.User.prototype.setIsDeactivated = function (value) {
  * @return {boolean}
  */
 proto.User.prototype.getCanCreateProjects = function () {
-  return /** @type {boolean} */ (
-    jspb.Message.getBooleanFieldWithDefault(this, 9, false)
-  );
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 9, false));
 };
 
 /**

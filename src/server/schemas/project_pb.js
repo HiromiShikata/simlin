@@ -29,14 +29,7 @@ goog.exportSymbol('Project', null, proto);
  * @constructor
  */
 proto.Project = function (opt_data) {
-  jspb.Message.initialize(
-    this,
-    opt_data,
-    0,
-    -1,
-    proto.Project.repeatedFields_,
-    null,
-  );
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.Project.repeatedFields_, null);
 };
 goog.inherits(proto.Project, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -88,18 +81,12 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
         ownerId: jspb.Message.getFieldWithDefault(msg, 2, ''),
         isPublic: jspb.Message.getBooleanFieldWithDefault(msg, 3, false),
         description: jspb.Message.getFieldWithDefault(msg, 4, ''),
-        tagsList:
-          (f = jspb.Message.getRepeatedField(msg, 5)) == null ? undefined : f,
-        collaboratorIdList:
-          (f = jspb.Message.getRepeatedField(msg, 6)) == null ? undefined : f,
+        tagsList: (f = jspb.Message.getRepeatedField(msg, 5)) == null ? undefined : f,
+        collaboratorIdList: (f = jspb.Message.getRepeatedField(msg, 6)) == null ? undefined : f,
         version: jspb.Message.getFieldWithDefault(msg, 7, 0),
         fileId: jspb.Message.getFieldWithDefault(msg, 8, ''),
-        created:
-          (f = msg.getCreated()) &&
-          google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
-        updated:
-          (f = msg.getUpdated()) &&
-          google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
+        created: (f = msg.getCreated()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
+        updated: (f = msg.getUpdated()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
       };
 
     if (includeInstance) {
@@ -172,18 +159,12 @@ proto.Project.deserializeBinaryFromReader = function (msg, reader) {
         break;
       case 9:
         var value = new google_protobuf_timestamp_pb.Timestamp();
-        reader.readMessage(
-          value,
-          google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader,
-        );
+        reader.readMessage(value, google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader);
         msg.setCreated(value);
         break;
       case 10:
         var value = new google_protobuf_timestamp_pb.Timestamp();
-        reader.readMessage(
-          value,
-          google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader,
-        );
+        reader.readMessage(value, google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader);
         msg.setUpdated(value);
         break;
       default:
@@ -251,19 +232,11 @@ proto.Project.serializeBinaryToWriter = function (message, writer) {
   }
   f = message.getCreated();
   if (f != null) {
-    writer.writeMessage(
-      9,
-      f,
-      google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter,
-    );
+    writer.writeMessage(9, f, google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter);
   }
   f = message.getUpdated();
   if (f != null) {
-    writer.writeMessage(
-      10,
-      f,
-      google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter,
-    );
+    writer.writeMessage(10, f, google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter);
   }
 };
 
@@ -320,9 +293,7 @@ proto.Project.prototype.setOwnerId = function (value) {
  * @return {boolean}
  */
 proto.Project.prototype.getIsPublic = function () {
-  return /** @type {boolean} */ (
-    jspb.Message.getBooleanFieldWithDefault(this, 3, false)
-  );
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 3, false));
 };
 
 /**
@@ -453,11 +424,7 @@ proto.Project.prototype.setFileId = function (value) {
  */
 proto.Project.prototype.getCreated = function () {
   return /** @type{?proto.google.protobuf.Timestamp} */ (
-    jspb.Message.getWrapperField(
-      this,
-      google_protobuf_timestamp_pb.Timestamp,
-      9,
-    )
+    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 9)
   );
 };
 
@@ -491,11 +458,7 @@ proto.Project.prototype.hasCreated = function () {
  */
 proto.Project.prototype.getUpdated = function () {
   return /** @type{?proto.google.protobuf.Timestamp} */ (
-    jspb.Message.getWrapperField(
-      this,
-      google_protobuf_timestamp_pb.Timestamp,
-      10,
-    )
+    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 10)
   );
 };
 

@@ -36,9 +36,7 @@ This document provides comprehensive information about how system dynamics diagr
 - Screen to canvas conversion uses matrix transformation with zoom factor
 - Implementation in `screenToCanvasPoint` function:
   ```typescript
-  canvasPoint = screenPoint.matrixTransform(
-    new DOMMatrix([zoom, 0, 0, zoom, 0, 0]).inverse(),
-  );
+  canvasPoint = screenPoint.matrixTransform(new DOMMatrix([zoom, 0, 0, zoom, 0, 0]).inverse());
   ```
 - Elements store their position as center coordinates (cx, cy)
 - For positioned elements (Stock, Aux, Module, Flow valve), x/y are aliased to cx/cy
