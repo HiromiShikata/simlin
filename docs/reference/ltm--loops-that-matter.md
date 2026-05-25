@@ -234,8 +234,8 @@ Where:
 
 - **Delta(z)** = z(t) - z(t-dt): total change in z over one timestep
 - **Delta(x)** = x(t) - x(t-dt): change in x over that interval
-- **Delta_x(z)** = f(x_current, y_previous) - z_previous: the **partial change** in z due
-  to x alone, computed by re-evaluating f with the current value of x but the _previous_
+- **Delta_x(z)** = f(x*current, y_previous) - z_previous: the **partial change** in z due
+  to x alone, computed by re-evaluating f with the current value of x but the \_previous*
   values of all other inputs (ceteris paribus)
 
 **Magnitude** `|Delta_x(z) / Delta(z)|`:
