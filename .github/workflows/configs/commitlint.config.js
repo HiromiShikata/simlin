@@ -19,7 +19,6 @@ module.exports = {
         'autogen',
         'prep',
         'adapt',
-        'security',
       ],
     ],
     'header-max-length': [0],
