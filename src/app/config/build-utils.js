@@ -11,7 +11,7 @@ const pc = require('picocolors');
  */
 function checkRequiredFiles(files) {
   try {
-    files.forEach(filePath => {
+    files.forEach((filePath) => {
       fs.accessSync(filePath, fs.constants.F_OK);
     });
     return true;
@@ -45,10 +45,7 @@ function gzipSize(buf) {
 function removeFileNameHash(fileName) {
   return fileName
     .replace(/\\/g, '/')
-    .replace(
-      /\/?(.*)(\.[0-9a-f]+)(\.chunk)?(\.js|\.css)/,
-      (match, p1, p2, p3, p4) => p1 + p4
-    );
+    .replace(/\/?(.*)(\.[0-9a-f]+)(\.chunk)?(\.js|\.css)/, (match, p1, p2, p3, p4) => p1 + p4);
 }
 
 /**
@@ -96,15 +93,9 @@ function measureFileSizesBeforeBuild(buildFolder) {
  * Print a table of build file sizes (gzipped), with optional comparison to
  * previous sizes.
  */
-function printFileSizesAfterBuild(
-  stats,
-  previousSizeMap,
-  buildFolder,
-  maxBundleGzipSize,
-  maxChunkGzipSize
-) {
+function printFileSizesAfterBuild(stats, previousSizeMap, buildFolder, maxBundleGzipSize, maxChunkGzipSize) {
   const sizes = previousSizeMap.sizes;
-  const statsData = (stats.stats || [stats]);
+  const statsData = stats.stats || [stats];
   const assets = [];
 
   for (const s of statsData) {
@@ -166,7 +157,7 @@ function printFileSizesAfterBuild(
         (isLarge ? pc.yellow(asset.sizeLabel) : asset.sizeLabel) +
         '  ' +
         pc.dim(asset.folder + path.sep) +
-        pc.cyan(asset.name)
+        pc.cyan(asset.name),
     );
   }
 

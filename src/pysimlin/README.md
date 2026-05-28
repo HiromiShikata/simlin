@@ -75,6 +75,7 @@ print(f"Population grows from {population_series.iloc[0]:.0f} to {population_ser
 ### Editing a flow in an existing model
 
 <!-- pysimlin-test: reset -->
+
 ```python
 """Example showing how to edit an existing model's flow equation with pysimlin."""
 
@@ -170,6 +171,7 @@ if __name__ == "__main__":
 ### Building a logistic population model programmatically
 
 <!-- pysimlin-test: reset -->
+
 ```python
 """Create a new Simlin project and build a simple population model using pysimlin's edit API."""
 
@@ -316,6 +318,7 @@ print(f"Created model with {len(model.get_var_names())} variables")
 You can also load models from files:
 
 <!-- pysimlin-test: skip -->
+
 ```python
 # Load from file (auto-detects format from extension)
 model = simlin.load("model.stmx")  # .stmx, .mdl, .json, etc.
@@ -489,6 +492,7 @@ Loops are classified by polarity, which indicates how they affect the system:
 Loop IDs use the polarity as a prefix (e.g., "R1", "B2", "U3").
 
 When you run a simulation, pysimlin computes actual loop scores at each timestep. The polarity is classified based on these runtime values:
+
 - If loop scores are consistently positive throughout: Reinforcing
 - If loop scores are consistently negative throughout: Balancing
 - If loop scores change sign during simulation: Undetermined (occurs in nonlinear models where link effects depend on variable values)
@@ -566,6 +570,7 @@ else:
 When loading models from files, you can catch import errors:
 
 <!-- pysimlin-test: skip -->
+
 ```python
 try:
     model = simlin.load("model.stmx")
@@ -580,6 +585,7 @@ except SimlinImportError as e:
 This example demonstrates loading a model from file and comparing scenarios with matplotlib:
 
 <!-- pysimlin-test: skip -->
+
 ```python
 import simlin
 import pandas as pd

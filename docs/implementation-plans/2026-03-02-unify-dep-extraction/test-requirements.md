@@ -6,28 +6,28 @@ This document maps every acceptance criterion from the design to either an autom
 
 ## Coverage Summary
 
-| Criterion | Type | Verification Method |
-|-----------|------|-------------------|
-| AC0.1 | Automated (integration) | Existing `tests/simulate.rs` suite, run at each phase boundary |
-| AC0.2 | Automated (unit) | Existing `cargo test -p simlin-engine`, run at each phase boundary |
-| AC0.3 | Automated (integration) | Full `cargo test -p simlin-engine --features file_io`, run after each phase |
-| AC1.1 | Automated (unit) | Table-driven matrix test in `variable.rs` |
-| AC1.2 | Automated (unit) | Table-driven matrix test in `variable.rs` |
-| AC1.3 | Automated (unit) | Table-driven matrix test in `variable.rs` |
-| AC1.4 | Automated (unit) | Table-driven matrix test in `variable.rs` |
-| AC1.5 | Human verification | Code review: wrapper function bodies |
-| AC1.6 | Automated (unit) | Table-driven matrix test in `variable.rs` |
-| AC2.1 | Human verification | Code review: call count in `variable_direct_dependencies_impl` |
-| AC2.2 | Human verification | Code review: call count in `extract_implicit_var_deps` |
-| AC2.3 | Automated (integration) | Existing integration tests confirm identical dep graphs |
-| AC3.1 | Human verification | Code review: both callers use `is_stdlib_module_function` |
-| AC3.2 | Human verification | Code review: no duplicated name-set logic |
-| AC4.1 | Automated (unit) | Table-driven matrix test enumerates all combinations |
-| AC4.2 | Automated (unit) | Test runner asserts all 5 fields per case |
-| AC4.3 | Automated (unit) | Named edge-case entries in matrix |
-| AC5.1 | Automated (integration) | Differential check over integration test models |
-| AC5.2 | Automated (unit) | Differential check over synthetic models |
-| AC5.3 | Automated (unit/integration) | Structural property of the differential test |
+| Criterion | Type                         | Verification Method                                                         |
+| --------- | ---------------------------- | --------------------------------------------------------------------------- |
+| AC0.1     | Automated (integration)      | Existing `tests/simulate.rs` suite, run at each phase boundary              |
+| AC0.2     | Automated (unit)             | Existing `cargo test -p simlin-engine`, run at each phase boundary          |
+| AC0.3     | Automated (integration)      | Full `cargo test -p simlin-engine --features file_io`, run after each phase |
+| AC1.1     | Automated (unit)             | Table-driven matrix test in `variable.rs`                                   |
+| AC1.2     | Automated (unit)             | Table-driven matrix test in `variable.rs`                                   |
+| AC1.3     | Automated (unit)             | Table-driven matrix test in `variable.rs`                                   |
+| AC1.4     | Automated (unit)             | Table-driven matrix test in `variable.rs`                                   |
+| AC1.5     | Human verification           | Code review: wrapper function bodies                                        |
+| AC1.6     | Automated (unit)             | Table-driven matrix test in `variable.rs`                                   |
+| AC2.1     | Human verification           | Code review: call count in `variable_direct_dependencies_impl`              |
+| AC2.2     | Human verification           | Code review: call count in `extract_implicit_var_deps`                      |
+| AC2.3     | Automated (integration)      | Existing integration tests confirm identical dep graphs                     |
+| AC3.1     | Human verification           | Code review: both callers use `is_stdlib_module_function`                   |
+| AC3.2     | Human verification           | Code review: no duplicated name-set logic                                   |
+| AC4.1     | Automated (unit)             | Table-driven matrix test enumerates all combinations                        |
+| AC4.2     | Automated (unit)             | Test runner asserts all 5 fields per case                                   |
+| AC4.3     | Automated (unit)             | Named edge-case entries in matrix                                           |
+| AC5.1     | Automated (integration)      | Differential check over integration test models                             |
+| AC5.2     | Automated (unit)             | Differential check over synthetic models                                    |
+| AC5.3     | Automated (unit/integration) | Structural property of the differential test                                |
 
 ---
 
@@ -242,15 +242,15 @@ This document maps every acceptance criterion from the design to either an autom
 - **Test name:** `test_classify_dependencies_matrix`
 - **Edge case mapping:**
 
-| # | Edge Case | Test Case Label | Key Assertion |
-|---|-----------|----------------|---------------|
-| 1 | PREVIOUS feedback (`7a9db2a5`) | `previous_scalar` | `previous_only={b}`, `b` NOT in `non_previous` |
-| 2 | Mixed current+lagged (`ae9f4ed9`) | `mixed_prev_current` | `previous_referenced={b}`, `previous_only={}` (b also outside PREVIOUS) |
-| 3 | Split by phase (`09ae1b33`) | `split_phase_dt` / `split_phase_init` | Same AST produces same classification; phase split is in db.rs |
-| 4 | INIT-only (`b0580011`) | `init_scalar` | `init_only={b}` |
-| 5 | Fragment context (`55ebef55`) | `init_scalar` + structural invariant | `all={b}` includes INIT arg; invariant asserts `all >= init_referenced` |
-| 6 | PREVIOUS+INIT combined (`c537bb2d`) | `both_lagged_scalar` | `init_only={b}`, `previous_only={b}` |
-| 7 | Nested PREVIOUS (`0aecdfbb`) | `nested_previous` | `previous_only={x}` at both nesting levels |
+| #   | Edge Case                           | Test Case Label                       | Key Assertion                                                           |
+| --- | ----------------------------------- | ------------------------------------- | ----------------------------------------------------------------------- |
+| 1   | PREVIOUS feedback (`7a9db2a5`)      | `previous_scalar`                     | `previous_only={b}`, `b` NOT in `non_previous`                          |
+| 2   | Mixed current+lagged (`ae9f4ed9`)   | `mixed_prev_current`                  | `previous_referenced={b}`, `previous_only={}` (b also outside PREVIOUS) |
+| 3   | Split by phase (`09ae1b33`)         | `split_phase_dt` / `split_phase_init` | Same AST produces same classification; phase split is in db.rs          |
+| 4   | INIT-only (`b0580011`)              | `init_scalar`                         | `init_only={b}`                                                         |
+| 5   | Fragment context (`55ebef55`)       | `init_scalar` + structural invariant  | `all={b}` includes INIT arg; invariant asserts `all >= init_referenced` |
+| 6   | PREVIOUS+INIT combined (`c537bb2d`) | `both_lagged_scalar`                  | `init_only={b}`, `previous_only={b}`                                    |
+| 7   | Nested PREVIOUS (`0aecdfbb`)        | `nested_previous`                     | `previous_only={x}` at both nesting levels                              |
 
 - **Implementation phase:** Phase 4, Task 1.
 
@@ -281,13 +281,13 @@ This document maps every acceptance criterion from the design to either an autom
 - **Verification command:** `cargo test -p simlin-engine test_fragment_phase_agreement_synthetic`
 - **Synthetic models:**
 
-| Model | Variables | Tests |
-|-------|-----------|-------|
-| PREVIOUS feedback | `x = TIME`, `y = PREVIOUS(x) + 1` | PREVIOUS-only dep does not create same-step ordering |
-| INIT-only deps | `x = TIME`, `y = INIT(x) + 1` | INIT-only dep places x in initials but not dt ordering |
-| Nested builtins | `x = TIME`, `z = PREVIOUS(PREVIOUS(x))` | Implicit helper vars have consistent phases |
-| Module-backed (SMOOTH) | `x = TIME`, `y = SMTH1(x, 1, x)` | Stdlib module expansion creates consistent phases |
-| Mixed all three | `x = TIME`, `y = PREVIOUS(x) + INIT(x) + x` | Bare `x` reference creates same-step dep despite PREVIOUS/INIT |
+| Model                  | Variables                                   | Tests                                                          |
+| ---------------------- | ------------------------------------------- | -------------------------------------------------------------- |
+| PREVIOUS feedback      | `x = TIME`, `y = PREVIOUS(x) + 1`           | PREVIOUS-only dep does not create same-step ordering           |
+| INIT-only deps         | `x = TIME`, `y = INIT(x) + 1`               | INIT-only dep places x in initials but not dt ordering         |
+| Nested builtins        | `x = TIME`, `z = PREVIOUS(PREVIOUS(x))`     | Implicit helper vars have consistent phases                    |
+| Module-backed (SMOOTH) | `x = TIME`, `y = SMTH1(x, 1, x)`            | Stdlib module expansion creates consistent phases              |
+| Mixed all three        | `x = TIME`, `y = PREVIOUS(x) + INIT(x) + x` | Bare `x` reference creates same-step dep despite PREVIOUS/INIT |
 
 - **Construction method:** Each model is built as a `datamodel::Project` with `datamodel::Model` and `datamodel::Variable` structs, compiled via `sync_from_datamodel`, then checked with `assert_fragment_phase_agreement`.
 - **Implementation phase:** Phase 5, Task 3.
@@ -318,14 +318,14 @@ The pre-commit hook (`scripts/pre-commit`) runs the full engine test suite (Rust
 
 ### Test file path summary
 
-| Test Category | File Path | Feature Flag |
-|---------------|-----------|-------------|
-| Existing simulation tests (AC0.1) | `src/simlin-engine/tests/simulate.rs` | `file_io` |
-| Existing engine unit tests (AC0.2) | `src/simlin-engine/src/**/*.rs` (inline tests) | none |
-| Full integration suite (AC0.3) | `src/simlin-engine/tests/*.rs` | `file_io` |
-| Table-driven matrix test (AC1, AC4) | `src/simlin-engine/src/variable.rs` | none |
-| Differential check -- integration (AC5.1) | `src/simlin-engine/src/db_differential_tests.rs` | `file_io` |
-| Differential check -- synthetic (AC5.2, AC5.3) | `src/simlin-engine/src/db_differential_tests.rs` | none |
+| Test Category                                  | File Path                                        | Feature Flag |
+| ---------------------------------------------- | ------------------------------------------------ | ------------ |
+| Existing simulation tests (AC0.1)              | `src/simlin-engine/tests/simulate.rs`            | `file_io`    |
+| Existing engine unit tests (AC0.2)             | `src/simlin-engine/src/**/*.rs` (inline tests)   | none         |
+| Full integration suite (AC0.3)                 | `src/simlin-engine/tests/*.rs`                   | `file_io`    |
+| Table-driven matrix test (AC1, AC4)            | `src/simlin-engine/src/variable.rs`              | none         |
+| Differential check -- integration (AC5.1)      | `src/simlin-engine/src/db_differential_tests.rs` | `file_io`    |
+| Differential check -- synthetic (AC5.2, AC5.3) | `src/simlin-engine/src/db_differential_tests.rs` | none         |
 
 ### Human verification checklist
 

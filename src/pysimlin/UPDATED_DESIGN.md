@@ -23,18 +23,21 @@ The API should optimize for these use cases, not for building interactive GUIs o
 We take a strong stance: **pysimlin should do what only pysimlin can do, and delegate everything else to the broader ecosystem.**
 
 What pysimlin uniquely provides:
+
 - Loading and compiling system dynamics models from various formats (XMILE, SDAI JSON, native JSON)
 - Running efficient simulations of stock-flow models
 - Computing feedback loop dominance analysis (Loops That Matter / LTM)
 - Structural analysis of models (stocks, flows, feedback loops)
 
 What pysimlin should NOT reimplement:
+
 - Plotting (matplotlib, seaborn, plotly do this better)
 - Statistical analysis (pandas, numpy, scipy do this better)
 - Data manipulation (pandas does this better)
 - Comparison/aggregation operations (pandas does this better)
 
 This philosophy leads to a clean separation:
+
 - pysimlin returns standard Python data structures (pandas DataFrames, numpy arrays, lists, dicts)
 - Users apply standard tools to these structures
 - AI agents can use their existing knowledge of pandas/matplotlib without learning custom APIs
@@ -959,6 +962,7 @@ run.results[['inventory', 'production_rate']].plot(secondary_y='production_rate'
 ### Immutability
 
 All data classes representing model structure are immutable (frozen dataclasses):
+
 - `Stock`, `Flow`, `Aux`: Cannot be modified after creation
 - `GraphicalFunction`, `GraphicalFunctionScale`: Immutable data
 - `TimeSpec`, `DominantPeriod`: Immutable metadata
@@ -971,6 +975,7 @@ All data classes representing model structure are immutable (frozen dataclasses)
 ### Eager Evaluation of base_case
 
 The `model.base_case` property contains a Run object computed during `simlin.load()`:
+
 1. After loading and parsing the model file
 2. Create a simulation with default parameters and `enable_ltm=True`
 3. Run the simulation to completion
@@ -995,6 +1000,7 @@ The loop dominance analysis (for `Run.dominant_periods`) should implement the gr
 ### DataFrame Construction
 
 The `Run.results` DataFrame should:
+
 - Have simulation time as the index (named 'time')
 - Have one column per variable
 - For arrayed variables (e.g., `population[region]` where region = {urban, rural}):
@@ -1008,6 +1014,7 @@ Variable names in the engine use canonical forms (lowercase, underscores). The A
 ### Type Hints
 
 All public APIs should have complete type hints compatible with mypy strict mode. Use:
+
 - `List`, `Dict`, `Optional`, `Union`, `Literal` from `typing`
 - `NDArray` from `numpy.typing`
 - `pd.DataFrame`, `pd.Series` from pandas
@@ -1015,6 +1022,7 @@ All public APIs should have complete type hints compatible with mypy strict mode
 ### Error Handling
 
 Custom exception hierarchy:
+
 ```python
 class SimlinError(Exception):
     """Base exception for simlin errors"""
@@ -1030,6 +1038,7 @@ class SimlinRuntimeError(SimlinError):
 ```
 
 Provide helpful error messages:
+
 - "Cannot get loop scores without enabling LTM. Use model.run(analyze_loops=True) or model.simulate(enable_ltm=True)"
 - "Variable 'populaton' not found. Did you mean 'population'?" (suggest close matches)
 
@@ -1050,12 +1059,14 @@ Provide helpful error messages:
 ### Migration Path
 
 The current pysimlin API should continue to work. Consider:
+
 1. Mark old APIs as deprecated with warnings
 2. Provide migration guide showing old → new equivalents
 3. Support both APIs for one major version
 4. Remove deprecated APIs in next major version
 
 Key mappings:
+
 ```python
 # Old → New
 Project.from_file(path) → simlin.load(path).project
@@ -1066,15 +1077,20 @@ sim.get_results() → sim.get_run().results
 ## Implementation Decisions
 
 ### Multi-dimensional Arrays
+
 For multi-dimensional arrayed variables, use comma-separated subscripts in column names:
+
 - `population[region,age_group]` creates columns like `population[urban,young]`, `population[urban,old]`, etc.
 - This matches standard mathematical notation and is parseable
 
 ### Unit Checking
+
 `check_units()` should be comprehensive - check all equations for dimensional consistency. Return all issues found, users can filter by severity if needed.
 
 ### Model.explain()
+
 Use template-based explanations:
+
 - Stocks: "{name} is a stock with initial value {equation}, increased by {inflows}, decreased by {outflows}"
 - Flows: "{name} is a flow computed as {equation}"
 - Auxs: "{name} is an auxiliary variable computed as {equation}"
@@ -1082,15 +1098,19 @@ Use template-based explanations:
 Keep it simple and deterministic. Advanced explanation can be added later.
 
 ### Sim Specs Precedence
+
 When getting time bounds and dt for a simulation:
+
 1. If the Model has sim_specs defined: use those
 2. Otherwise: use the Project-level sim_specs
 3. Both `model.run()` and base_case follow this rule
 
 ### Project.get_model() Scope
+
 `project.get_model(name)` returns any model defined in the project file, whether it's used as a module or not. This allows inspection of the full model hierarchy.
 
 ### Sim.get_run() Behavior
+
 Allow calling `get_run()` before `run_to_end()` - return results for the partial simulation. Useful for debugging and interrupted simulations. Loop analysis is included if the sim was created with `enable_ltm=True`.
 
 ## Rationale for Key Decisions
@@ -1100,6 +1120,7 @@ Allow calling `get_run()` before `run_to_end()` - return results for the partial
 **Decision**: Do not provide `run.plot()`, `run.plot_loop_dominance()`, or similar visualization methods.
 
 **Rationale**:
+
 - Users already know matplotlib/seaborn/plotly
 - Any custom plotting API will be less flexible than the standard tools
 - Reduces API surface area and maintenance burden
@@ -1114,6 +1135,7 @@ Allow calling `get_run()` before `run_to_end()` - return results for the partial
 **Decision**: Use three separate classes rather than one `Variable` class with a `type` field.
 
 **Rationale**:
+
 - Different variable types have different structure (stocks have inflows/outflows)
 - Type system can enforce correctness (can't ask for inflows of a Flow)
 - More pythonic - use types to express semantics
@@ -1127,6 +1149,7 @@ Allow calling `get_run()` before `run_to_end()` - return results for the partial
 **Decision**: Do not provide comparison methods on Run objects.
 
 **Rationale**:
+
 - Comparison is just: `pd.DataFrame({'base': base.results['x'], 'policy': policy.results['x']})`
 - pandas provides richer comparison operations than we could build
 - Reduces API surface, increases flexibility
@@ -1140,6 +1163,7 @@ Allow calling `get_run()` before `run_to_end()` - return results for the partial
 **Decision**: Use `model.base_case` as the property name.
 
 **Rationale**:
+
 - "Base case" is standard SD terminology
 - Clear that this is the default/reference scenario
 - Natural to say "compare policy to base case"
@@ -1154,6 +1178,7 @@ Allow calling `get_run()` before `run_to_end()` - return results for the partial
 **Decision**: `model.run(analyze_loops=True)` by default, must explicitly disable.
 
 **Rationale**:
+
 - Loop analysis is pysimlin's unique value proposition
 - Most users want loop analysis (otherwise why use simlin vs basic ODE solver?)
 - Making it opt-in would lead to confusion ("why don't I have dominant_periods?")
@@ -1168,12 +1193,14 @@ Allow calling `get_run()` before `run_to_end()` - return results for the partial
 **Decision**: Name the class returned by `model.run()` as `Run`.
 
 **Rationale**:
+
 - Natural: "I ran the model and got a run"
 - Short and simple
 - Common term in both SD and data science
 - Works well grammatically: "the run shows...", "compare runs"
 
 **Alternatives considered**:
+
 - `Result`: Too generic, doesn't convey simulation aspect
 - `Simulation`: Conflicts with `Sim` class for low-level gaming
 - `Execution`: Too formal/computer-sciency

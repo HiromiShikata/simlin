@@ -22,11 +22,11 @@ Criterion saves results in `target/criterion/` and generates HTML reports in `ta
 
 ## Benchmark suites
 
-| Suite | File | What it measures |
-|-------|------|------------------|
-| `compiler` | `benches/compiler.rs` | End-to-end compiler pipeline on real models (WRLD3, C-LEARN) |
+| Suite        | File                    | What it measures                                                  |
+| ------------ | ----------------------- | ----------------------------------------------------------------- |
+| `compiler`   | `benches/compiler.rs`   | End-to-end compiler pipeline on real models (WRLD3, C-LEARN)      |
 | `simulation` | `benches/simulation.rs` | VM execution, slider interaction, compilation of synthetic models |
-| `array_ops` | `benches/array_ops.rs` | Array sum, element-wise add, broadcasting, multi-ref |
+| `array_ops`  | `benches/array_ops.rs`  | Array sum, element-wise add, broadcasting, multi-ref              |
 
 ### compiler benchmarks
 
@@ -38,6 +38,7 @@ The `compiler` suite measures each stage of the compilation pipeline independent
 - **`full_pipeline`** — all stages end-to-end
 
 Models used:
+
 - `wrld3` — World3 model (151 KB, ~3,800 lines), a classic system dynamics model
 - `clearn` — C-LEARN climate model (1.4 MB, ~53,000 lines), a stress test for the compiler
 

@@ -1,0 +1,20 @@
+name: Empty format test
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "test"
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: |
+          printf '.github/\npnpm-lock.yaml\n' > /tmp/.prettierignore-workflows
+          npx prettier --check "**/*.{md,yaml,yml,js}" --ignore-path /tmp/.prettierignore-workflows

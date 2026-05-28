@@ -1,5 +1,4 @@
-Test Inline Lookups
-===================
+# Test Inline Lookups
 
 This tests the vensim syntax for lookup definition as they are created inline. In this case we add the lookup function bounds:
 
@@ -10,12 +9,9 @@ Variable with Inline Lookup=
 
 ![test_lookups Vensim screenshot](vensim_screenshot.png)
 
+## Contributions
 
-
-Contributions
--------------
-
-| Component                      | Author          | Contact                    | Date    | Software Version        |
-|:------------------------------ |:--------------- |:-------------------------- |:------- |:----------------------- |
-| `test_lookups_inline.mdl`     | James Houghton  | james.p.houghton@gmail.com | 6/28/16 | Vensim DSS 6.3E for Mac  |
-| output.csv                     | James Houghton  | james.p.houghton@gmail.com | 6/28/16 | Vensim DSS 6.3E for Mac  |
+| Component                 | Author         | Contact                    | Date    | Software Version        |
+| :------------------------ | :------------- | :------------------------- | :------ | :---------------------- |
+| `test_lookups_inline.mdl` | James Houghton | james.p.houghton@gmail.com | 6/28/16 | Vensim DSS 6.3E for Mac |
+| output.csv                | James Houghton | james.p.houghton@gmail.com | 6/28/16 | Vensim DSS 6.3E for Mac |

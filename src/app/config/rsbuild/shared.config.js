@@ -17,7 +17,6 @@ const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false';
 // Public URL handling
 const PUBLIC_URL = process.env.PUBLIC_URL || '';
 
-
 const sharedConfig = defineConfig({
   plugins: [
     pluginReact({
@@ -89,20 +88,22 @@ const sharedConfig = defineConfig({
     },
     htmlFallback: 'index',
     printUrls: ({ urls }) => {
-      return urls.map(url => url.replace('/index', ''));
+      return urls.map((url) => url.replace('/index', ''));
     },
     proxy: [
       {
         context: (pathname) => {
           // Only proxy specific API endpoints to backend
           // API endpoints that should be proxied
-          if (pathname.startsWith('/api/') ||
-              pathname.startsWith('/auth/') ||
-              pathname.startsWith('/oauth/') ||
-              pathname.startsWith('/logout') ||
-              pathname.startsWith('/render/') ||
-              pathname.startsWith('/session') ||
-              pathname.startsWith('/download/')) {
+          if (
+            pathname.startsWith('/api/') ||
+            pathname.startsWith('/auth/') ||
+            pathname.startsWith('/oauth/') ||
+            pathname.startsWith('/logout') ||
+            pathname.startsWith('/render/') ||
+            pathname.startsWith('/session') ||
+            pathname.startsWith('/download/')
+          ) {
             return true;
           }
           // Everything else (including user/project paths) should be handled by the SPA
@@ -132,7 +133,19 @@ const sharedConfig = defineConfig({
         ],
       },
       resolve: {
-        extensions: ['.web.mjs', '.mjs', '.web.js', '.js', '.web.ts', '.ts', '.web.tsx', '.tsx', '.json', '.web.jsx', '.jsx'],
+        extensions: [
+          '.web.mjs',
+          '.mjs',
+          '.web.js',
+          '.js',
+          '.web.ts',
+          '.ts',
+          '.web.tsx',
+          '.tsx',
+          '.json',
+          '.web.jsx',
+          '.jsx',
+        ],
         alias: {
           '@': resolveApp('.'),
           '@simlin/core': resolveApp('../core'),

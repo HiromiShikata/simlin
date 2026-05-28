@@ -39,6 +39,7 @@ for foundational context.
 ## Acceptance Criteria
 
 ### salsa-consolidation.AC1: LTM fully incrementalized
+
 - **salsa-consolidation.AC1.1 Success:** `simlin_sim_new` with `enable_ltm=true` produces identical numerical results to the current monolithic `with_ltm()` path for all models in `tests/simulate_ltm.rs`.
 - **salsa-consolidation.AC1.2 Success:** Equation edit with unchanged dependency set does not recompile any LTM fragments (verifiable via salsa event logging).
 - **salsa-consolidation.AC1.3 Success:** Equation edit with changed dependency set recompiles only affected link score equations and their fragments.
@@ -48,6 +49,7 @@ for foundational context.
 - **salsa-consolidation.AC1.7 Success:** Stdlib dynamic module composite scores (SMOOTH, DELAY, TREND internal LTM) compile once and are never recomputed.
 
 ### salsa-consolidation.AC2: Patch error checking uses incremental path only
+
 - **salsa-consolidation.AC2.1 Success:** `apply_patch` with a valid equation edit produces identical accept/reject decisions as the current dual-path implementation.
 - **salsa-consolidation.AC2.2 Failure:** `apply_patch` with a `BadTable` error (mismatched x/y lengths) surfaces the specific `BadTable` error code, not generic `NotSimulatable`.
 - **salsa-consolidation.AC2.3 Failure:** `apply_patch` with `EmptyEquation` (stock with no equation) surfaces `EmptyEquation` error code.
@@ -57,6 +59,7 @@ for foundational context.
 - **salsa-consolidation.AC2.7 Success:** VM bytecode validation (`Vm::new`) errors are detected during `apply_patch` and cause rejection.
 
 ### salsa-consolidation.AC3: Old bytecode compilation path deleted
+
 - **salsa-consolidation.AC3.1 Success:** `compile_project` free function no longer exists in the codebase.
 - **salsa-consolidation.AC3.2 Success:** `Simulation::compile()`, `Module::compile()`, and `build_metadata` no longer exist.
 - **salsa-consolidation.AC3.3 Success:** `compile_simulation` in libsimlin no longer exists.
@@ -64,17 +67,20 @@ for foundational context.
 - **salsa-consolidation.AC3.5 Success:** Error struct fields on `ModelStage1` and `Variable` are removed. No struct-field error walking remains.
 
 ### salsa-consolidation.AC4: Interpreter preserved
+
 - **salsa-consolidation.AC4.1 Success:** `Simulation::new()` + `Simulation::run_to_end()` still works for cross-validation in tests.
 - **salsa-consolidation.AC4.2 Success:** `Module::new` still builds `Vec<Expr>` runlists for the interpreter.
 - **salsa-consolidation.AC4.3 Success:** Interpreter results match VM results for all test models (existing cross-validation tests pass).
 
 ### salsa-consolidation.AC5: All existing tests pass
+
 - **salsa-consolidation.AC5.1 Success:** All tests in `tests/simulate*.rs` pass with identical numerical results.
 - **salsa-consolidation.AC5.2 Success:** All tests in `tests/simulate_ltm.rs` pass with identical numerical results.
 - **salsa-consolidation.AC5.3 Success:** All libsimlin integration tests pass.
 - **salsa-consolidation.AC5.4 Success:** PREVIOUS and INIT behave identically as builtins -- no numerical differences from the stdlib module implementations.
 
 ### salsa-consolidation.AC6: PREVIOUS and INIT as builtins
+
 - **salsa-consolidation.AC6.1 Success:** `PREVIOUS(x)` compiles to a single `LoadPrev` opcode instead of a 5-variable module instantiation.
 - **salsa-consolidation.AC6.2 Success:** `INIT(x)` compiles to a single `LoadInitial` opcode.
 - **salsa-consolidation.AC6.3 Success:** Nested `PREVIOUS(PREVIOUS(x))` in LTM equations compiles to two sequential `LoadPrev` opcodes (no module expansion).
@@ -289,12 +295,14 @@ design removes `previous` and `init` from that path, converting them to
 ## Implementation Phases
 
 <!-- START_PHASE_1 -->
+
 ### Phase 1: PREVIOUS and INIT as Builtin Opcodes
 
 **Goal:** Replace the stdlib dynamic module implementations of PREVIOUS and INIT
 with VM intrinsic opcodes, eliminating per-call module instantiation overhead.
 
 **Components:**
+
 - `BuiltinFn` enum in `src/simlin-engine/src/builtins.rs` -- add `Previous` and
   `Init` variants
 - `is_builtin_fn` in `src/simlin-engine/src/builtins.rs` -- recognize
@@ -317,18 +325,21 @@ with VM intrinsic opcodes, eliminating per-call module instantiation overhead.
 **Done when:** All existing simulation and LTM tests pass with identical
 numerical results. `PREVIOUS(x)` and `INIT(x)` compile to single opcodes
 instead of module instantiations.
+
 <!-- END_PHASE_1 -->
 
 <!-- START_PHASE_2 -->
+
 ### Phase 2: LTM Parallel Compilation Path
 
 **Goal:** Connect existing LTM tracked functions to the incremental compilation
 pipeline so LTM synthetic variables are compiled through `assemble_simulation`.
 
 **Components:**
+
 - `compile_ltm_var_fragment` tracked function in
   `src/simlin-engine/src/db.rs` -- keyed on `(LtmLinkId, SourceModel,
-  SourceProject)`, compiles link/loop/relative score equations to symbolic
+SourceProject)`, compiles link/loop/relative score equations to symbolic
   bytecode fragments
 - `ltm_enabled` flag on `SourceProject` input in
   `src/simlin-engine/src/db.rs`
@@ -348,15 +359,18 @@ path. All LTM integration tests in `tests/simulate_ltm.rs` pass. Monolithic
 `with_ltm()` + `compile_simulation()` fallback in `simulation.rs` is removed.
 Salsa event logging confirms per-link caching: equation edits with unchanged
 dependency sets do not recompile LTM fragments.
+
 <!-- END_PHASE_2 -->
 
 <!-- START_PHASE_3 -->
+
 ### Phase 3: Error Accumulator Consolidation
 
 **Goal:** Make `CompilationDiagnostic` the sole error source, eliminating struct
 field errors.
 
 **Components:**
+
 - `CompilationDiagnostic` and `DiagnosticError` in
   `src/simlin-engine/src/db.rs` -- extend with `Assembly` variant, severity
   level (error vs warning)
@@ -381,17 +395,20 @@ field errors.
 correct error codes. `collect_all_diagnostics` produces identical error sets to
 what `collect_project_errors` + `compile_simulation` currently produce. Struct
 field error paths can be removed without losing any error coverage.
+
 <!-- END_PHASE_3 -->
 
 <!-- START_PHASE_4 -->
+
 ### Phase 4: Replace `engine::Project` in `apply_patch`
 
 **Goal:** Remove `engine::Project` from `SimlinProject` and the `apply_patch`
 flow. All error checking goes through the salsa incremental path.
 
 **Components:**
+
 - `SimlinProject` in `src/libsimlin/src/lib.rs` -- change `project:
-  Mutex<engine::Project>` to `datamodel: Mutex<datamodel::Project>`
+Mutex<engine::Project>` to `datamodel: Mutex<datamodel::Project>`
 - `apply_project_patch_internal` in `src/libsimlin/src/patch.rs` -- replace
   `Project::from_with_salsa_sync` + `compile_simulation` with
   `compile_project_incremental` + `Vm::new` validation +
@@ -413,15 +430,18 @@ flow. All error checking goes through the salsa incremental path.
 messages as the current implementation. `engine::Project` is not stored on
 `SimlinProject`. The monolithic `compile_simulation` call in the patch path is
 eliminated. All libsimlin integration tests pass.
+
 <!-- END_PHASE_4 -->
 
 <!-- START_PHASE_5 -->
+
 ### Phase 5: Thread SimlinDb to Internal Callers
 
 **Goal:** All internal engine code that needs simulation results uses the
 incremental path via `SimlinDb`.
 
 **Components:**
+
 - `src/simlin-engine/src/layout/mod.rs` -- auto-layout LTM loop scoring gains
   `db: &dyn Db` parameter, uses `compile_project_incremental` + `Vm::new` +
   `run_to_end()`
@@ -441,15 +461,18 @@ holds datamodel + db)
 bytecode compilation. `with_ltm()` and `with_ltm_all_links()` methods are
 deleted. Layout, analysis, and CLI produce identical results using the
 incremental path. All tests pass.
+
 <!-- END_PHASE_5 -->
 
 <!-- START_PHASE_6 -->
+
 ### Phase 6: Delete Old Bytecode Compilation Path
 
 **Goal:** Remove the monolithic bytecode compilation code. All bytecode
 generation goes through the salsa incremental pipeline.
 
 **Components:**
+
 - `compile_project` free function in
   `src/simlin-engine/src/interpreter.rs` -- delete
 - `Simulation::compile()` in `src/simlin-engine/src/interpreter.rs` -- delete
@@ -475,6 +498,7 @@ generation goes through the salsa incremental pipeline.
 error paths remain. All tests and benchmarks pass using the incremental path.
 The AST interpreter (`Simulation::new` + `run_to_end`) still works for
 cross-validation.
+
 <!-- END_PHASE_6 -->
 
 ## Additional Considerations

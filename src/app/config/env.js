@@ -9,9 +9,7 @@ delete require.cache[require.resolve('./paths')];
 
 const NODE_ENV = process.env.NODE_ENV;
 if (!NODE_ENV) {
-  throw new Error(
-    'The NODE_ENV environment variable is required but was not specified.'
-  );
+  throw new Error('The NODE_ENV environment variable is required but was not specified.');
 }
 
 // Load environment variables from .env files if dotenv is available.
@@ -22,12 +20,10 @@ const dotenvFiles = [
   paths.dotenv,
 ].filter(Boolean);
 
-dotenvFiles.forEach(dotenvFile => {
+dotenvFiles.forEach((dotenvFile) => {
   if (fs.existsSync(dotenvFile)) {
     try {
-      require('dotenv-expand')(
-        require('dotenv').config({ path: dotenvFile })
-      );
+      require('dotenv-expand')(require('dotenv').config({ path: dotenvFile }));
     } catch (err) {
       // dotenv/dotenv-expand not installed; skip .env loading
     }
@@ -38,6 +34,6 @@ dotenvFiles.forEach(dotenvFile => {
 const appDirectory = fs.realpathSync(process.cwd());
 process.env.NODE_PATH = (process.env.NODE_PATH || '')
   .split(path.delimiter)
-  .filter(folder => folder && !path.isAbsolute(folder))
-  .map(folder => path.resolve(appDirectory, folder))
+  .filter((folder) => folder && !path.isAbsolute(folder))
+  .map((folder) => path.resolve(appDirectory, folder))
   .join(path.delimiter);

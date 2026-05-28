@@ -17,6 +17,7 @@
 This phase implements:
 
 ### unify-dep-extraction.AC1: Single unified dependency analysis pass
+
 - **unify-dep-extraction.AC1.1 Success:** `classify_dependencies()` on a scalar equation with mixed references (`PREVIOUS(a) + INIT(b) + c`) returns correct `all`, `previous_only`, `init_only`, `init_referenced`, `previous_referenced` sets in one call
 - **unify-dep-extraction.AC1.2 Success:** `classify_dependencies()` handles `ApplyToAll` and `Arrayed` AST variants, walking all element expressions and default expressions
 - **unify-dep-extraction.AC1.3 Success:** `IsModuleInput` branch selection works correctly when `module_inputs` is provided -- only the active branch's deps are collected
@@ -25,6 +26,7 @@ This phase implements:
 - **unify-dep-extraction.AC1.6 Edge:** Nested `PREVIOUS(PREVIOUS(x))` correctly classifies `x` as previous_only at both nesting levels
 
 ### unify-dep-extraction.AC0: Regression Safety
+
 - **unify-dep-extraction.AC0.1 Success:** All existing simulation tests (`tests/simulate.rs`) pass at each phase boundary
 - **unify-dep-extraction.AC0.2 Success:** All existing engine unit tests (`cargo test` in `src/simlin-engine`) pass at each phase boundary
 
@@ -33,6 +35,7 @@ This phase implements:
 ## Reference files
 
 Read these CLAUDE.md files for project conventions before implementing:
+
 - `/home/bpowers/src/simlin/CLAUDE.md` (project root)
 - `/home/bpowers/src/simlin/src/simlin-engine/CLAUDE.md` (engine crate)
 - `/home/bpowers/src/simlin/docs/dev/rust.md` (Rust coding standards)
@@ -41,11 +44,13 @@ Read these CLAUDE.md files for project conventions before implementing:
 
 <!-- START_SUBCOMPONENT_A (tasks 1-2) -->
 <!-- START_TASK_1 -->
+
 ### Task 1: Implement `DepClassification` struct and `classify_dependencies()` function
 
 **Verifies:** unify-dep-extraction.AC1.1, unify-dep-extraction.AC1.2, unify-dep-extraction.AC1.3, unify-dep-extraction.AC1.4, unify-dep-extraction.AC1.6
 
 **Files:**
+
 - Modify: `src/simlin-engine/src/variable.rs` -- add `DepClassification`, `ClassifyVisitor`, and `classify_dependencies()` above the existing `IdentifierSetVisitor` (around line 673)
 
 **Implementation:**
@@ -127,6 +132,7 @@ The impl block needs these methods, matching the patterns of both `IdentifierSet
 `walk_index(&mut self, e: &IndexExpr2)`: Identical to `IdentifierSetVisitor::walk_index` (lines 709-724). Dispatches `Range(start, end, _)` to `walk_index_expr` for both endpoints; handles `Wildcard`, `StarRange`, `DimPosition` as no-ops; dispatches `Expr(expr)` to `walk_index_expr`.
 
 `record_ident(&mut self, ident_str: &str)`: Helper that records an identifier string in the flag-dependent sets. Called for both `Var` and `Subscript` ident names:
+
 ```rust
 fn record_ident(&mut self, ident_str: &str) {
     if !self.in_previous {
@@ -222,6 +228,7 @@ pub fn classify_dependencies(
 **Testing:**
 
 Existing tests verify the old functions produce correct results. After Task 2 converts those functions to wrappers, the same tests verify the unified walker:
+
 - `test_identifier_sets` (line 1137): exercises `identifier_set` with dimension filtering and IsModuleInput
 - `test_init_only_referenced_idents` (line 1202): exercises `init_only_referenced_idents_with_module_inputs` with INIT, PREVIOUS+INIT, and dotted module refs
 - `test_range_end_expressions_are_walked_in_init_previous_helpers` (line 1233): exercises range-endpoint walking for PREVIOUS and INIT
@@ -231,6 +238,7 @@ Existing tests verify the old functions produce correct results. After Task 2 co
 ```bash
 cargo test -p simlin-engine
 ```
+
 Expected: all existing tests pass (compilation of the new code is verified; behavioral correctness is verified after Task 2 wires up the wrappers).
 
 **Commit:** `engine: add DepClassification struct and classify_dependencies()`
@@ -238,11 +246,13 @@ Expected: all existing tests pass (compilation of the new code is verified; beha
 <!-- END_TASK_1 -->
 
 <!-- START_TASK_2 -->
+
 ### Task 2: Convert old functions to thin wrappers over `classify_dependencies()`
 
 **Verifies:** unify-dep-extraction.AC1.5
 
 **Files:**
+
 - Modify: `src/simlin-engine/src/variable.rs` -- replace function bodies of all 5 old functions with one-line delegations
 
 **Implementation:**
@@ -250,6 +260,7 @@ Expected: all existing tests pass (compilation of the new code is verified; beha
 Replace the bodies (NOT the signatures) of all 5 public functions. Each becomes a thin wrapper. Preserve existing doc comments and function signatures exactly so that all external callers continue to compile without changes.
 
 **`identifier_set` (lines 780-803) becomes:**
+
 ```rust
 pub fn identifier_set(
     ast: &Ast<Expr2>,
@@ -263,14 +274,17 @@ pub fn identifier_set(
 Delete the `IdentifierSetVisitor` struct and its impl block (lines 674-778) -- it is fully replaced by `ClassifyVisitor`.
 
 **`init_referenced_idents` (lines 809-872) becomes:**
+
 ```rust
 pub fn init_referenced_idents(ast: &Ast<Expr2>) -> BTreeSet<String> {
     classify_dependencies(ast, &[], None).init_referenced
 }
 ```
+
 Passing `&[]` for dimensions and `None` for module_inputs matches the original behavior: no dimension filtering (empty dimensions means `is_dimension_or_element` always returns false), no branch pruning (None module_inputs means all If branches are walked).
 
 **`previous_referenced_idents` (lines 877-940) becomes:**
+
 ```rust
 pub fn previous_referenced_idents(ast: &Ast<Expr2>) -> BTreeSet<String> {
     classify_dependencies(ast, &[], None).previous_referenced
@@ -278,6 +292,7 @@ pub fn previous_referenced_idents(ast: &Ast<Expr2>) -> BTreeSet<String> {
 ```
 
 **`lagged_only_previous_idents_with_module_inputs` (lines 945-1037) becomes:**
+
 ```rust
 pub fn lagged_only_previous_idents_with_module_inputs(
     ast: &Ast<Expr2>,
@@ -286,9 +301,11 @@ pub fn lagged_only_previous_idents_with_module_inputs(
     classify_dependencies(ast, &[], module_inputs).previous_only
 }
 ```
+
 Passes `&[]` for dimensions (the original function never did dimension filtering) and forwards `module_inputs` for IsModuleInput branch selection.
 
 **`init_only_referenced_idents_with_module_inputs` (lines 1042-1135) becomes:**
+
 ```rust
 pub fn init_only_referenced_idents_with_module_inputs(
     ast: &Ast<Expr2>,
@@ -303,6 +320,7 @@ Preserve the existing doc comments on each function (lines 805-808, 874-876, 942
 **Testing:**
 
 The existing tests now exercise `classify_dependencies()` through the wrapper functions:
+
 - `test_identifier_sets`: calls `identifier_set` which delegates to `classify_dependencies().all`
 - `test_init_only_referenced_idents`: calls `init_only_referenced_idents_with_module_inputs` which delegates to `classify_dependencies().init_only`
 - `test_range_end_expressions_are_walked_in_init_previous_helpers`: calls `previous_referenced_idents`, `lagged_only_previous_idents_with_module_inputs`, `init_referenced_idents`, `init_only_referenced_idents_with_module_inputs` -- all now wrappers
@@ -314,11 +332,13 @@ All external callers in db.rs (lines 872, 880, 889, 893, 900, 907), db_implicit_
 ```bash
 cargo test -p simlin-engine
 ```
+
 Expected: all tests pass. The wrappers produce identical results to the old implementations.
 
 ```bash
 cargo test -p simlin-engine --features file_io
 ```
+
 Expected: integration tests in `tests/simulate.rs` pass, confirming no behavioral regressions in the full compilation pipeline.
 
 **Commit:** `engine: convert dep-extraction functions to classify_dependencies wrappers`

@@ -17,11 +17,13 @@
 This phase implements and tests:
 
 ### unify-dep-extraction.AC2: Simplified db.rs consumption
+
 - **unify-dep-extraction.AC2.1 Success:** `variable_direct_dependencies_impl` calls `classify_dependencies` exactly twice (dt AST + init AST) and populates `VariableDeps` from the results
 - **unify-dep-extraction.AC2.2 Success:** `extract_implicit_var_deps` calls `classify_dependencies` exactly twice and populates `ImplicitVarDeps` from the results
 - **unify-dep-extraction.AC2.3 Success:** Pruning logic in `model_dependency_graph_impl` produces identical dependency graphs before and after the refactoring (verified by existing integration tests passing)
 
 ### unify-dep-extraction.AC0: Regression Safety
+
 - **unify-dep-extraction.AC0.1 Success:** All existing simulation tests (`tests/simulate.rs`) pass at each phase boundary
 - **unify-dep-extraction.AC0.2 Success:** All existing engine unit tests (`cargo test` in `src/simlin-engine`) pass at each phase boundary
 
@@ -30,6 +32,7 @@ This phase implements and tests:
 ## Reference files
 
 Read these CLAUDE.md files for project conventions before implementing:
+
 - `/home/bpowers/src/simlin/CLAUDE.md` (project root)
 - `/home/bpowers/src/simlin/src/simlin-engine/CLAUDE.md` (engine crate)
 
@@ -42,11 +45,13 @@ Phase 1 must be complete: `DepClassification` struct and `classify_dependencies(
 ---
 
 <!-- START_TASK_1 -->
+
 ### Task 1: Add `Default` impl for `DepClassification`
 
 **Verifies:** None (infrastructure for Task 2)
 
 **Files:**
+
 - Modify: `src/simlin-engine/src/variable.rs` -- add `Default` derive to `DepClassification`
 
 **Implementation:**
@@ -58,6 +63,7 @@ Add `#[derive(Default)]` to the `DepClassification` struct definition. All field
 ```bash
 cargo test -p simlin-engine --lib
 ```
+
 Expected: compiles without errors.
 
 **Commit:** `engine: derive Default for DepClassification`
@@ -66,11 +72,13 @@ Expected: compiles without errors.
 
 <!-- START_SUBCOMPONENT_A (tasks 2-3) -->
 <!-- START_TASK_2 -->
+
 ### Task 2: Simplify `variable_direct_dependencies_impl` in db.rs
 
 **Verifies:** unify-dep-extraction.AC2.1, unify-dep-extraction.AC2.3
 
 **Files:**
+
 - Modify: `src/simlin-engine/src/db.rs:850-925` -- replace the non-Module arm of `variable_direct_dependencies_impl`
 
 **Implementation:**
@@ -78,6 +86,7 @@ Expected: compiles without errors.
 Replace the 7 walker calls (lines 871-912) in the `_ =>` arm with exactly 2 calls to `classify_dependencies`. The Module arm (lines 833-848) is unchanged.
 
 The current code (lines 871-912) calls:
+
 1. `identifier_set(dt_ast, dims, module_inputs)` -> `dt_deps`
 2. `identifier_set(init_ast, dims, module_inputs)` -> `initial_deps`
 3. `extract_implicit_var_deps(...)` -> `implicit_vars`
@@ -127,15 +136,15 @@ VariableDeps {
 
 **Field mapping from DepClassification to VariableDeps:**
 
-| VariableDeps field | Source | DepClassification field | Conversion |
-|---|---|---|---|
-| `dt_deps` | dt | `.all` | `HashSet<Ident>` -> `BTreeSet<String>` via `.into_iter().map(\|id\| id.to_string()).collect()` |
-| `initial_deps` | init | `.all` | same conversion |
-| `implicit_vars` | `extract_implicit_var_deps()` | N/A | unchanged |
-| `init_referenced_vars` | dt | `.init_referenced` | direct (already `BTreeSet<String>`) |
-| `dt_init_only_referenced_vars` | dt | `.init_only` | direct |
-| `dt_previous_referenced_vars` | dt | `.previous_only` | direct |
-| `initial_previous_referenced_vars` | init | `.previous_only` | direct |
+| VariableDeps field                 | Source                        | DepClassification field | Conversion                                                                                     |
+| ---------------------------------- | ----------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------- |
+| `dt_deps`                          | dt                            | `.all`                  | `HashSet<Ident>` -> `BTreeSet<String>` via `.into_iter().map(\|id\| id.to_string()).collect()` |
+| `initial_deps`                     | init                          | `.all`                  | same conversion                                                                                |
+| `implicit_vars`                    | `extract_implicit_var_deps()` | N/A                     | unchanged                                                                                      |
+| `init_referenced_vars`             | dt                            | `.init_referenced`      | direct (already `BTreeSet<String>`)                                                            |
+| `dt_init_only_referenced_vars`     | dt                            | `.init_only`            | direct                                                                                         |
+| `dt_previous_referenced_vars`      | dt                            | `.previous_only`        | direct                                                                                         |
+| `initial_previous_referenced_vars` | init                          | `.previous_only`        | direct                                                                                         |
 
 Remove the `crate::variable::identifier_set`, `crate::variable::init_referenced_idents`, `crate::variable::init_only_referenced_idents_with_module_inputs`, and `crate::variable::lagged_only_previous_idents_with_module_inputs` calls from this function. Do NOT remove the imports at the top of db.rs yet -- other code may still use them.
 
@@ -144,6 +153,7 @@ Remove the `crate::variable::identifier_set`, `crate::variable::init_referenced_
 **Testing:**
 
 Existing tests verify that `VariableDeps` is populated correctly through the salsa pipeline:
+
 - unify-dep-extraction.AC2.1: `variable_direct_dependencies_impl` now makes exactly 2 `classify_dependencies` calls
 - unify-dep-extraction.AC2.3: `model_dependency_graph_impl` (lines 1111+) consumes `VariableDeps` fields for pruning -- unchanged code, so identical dep graphs
 
@@ -152,11 +162,13 @@ Existing tests verify that `VariableDeps` is populated correctly through the sal
 ```bash
 cargo test -p simlin-engine
 ```
+
 Expected: all unit tests pass.
 
 ```bash
 cargo test -p simlin-engine --features file_io
 ```
+
 Expected: all integration tests pass (confirms dependency graphs are identical).
 
 **Commit:** `engine: simplify variable_direct_dependencies_impl with classify_dependencies`
@@ -164,11 +176,13 @@ Expected: all integration tests pass (confirms dependency graphs are identical).
 <!-- END_TASK_2 -->
 
 <!-- START_TASK_3 -->
+
 ### Task 3: Simplify `extract_implicit_var_deps` in db_implicit_deps.rs
 
 **Verifies:** unify-dep-extraction.AC2.2
 
 **Files:**
+
 - Modify: `src/simlin-engine/src/db_implicit_deps.rs:86-120` -- replace the 5 walker calls per implicit var with 2 `classify_dependencies` calls
 
 **Implementation:**
@@ -212,13 +226,13 @@ ImplicitVarDeps {
 
 **Field mapping from DepClassification to ImplicitVarDeps:**
 
-| ImplicitVarDeps field | Source | DepClassification field | Conversion |
-|---|---|---|---|
-| `dt_deps` | dt | `.all` | `HashSet<Ident>` -> `BTreeSet<String>` |
-| `initial_deps` | init | `.all` | same conversion |
-| `dt_init_only_referenced_vars` | dt | `.init_only` | direct |
-| `dt_previous_referenced_vars` | dt | `.previous_only` | direct |
-| `initial_previous_referenced_vars` | init | `.previous_only` | direct |
+| ImplicitVarDeps field              | Source | DepClassification field | Conversion                             |
+| ---------------------------------- | ------ | ----------------------- | -------------------------------------- |
+| `dt_deps`                          | dt     | `.all`                  | `HashSet<Ident>` -> `BTreeSet<String>` |
+| `initial_deps`                     | init   | `.all`                  | same conversion                        |
+| `dt_init_only_referenced_vars`     | dt     | `.init_only`            | direct                                 |
+| `dt_previous_referenced_vars`      | dt     | `.previous_only`        | direct                                 |
+| `initial_previous_referenced_vars` | init   | `.previous_only`        | direct                                 |
 
 Note: `ImplicitVarDeps` has no `init_referenced_vars` field (unlike `VariableDeps`), so that DepClassification field is unused here.
 
@@ -239,6 +253,7 @@ cargo test -p simlin-engine
 ```bash
 cargo test -p simlin-engine --features file_io
 ```
+
 Expected: all tests pass. Integration tests with SMOOTH/DELAY models confirm implicit var deps are correct.
 
 **Commit:** `engine: simplify extract_implicit_var_deps with classify_dependencies`

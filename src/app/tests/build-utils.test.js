@@ -112,10 +112,7 @@ describe('walkDir', () => {
     fs.writeFileSync(path.join(tmpDir, 'b.css'), 'b');
 
     const result = walkDir(tmpDir);
-    expect(result.sort()).toEqual([
-      path.join(tmpDir, 'a.js'),
-      path.join(tmpDir, 'b.css'),
-    ].sort());
+    expect(result.sort()).toEqual([path.join(tmpDir, 'a.js'), path.join(tmpDir, 'b.css')].sort());
   });
 
   test('returns files recursively', () => {
@@ -125,10 +122,7 @@ describe('walkDir', () => {
     fs.writeFileSync(path.join(sub, 'nested.js'), 'n');
 
     const result = walkDir(tmpDir);
-    expect(result.sort()).toEqual([
-      path.join(tmpDir, 'root.js'),
-      path.join(sub, 'nested.js'),
-    ].sort());
+    expect(result.sort()).toEqual([path.join(tmpDir, 'root.js'), path.join(sub, 'nested.js')].sort());
   });
 
   test('returns empty array for empty directory', () => {
@@ -233,7 +227,7 @@ describe('printFileSizesAfterBuild', () => {
 
   function makeStats(assetNames) {
     return {
-      assets: assetNames.map(name => ({ name })),
+      assets: assetNames.map((name) => ({ name })),
     };
   }
 

@@ -15,6 +15,7 @@ For design history and detailed implementation notes, see [docs/design/mdl-parse
 ## Module Map
 
 ### Parsing Pipeline
+
 - `lexer.rs` -- Hand-written `RawLexer` for MDL tokens (context-free)
 - `normalizer.rs` -- `TokenNormalizer` for context-sensitive transformations (function detection, section tracking)
 - `parser.rs` -- Recursive descent parser producing AST
@@ -24,6 +25,7 @@ For design history and detailed implementation notes, see [docs/design/mdl-parse
 - `settings.rs` -- Post-equation settings section parser (integration type, unit equivalences)
 
 ### Conversion (`convert/`)
+
 - `mod.rs` -- Main conversion orchestration, group building, `DataProvider` threading
 - `variables.rs` -- Variable type detection (stock/flow/aux) and building; EXCEPT default_equation handling, GET DIRECT resolution
 - `stocks.rs` -- Stock/flow linking via is_all_plus_minus algorithm
@@ -33,6 +35,7 @@ For design history and detailed implementation notes, see [docs/design/mdl-parse
 - `helpers.rs` -- Utility functions (units, expressions)
 
 ### Views (`view/`)
+
 - `mod.rs` -- Main view parsing: `parse_views()` entry point
 - `elements.rs` -- Element line parsing (types 1, 10, 11, 12)
 - `types.rs` -- View types: `VensimView`, `VensimElement`, `ViewError`
@@ -40,6 +43,7 @@ For design history and detailed implementation notes, see [docs/design/mdl-parse
 - `processing.rs` -- Coordinate transforms, angle calculation, flow points
 
 ### Expression Formatting
+
 - `xmile_compat.rs` -- XMILE-compatible expression formatter (function renames, argument reordering, name formatting, per-element subscript substitution)
 
 ## Known Gaps

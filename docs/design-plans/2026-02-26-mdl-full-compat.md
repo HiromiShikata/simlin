@@ -11,6 +11,7 @@ The approach has four pillars. First, a pluggable `DataProvider` trait resolves 
 Complete the simlin-engine MDL parser/converter/compiler pipeline so that **all** Vensim MDL models in the test suite parse, convert, and simulate correctly -- including the full C-LEARN v77 model.
 
 Specifically:
+
 1. All 47 sdeverywhere test models parse, convert, and simulate correctly via the MDL path (no `#[ignore]` for feature gaps).
 2. C-LEARN v77 (`test/xmutil_test_models/C-LEARN v77 for Vensim.mdl`) fully parses, converts, and simulates with results validated against reference VDF data within cross-simulator tolerance.
 3. A pluggable sync `DataProvider` trait for external data loading, with a filesystem implementation for native builds and an adapter pattern for WASM/browser callers.
@@ -19,6 +20,7 @@ Specifically:
 6. No panics on any valid MDL input.
 
 **Serialization scope:**
+
 - **MDL format**: All changes roundtrip correctly through MDL read/write.
 - **sd.json format**: Full fidelity representing the datamodel (DataProvider metadata, EXCEPT, new equation types).
 - **Protobuf**: Returns error for unsupported new constructs (tracked as GitHub issue).
@@ -27,14 +29,17 @@ Specifically:
 ## Acceptance Criteria
 
 ### mdl-full-compat.AC1: SDEverywhere models simulate via MDL path
+
 - **mdl-full-compat.AC1.1 Success:** All 47 sdeverywhere test models parse and convert to datamodel without errors
 - **mdl-full-compat.AC1.2 Success:** All 47 sdeverywhere test models simulate with results matching expected output within tolerance (2e-3 absolute or 5e-6 relative)
 
 ### mdl-full-compat.AC2: C-LEARN model works end-to-end
+
 - **mdl-full-compat.AC2.1 Success:** C-LEARN simulation completes without `not_simulatable` error
 - **mdl-full-compat.AC2.2 Success:** C-LEARN simulation results match VDF reference data within cross-simulator tolerance (1% relative error)
 
 ### mdl-full-compat.AC3: External data via DataProvider
+
 - **mdl-full-compat.AC3.1 Success:** `DataProvider` trait compiles for both native and WASM targets
 - **mdl-full-compat.AC3.2 Success:** `FilesystemDataProvider` loads CSV data files and produces correct lookup tables
 - **mdl-full-compat.AC3.3 Success:** `FilesystemDataProvider` loads Excel (XLS) data files via `calamine` crate (feature-gated)
@@ -42,21 +47,25 @@ Specifically:
 - **mdl-full-compat.AC3.5 Failure:** `NullDataProvider` returns clear error when data file is referenced but no provider configured
 
 ### mdl-full-compat.AC4: EXCEPT support
+
 - **mdl-full-compat.AC4.1 Success:** `Equation::Arrayed` with `default_equation` roundtrips through JSON serialization
 - **mdl-full-compat.AC4.2 Success:** MDL writer emits `:EXCEPT:` syntax for Arrayed equations with default_equation
 - **mdl-full-compat.AC4.3 Success:** EXCEPT equations compile and simulate correctly (except/except2 test models pass)
 
 ### mdl-full-compat.AC5: Missing builtins
+
 - **mdl-full-compat.AC5.1 Success:** QUANTUM, SSHAPE, RAMP_FROM_TO produce correct values for standard test inputs
 - **mdl-full-compat.AC5.2 Success:** DELAY FIXED, SAMPLE IF TRUE, NPV simulate correctly as stdlib model expansions
 - **mdl-full-compat.AC5.3 Success:** GET DATA BETWEEN TIMES retrieves correct values from data-backed lookups
 - **mdl-full-compat.AC5.4 Success:** VECTOR SELECT, VECTOR ELM MAP, VECTOR SORT ORDER, ALLOCATE AVAILABLE produce correct array outputs
 
 ### mdl-full-compat.AC6: No panics
+
 - **mdl-full-compat.AC6.1 Success:** Compiler handles missing/sparse array element keys without panic (returns error)
 - **mdl-full-compat.AC6.2 Success:** MDL conversion of any valid MDL file completes without panic (returns Result with errors)
 
 ### mdl-full-compat.AC7: Serialization
+
 - **mdl-full-compat.AC7.1 Success:** sd.json format includes all new datamodel fields (default_equation, DimensionMapping, DataSource)
 - **mdl-full-compat.AC7.2 Success:** sd.json roundtrip preserves all new fields
 - **mdl-full-compat.AC7.3 Failure:** Protobuf and XMILE serialization return explicit errors for unsupported constructs (not silent data loss)
@@ -199,12 +208,12 @@ pub struct DimensionMapping {
 
 ### Builtin Categorization
 
-| Category | Functions | Implementation |
-|----------|-----------|----------------|
-| VM builtins (pure math) | QUANTUM, SSHAPE, RAMP_FROM_TO | New opcodes in `bytecode.rs`, handlers in `vm.rs` |
-| Stdlib models (stateful) | DELAY FIXED, SAMPLE IF TRUE, NPV | `.stmx` files in `stdlib/`, compiled to `stdlib.gen.rs` |
-| Compiler-level (arrays) | VECTOR SELECT, VECTOR ELM MAP, VECTOR SORT ORDER, ALLOCATE AVAILABLE | Array iteration patterns in `compiler/expr.rs` |
-| Conversion-level (data) | GET DIRECT DATA/CONSTANTS/SUBSCRIPT/LOOKUPS, GET XLS DATA, GET DATA BETWEEN TIMES | Resolved during `mdl/convert/` via DataProvider |
+| Category                 | Functions                                                                         | Implementation                                          |
+| ------------------------ | --------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| VM builtins (pure math)  | QUANTUM, SSHAPE, RAMP_FROM_TO                                                     | New opcodes in `bytecode.rs`, handlers in `vm.rs`       |
+| Stdlib models (stateful) | DELAY FIXED, SAMPLE IF TRUE, NPV                                                  | `.stmx` files in `stdlib/`, compiled to `stdlib.gen.rs` |
+| Compiler-level (arrays)  | VECTOR SELECT, VECTOR ELM MAP, VECTOR SORT ORDER, ALLOCATE AVAILABLE              | Array iteration patterns in `compiler/expr.rs`          |
+| Conversion-level (data)  | GET DIRECT DATA/CONSTANTS/SUBSCRIPT/LOOKUPS, GET XLS DATA, GET DATA BETWEEN TIMES | Resolved during `mdl/convert/` via DataProvider         |
 
 ## Existing Patterns
 
@@ -221,10 +230,13 @@ pub struct DimensionMapping {
 ## Implementation Phases
 
 <!-- START_PHASE_1 -->
+
 ### Phase 1: Tactical Fixes
+
 **Goal:** Fix high-leverage bugs that cause cascading failures in existing tests and C-LEARN
 
 **Components:**
+
 - `:NA:` emission in `src/simlin-engine/src/mdl/xmile_compat.rs` -- emit `NaN` instead of `:NA:` for core parser compatibility
 - Dimension alias casing in `src/simlin-engine/src/mdl/convert/dimensions.rs` -- preserve original case from MDL source
 - Equation type handling in `src/simlin-engine/src/mdl/convert/variables.rs` -- add `Data`, `TabbedArray`, `NumberList`, `Implicit` arms to `build_equation_rhs_with_context`
@@ -235,17 +247,21 @@ pub struct DimensionMapping {
 **Dependencies:** None (first phase)
 
 **Done when:** C-LEARN equivalence test has zero diffs. Existing sdeverywhere tests still pass. No panics on C-LEARN parse/convert. Covers `mdl-full-compat.AC6.1`, `mdl-full-compat.AC6.2`.
+
 <!-- END_PHASE_1 -->
 
 <!-- START_PHASE_2 -->
+
 ### Phase 2: Datamodel Extensions
+
 **Goal:** Extend the datamodel to represent EXCEPT, dimension mappings, and data source metadata
 
 **Components:**
+
 - `Equation::Arrayed` in `src/simlin-engine/src/datamodel.rs` -- add `Option<String>` default_equation field
 - `Dimension` in `src/simlin-engine/src/datamodel.rs` -- replace `maps_to: Option<String>` with `mappings: Vec<DimensionMapping>`
 - New `DimensionMapping` struct in `src/simlin-engine/src/datamodel.rs`
-- New `DataSource` metadata struct in `src/simlin-engine/src/datamodel.rs` -- stores parsed GET_* function arguments (file, sheet, row/col labels) for variables backed by external data
+- New `DataSource` metadata struct in `src/simlin-engine/src/datamodel.rs` -- stores parsed GET\_\* function arguments (file, sheet, row/col labels) for variables backed by external data
 - JSON serialization in `src/simlin-engine/src/json.rs` -- full-fidelity for all new fields
 - MDL writer in `src/simlin-engine/src/mdl/writer.rs` -- roundtrip for EXCEPT, dimension mappings
 - Update all `Equation::Arrayed` match arms throughout the codebase for the new field
@@ -254,13 +270,17 @@ pub struct DimensionMapping {
 **Dependencies:** Phase 1
 
 **Done when:** Datamodel compiles with new types. JSON roundtrip tests pass for EXCEPT equations, multi-entry dimension mappings, and data source metadata. MDL writer emits `:EXCEPT:` syntax. GitHub issues filed. Covers `mdl-full-compat.AC4.1`, `mdl-full-compat.AC4.2`, `mdl-full-compat.AC7.1`, `mdl-full-compat.AC7.2`, `mdl-full-compat.AC7.3`.
+
 <!-- END_PHASE_2 -->
 
 <!-- START_PHASE_3 -->
+
 ### Phase 3: EXCEPT Semantics
+
 **Goal:** Full EXCEPT support from MDL parsing through simulation
 
 **Components:**
+
 - MDL converter in `src/simlin-engine/src/mdl/convert/variables.rs` -- consume `lhs.except` to produce `Arrayed` equations with `default_equation`
 - Compiler expansion in `src/simlin-engine/src/compiler/mod.rs` -- expand default+overrides to dense per-element equations before codegen
 - Expression substitution -- apply element-specific dimension references in default equations during expansion
@@ -268,13 +288,17 @@ pub struct DimensionMapping {
 **Dependencies:** Phase 2
 
 **Done when:** `test/sdeverywhere/models/except/` and `test/sdeverywhere/models/except2/` parse, convert, and simulate correctly. Covers `mdl-full-compat.AC4.3`.
+
 <!-- END_PHASE_3 -->
 
 <!-- START_PHASE_4 -->
+
 ### Phase 4: DataProvider Infrastructure and External Data
+
 **Goal:** External data loading from CSV/Excel files via pluggable DataProvider trait
 
 **Components:**
+
 - `DataProvider` trait in `src/simlin-engine/src/datamodel.rs` or new `src/simlin-engine/src/data_provider.rs`
 - `FilesystemDataProvider` implementation -- CSV parsing, Excel reading (via feature-gated dependency)
 - `NullDataProvider` -- returns errors, used when no data files available (WASM default)
@@ -287,13 +311,17 @@ pub struct DimensionMapping {
 **Dependencies:** Phase 2
 
 **Done when:** `test/sdeverywhere/models/directdata/`, `directconst/`, `directlookups/`, `directsubs/`, `extdata/` all simulate correctly. Covers `mdl-full-compat.AC3.1`, `mdl-full-compat.AC3.2`, `mdl-full-compat.AC3.3`, `mdl-full-compat.AC3.4`.
+
 <!-- END_PHASE_4 -->
 
 <!-- START_PHASE_5 -->
+
 ### Phase 5: Missing Builtins -- VM and Stdlib
+
 **Goal:** Implement all missing Vensim builtin functions
 
 **Components:**
+
 - **VM builtins** in `src/simlin-engine/src/builtins.rs`, `bytecode.rs`, `vm.rs`, `interpreter.rs`:
   - QUANTUM(x, quantum) -- quantize to nearest multiple
   - SSHAPE(x, bottom, top) -- S-shaped growth function
@@ -308,13 +336,17 @@ pub struct DimensionMapping {
 **Dependencies:** Phase 4 (GET DATA BETWEEN TIMES needs data infrastructure)
 
 **Done when:** `test/sdeverywhere/models/quantum/`, `npv/`, `sample/`, `delayfixed/`, `delayfixed2/`, `getdata/` all simulate correctly. Covers `mdl-full-compat.AC5.1`, `mdl-full-compat.AC5.2`, `mdl-full-compat.AC5.3`.
+
 <!-- END_PHASE_5 -->
 
 <!-- START_PHASE_6 -->
+
 ### Phase 6: Compiler-Level Array Operations
+
 **Goal:** Implement VECTOR operations and ALLOCATE AVAILABLE at the compiler level
 
 **Components:**
+
 - VECTOR SELECT in `src/simlin-engine/src/compiler/expr.rs` -- compile to conditional element selection with array iteration
 - VECTOR ELM MAP in `src/simlin-engine/src/compiler/expr.rs` -- compile to index-remapped array access
 - VECTOR SORT ORDER in `src/simlin-engine/src/compiler/expr.rs` -- compile to sort-index computation (may need VM support for comparison-based sorting)
@@ -325,13 +357,17 @@ pub struct DimensionMapping {
 **Dependencies:** Phase 2 (dimension mappings), Phase 3 (EXCEPT for some test models)
 
 **Done when:** `test/sdeverywhere/models/mapping/`, `multimap/`, `subscript/`, `allocate/` simulate correctly. Vector operations work in C-LEARN equations. Covers `mdl-full-compat.AC5.4`.
+
 <!-- END_PHASE_6 -->
 
 <!-- START_PHASE_7 -->
+
 ### Phase 7: C-LEARN Simulation and Full Test Enablement
+
 **Goal:** C-LEARN simulates correctly; all sdeverywhere models pass
 
 **Components:**
+
 - C-LEARN-specific equation fixes -- any remaining conversion issues surfaced by simulation attempts
 - C-LEARN simulation test in `src/simlin-engine/tests/simulate.rs` -- add test comparing against VDF reference data
 - Enable all 47 sdeverywhere models in simulation test suite -- remove `#[ignore]` annotations and exclusion lists
@@ -342,6 +378,7 @@ pub struct DimensionMapping {
 **Dependencies:** Phases 1-6
 
 **Done when:** `cargo test --features file_io -p simlin-engine` passes with all sdeverywhere models enabled. C-LEARN simulation matches reference VDF within cross-simulator tolerance (1% relative error). Covers `mdl-full-compat.AC1.1`, `mdl-full-compat.AC1.2`, `mdl-full-compat.AC2.1`, `mdl-full-compat.AC2.2`, `mdl-full-compat.AC2.3`.
+
 <!-- END_PHASE_7 -->
 
 ## Additional Considerations

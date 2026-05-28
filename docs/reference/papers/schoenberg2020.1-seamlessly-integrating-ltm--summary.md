@@ -38,6 +38,7 @@ The paper provides a condensed review of the two historical approaches, noting w
 ### 2.3 Why None Are In Common Use
 
 Despite 40+ years of research and many publications, **none of these approaches are in common use** by a significant number of modelers or students. The paper attributes this to:
+
 1. Each approach has systematic limitations and blind spots.
 2. More importantly, **all of them require the practitioner to do significant work**. People with years of experience tend to rely on intuition; those with less experience are overwhelmed by model-building itself and cannot also learn a complex analytical toolset.
 
@@ -104,22 +105,26 @@ An important attribute of link scores is that they can be **multiplied together*
 **Example -- DELAY3 macro (Figure 1):** The DELAY3 macro expands into 3 stocks, 4 flows, and multiple causal pathways. What appears to be two simple direct links on the diagram (input -> output, delay time -> output) is actually **seven distinct causal pathways** if we include influences to flows both directly and through upstream stocks. Additionally, the structure itself contains **three feedback loops** internal to the macro, which the paper notes generally do not produce behavior by themselves.
 
 **The challenge in detail:**
+
 - Multiple causal pathways exist through the macro with differing strengths and potentially even polarities.
 - There may be feedback loops **within** the macro equations themselves.
 - Expanding macros to show all internal variables would be confusing to practitioners, generate meaningless variable names, and undermine one of the main reasons for using macros (preventing clutter).
 
 **The solution -- composite link score:** A simple heuristic applied at each calculation interval:
+
 1. Compute the path score for every pathway through the macro.
 2. If there is only one pathway through the macro, the composite link score equals that path score (identical to the fully expanded case).
 3. If there are multiple pathways, **choose the path score with the largest magnitude** (positive or negative).
 
 **Rationale:** This maintains the integrity of loop scores computed through macros:
+
 - Single path: loop score is exactly what it would have been if the macro had been expanded.
 - Multiple paths: loop score reflects the biggest (most important) of all the loops involving the macro.
 
 **The link score for anything going into a macro is thus a composite.** As a consequence, the structure represented by a link through a macro is **not necessarily fixed** throughout the simulation run -- the dominant pathway can change over time.
 
 **Alternative approaches considered and rejected:**
+
 1. Post-processing all path scores and picking the best one -- advantage of invariant macro structure, but would change loop scores relative to fully expanded case.
 2. Predefined pathways for link score computation -- rejected for similar reasons.
 3. Expanding all macros to expose internal variables to the user -- rejected because it would be confusing, generate meaningless names, and undermine the purpose of macros.
@@ -133,6 +138,7 @@ An important attribute of link scores is that they can be **multiplied together*
 ### 4.2 Discrete Variables and Stateful Functions
 
 **The problem:** Stella includes discrete elements (Conveyors, Queues, Ovens) and builtin functions like PREVIOUS that retain state. Unlike macros, there is no rigorous way to expand these into structures amenable to complete link score computation, because:
+
 - Internal structures cannot practically be exposed (a conveyor can have thousands of individual elements waiting to be used at a later time).
 - Following paths through such elements is not feasible.
 
@@ -147,6 +153,7 @@ An important attribute of link scores is that they can be **multiplied together*
 **Static analysis limitations:** The independent loopset and shortest independent loopset (used by EEA) are static analysis techniques that do not allow the loops under consideration to change over the course of a simulation. This is exactly what is required for dominance shifts and can therefore **miss important feedback** (Guneralp, 2006; Huang et al., 2012).
 
 **The solution -- the "strongest path" algorithm** (described in Eberlein and Schoenberg, 2020): A heuristic that finds the loops that matter **at each point in time**, with the resulting set of loops used for further analysis. Unlike static ILS/SILS:
+
 - The set of identified loops **can change** based on the parameterization of a simulation run.
 - Just as the most important loops change with different parameters, so will the loops actually identified for large models.
 
@@ -197,10 +204,12 @@ confidence = |r - |b|| / (r + |b|)
 ```
 
 Where:
+
 - `r` = sum of the single highest magnitude instantaneous reinforcing pathway scores across the entire simulation
 - `b` = sum of the single highest magnitude instantaneous balancing pathway scores across the entire simulation
 
 **Interpretation:**
+
 - Confidence = 1 when only one polarity is present (either r or b is 0).
 - Confidence approaches 0 when both polarities contribute equally.
 - A confidence value of **0.99 or lower** triggers the link to be displayed in **gray** (representing mixed/unknown polarity), making it abundantly clear the simplified CLD is over-simplified at that point.
@@ -213,13 +222,13 @@ Where:
 
 **The solution -- a loop polarity classification scheme:**
 
-| Label | Meaning |
-|-------|---------|
-| Rx | Reinforcing (index x) |
-| Bx | Balancing (index x) |
-| Rux | Unknown polarity, predominantly reinforcing |
-| Bux | Unknown polarity, predominantly balancing |
-| Ux | Unknown polarity |
+| Label | Meaning                                     |
+| ----- | ------------------------------------------- |
+| Rx    | Reinforcing (index x)                       |
+| Bx    | Balancing (index x)                         |
+| Rux   | Unknown polarity, predominantly reinforcing |
+| Bux   | Unknown polarity, predominantly balancing   |
+| Ux    | Unknown polarity                            |
 
 The Ru and Bu designations are assigned when the **confidence value for loop polarity is above 0.99** (calculated using Equation 3 applied at the loop level). This cutoff allows a well-reasoned factual interpretation of full and simplified CLDs where the polarity-changing nature of links is not important over the course of the simulation.
 
@@ -240,6 +249,7 @@ The simplest population model: one stock (Population), one flow (births), one pa
 ### 5.2 Population with Births and Deaths (Figure 5)
 
 Adding deaths with an average lifetime of 20 produces slower exponential growth with two loops:
+
 - R1 (reinforcing): 67% contribution
 - B1 (balancing): 35% contribution (note: magnitudes sum to more than 100% in instantaneous terms because opposing effects inflate both)
 
@@ -248,6 +258,7 @@ Adding deaths with an average lifetime of 20 produces slower exponential growth 
 ### 5.3 Population with Carrying Capacity (Figure 7)
 
 Adding carrying capacity (effect of crowding on deaths) creates three loops:
+
 - R1: 50% (reinforcing)
 - B1: -36.17% (balancing, from death rate)
 - B2: -13.83% (balancing, from carrying capacity effect)
@@ -263,6 +274,7 @@ This dramatically shows the difference between a fragile equilibrium and one res
 ### 6.1 Model Characteristics
 
 Mass' 1975 Economic Cycles model is a practitioner-developed model with a high level of complexity:
+
 - **163 variables**
 - **17 stocks**
 - **494 feedback loops** (plus 4 additional two-variable stock/flow balancing loops, each in their own cycle partition, which do not affect model behavior)
@@ -270,6 +282,7 @@ Mass' 1975 Economic Cycles model is a practitioner-developed model with a high l
 ### 6.2 Simplified CLD (Figure 8)
 
 A machine-generated simplified CLD with:
+
 - Link inclusion threshold: over 100%
 - Loop inclusion threshold: 2.4%
 - Flows not automatically kept with stocks
@@ -277,22 +290,23 @@ A machine-generated simplified CLD with:
 Produces **9 simplified feedback loops** representing the combined effects of **21 full feedback loops**. These 9 simplified loops explain **59.7%** of the behavior across the entire simulation.
 
 Accounting for the remaining 40.3%:
+
 - **31.2%** comes from 469 relatively unimportant loops (each individually producing less than 2% of cumulative behavior).
 - **8.9%** comes from 4 remaining loops not shown. These consist of **two sets of paired feedback loops** (one balancing and one reinforcing in each pair) which perfectly cancel each other at all time points, making all 4 irrelevant to observed behavior.
 
 ### 6.3 Simplified Loop Details (Table 1)
 
-| Loop | Total Contribution | Full Loops Aggregated | Links Included |
-|------|-------------------|-----------------------|----------------|
-| B1   | 38.12%            | 1                     | Vacancies -> labor -> Inventory -> Backlog |
-| B2   | 6.60%             | 1                     | labor -> Inventory -> Backlog |
-| B3   | 5.11%             | 3                     | Vacancies -> labor -> Avg Prod Rate -> Avg Unit Cost of Prod -> Avg Price -> Smoothed Avg Price -> Perc Rate of Inc in Price -> Inventory |
-| R1   | 5.11%             | 3                     | Vacancies -> labor -> Avg Prod Rate -> Avg Unit Cost of Prod -> Avg Price -> Smoothed Avg Price -> Perc Rate of Inc in Price -> Backlog |
-| B4   | 4.15%             | 1                     | Vacancies -> labor -> Inventory -> Avg Unit Cost of Prod -> Avg Price -> Smoothed Avg Price -> Perc Rate of Inc in Price -> Backlog |
-| B5   | 0.37%             | 1                     | Vacancies -> labor -> Inventory |
-| B6   | 0.13%             | 1                     | Avg Unit Cost of Prod -> Avg Price -> Smoothed Avg Price -> Perc Rate of Inc in Price -> Backlog -> labor -> Inventory |
-| R2   | 0.10%             | 3                     | Avg Unit Cost of Prod -> Avg Price -> Smoothed Avg Price -> Perc Rate of Inc in Price -> Backlog -> labor -> Avg Prod Rate |
-| U1   | 0.02%             | 7                     | Avg Unit Cost of Prod -> Avg Price -> Smoothed Avg Price -> Perc Rate of Inc in Price -> Inventory |
+| Loop | Total Contribution | Full Loops Aggregated | Links Included                                                                                                                            |
+| ---- | ------------------ | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| B1   | 38.12%             | 1                     | Vacancies -> labor -> Inventory -> Backlog                                                                                                |
+| B2   | 6.60%              | 1                     | labor -> Inventory -> Backlog                                                                                                             |
+| B3   | 5.11%              | 3                     | Vacancies -> labor -> Avg Prod Rate -> Avg Unit Cost of Prod -> Avg Price -> Smoothed Avg Price -> Perc Rate of Inc in Price -> Inventory |
+| R1   | 5.11%              | 3                     | Vacancies -> labor -> Avg Prod Rate -> Avg Unit Cost of Prod -> Avg Price -> Smoothed Avg Price -> Perc Rate of Inc in Price -> Backlog   |
+| B4   | 4.15%              | 1                     | Vacancies -> labor -> Inventory -> Avg Unit Cost of Prod -> Avg Price -> Smoothed Avg Price -> Perc Rate of Inc in Price -> Backlog       |
+| B5   | 0.37%              | 1                     | Vacancies -> labor -> Inventory                                                                                                           |
+| B6   | 0.13%              | 1                     | Avg Unit Cost of Prod -> Avg Price -> Smoothed Avg Price -> Perc Rate of Inc in Price -> Backlog -> labor -> Inventory                    |
+| R2   | 0.10%              | 3                     | Avg Unit Cost of Prod -> Avg Price -> Smoothed Avg Price -> Perc Rate of Inc in Price -> Backlog -> labor -> Avg Prod Rate                |
+| U1   | 0.02%              | 7                     | Avg Unit Cost of Prod -> Avg Price -> Smoothed Avg Price -> Perc Rate of Inc in Price -> Inventory                                        |
 
 Note: B5, B6, R2, and U1 are **artifact loops** brought forth by the specific combination of selected feedback loops (loop closure for layout improvement). They were not directly selected.
 
@@ -329,24 +343,25 @@ Note: B5, B6, R2, and U1 are **artifact loops** brought forth by the specific co
 ### 7.1 Model Structure (Figure 11, Table 2)
 
 A simple workforce training model using:
+
 - A **conveyor** (pipeline delay) modeling the training process: apprentices enter, train for a specified time, then emerge as workers.
 - A **non-negative stock** for Workers (intentionally used to limit the number of employees leaving the system).
 
 **Model equations:**
 
-| Equation | Units |
-|----------|-------|
-| Apprentices = CONVEYOR(hiring - finishing training, training time) | People |
-| Workers = NONNEGATIVE(finishing training - leaving) | People |
-| hiring = adjustment + leaving | People/Time |
-| leaving = 100 + STEP(50, 5) | People/Time |
-| finishing training = f(Apprentices) | People/Time |
-| adjustment = (target workers - workers) / time to adjust | People/Time |
-| training time = 5 | Time |
-| target workers = 500 | People |
-| Initial Apprentices = 5 * hiring | People |
-| Initial Workers = target workers | People |
-| time to adjust = 5 or 2 (two cases) | Time |
+| Equation                                                           | Units       |
+| ------------------------------------------------------------------ | ----------- |
+| Apprentices = CONVEYOR(hiring - finishing training, training time) | People      |
+| Workers = NONNEGATIVE(finishing training - leaving)                | People      |
+| hiring = adjustment + leaving                                      | People/Time |
+| leaving = 100 + STEP(50, 5)                                        | People/Time |
+| finishing training = f(Apprentices)                                | People/Time |
+| adjustment = (target workers - workers) / time to adjust           | People/Time |
+| training time = 5                                                  | Time        |
+| target workers = 500                                               | People      |
+| Initial Apprentices = 5 \* hiring                                  | People      |
+| Initial Workers = target workers                                   | People      |
+| time to adjust = 5 or 2 (two cases)                                | Time        |
 
 ### 7.2 Two Parameterizations Analyzed
 
@@ -357,10 +372,12 @@ Two cases are analyzed, identical except for "time to adjust": Case 1 uses 5, Ca
 The simplified CLDs for the two parameterizations reveal **qualitatively different feedback structures**:
 
 **Case 1 (time to adjust = 5):** The simplified CLD shows **two balancing loops**:
+
 - One involving apprentices -> finishing training -> workers -> adjustment -> hiring (the main balancing chain)
 - Shows the hidden feedback loop within the conveyor between Apprentices and finishing training (the conveyor directly affects its own output)
 
 **Case 2 (time to adjust = 2):** The non-negative stock becomes active and constrains the outflow "leaving." The simplified CLD shows **four loops**:
+
 - The same two balancing loops from Case 1
 - An **additional balancing loop** (between leaving and workers)
 - An **additional reinforcing loop** (across the entirety of the main chain, adjusting hiring without passing through the adjustment variable)
@@ -387,6 +404,7 @@ The paper concludes that the Stella family of products now gives all system dyna
 ### 8.1 Remaining Limitations
 
 Only two limitations are identified:
+
 1. **Inability to report on unobserved behavioral modes** -- LTM can only analyze behavior that actually occurs during simulation.
 2. **Inability to report on loop dominance during equilibrium** -- when nothing changes, all scores are zero.
 
@@ -401,59 +419,71 @@ The work is designed for the system dynamics community but is **directly applica
 ## 9. Key Figures Summary
 
 ### Figure 1
+
 Structure of the DELAY3 macro showing the complex set of pathways between arguments (input, delay time) and the output. Shows 3 stocks, 4 flows, and the much more indirect true path structure. Demonstrates that 2 apparent links on a diagram represent 7 distinct causal pathways.
 
 ### Figure 2
+
 Three views of a weakly coupled system: (left) stock-and-flow diagram, (middle) full CLD showing all feedback relationships, (right) simplified CLD showing only the most important feedback -- which produces two disconnected subsystems because the weak coupling loop is filtered out.
 
 ### Figure 3
+
 Simplified CLD of Forrester's (1968) market growth model. Left panel shows an over-simplified version with a gray link indicating indeterminate polarity (confidence < 0.99). Right panel shows the result of lowering the link inclusion threshold slightly, expanding the gray link into its constituent pathways.
 
 ### Figure 4
+
 Simple population model with births only. Shows stock-and-flow diagram, exponential growth, and LTM panel reporting R1 with 100% contribution.
 
 ### Figure 5
+
 Population model with births and deaths (average lifetime = 20). Shows R1 at +66.67% (current), B1 at -33.33% (current). Still exponential growth but slower.
 
 ### Figure 6
+
 Highlighting the negative loop involving "deaths" on the SFD. Shows how the outflow loop (which lacks a visible arrowhead back to the stock) is harder for students to recognize.
 
 ### Figure 7
+
 Population model with carrying capacity. Three loops: R1 (+50%), B1 (-36.17%), B2 (-13.83%). Shows shifting loop dominance as the capacity constraint loop becomes active.
 
 ### Figure 8
+
 Machine-generated simplified CLD of Mass' 1975 Economic Cycles model (163 variables, 17 stocks, 494 feedback loops). 9 simplified loops explaining 59.7% of total behavior. Key variables: Vacancies, labor, Inventory, Backlog, Avg Prod Rate, Avg Unit Cost of Prod, Avg Price, Smoothed Avg Price, Perc Rate of Inc in Price.
 
 ### Figure 9
+
 Composite relative loop scores over time (period 9-12.5) for the Economic Cycles model. Shows the oscillating dominance pattern with B1 dominant, transitioning through R1/B3 interference, B4's delayed effect, and B2's termination-driven dominance at inflection points.
 
 ### Figure 10
+
 Key indicator stocks (Backlog, Inventory, Labor, Vacancies) for the Economic Cycles model. Left panel: full simulation period showing dampened oscillation. Right panel: analysis period (9-12.5) showing one complete cycle.
 
 ### Figure 11
+
 Stock-and-flow diagram of the workforce training model with discrete elements: conveyor for Apprentices, non-negative stock for Workers, flows for hiring, finishing training, and leaving.
 
 ### Figure 12
+
 Two simplified CLDs for the workforce training model under different parameterizations. Left (time to adjust = 5): two balancing loops. Right (time to adjust = 2): four loops including additional feedback from the active non-negative constraint. Demonstrates how parameterization changes the feedback complexity of discrete systems.
 
 ---
 
 ## 10. Concepts and Enhancements Covered in This Paper
 
-| Concept | Definition |
-|---------|-----------|
-| **Path score** | Product of link scores along a path between two variables; equivalent to the link score that would exist if the path were a single direct link |
-| **Composite link score** | Link score for macros: the path score of the dominant (largest magnitude) pathway through the macro at each time step |
-| **LOOPSCORE builtin** | Model equation function allowing practitioners to specify an arbitrary loop and compute its relative loop score across the simulation |
-| **PATHSCORE builtin** | Model equation function computing raw (non-relative) loop/path scores during simulation |
-| **Link inclusion threshold** | Simplification metric introduced in LoopX: minimum variation in relative link score magnitude across the simulation for a variable to be included in a simplified CLD |
-| **Loop inclusion threshold** | Simplification metric introduced in LoopX: minimum average percentage of behavior a loop must explain to have its stocks (and optionally flows) included in a simplified CLD |
-| **Polarity confidence** (Equation 3) | `\|r - \|b\|\| / (r + \|b\|)` -- measures how consistently a simplified link has a single polarity; values of 0.99 or lower trigger gray (mixed polarity) display |
-| **Composite relative loop score** | For simplified CLD loops: sum of relative loop scores from all full-model loops that reduce to that simplified loop |
-| **Loop polarity labels** | Rx (reinforcing), Bx (balancing), Rux (unknown, predominantly reinforcing), Bux (unknown, predominantly balancing), Ux (unknown) |
-| **Flow inclusion toggle** | Boolean controlling whether flows are automatically kept when a stock is included in a simplified CLD |
-| **Strongest path algorithm** | Heuristic (Eberlein and Schoenberg, 2020) that dynamically identifies the most important loops at each time point, allowing the set of analyzed loops to change during simulation |
-| **Perfect mixing approximation** | Treatment of discrete elements (conveyors, etc.) as if their eventual response to input changes were instantaneous, preserving polarity and magnitude while potentially distorting timing |
+| Concept                              | Definition                                                                                                                                                                                |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Path score**                       | Product of link scores along a path between two variables; equivalent to the link score that would exist if the path were a single direct link                                            |
+| **Composite link score**             | Link score for macros: the path score of the dominant (largest magnitude) pathway through the macro at each time step                                                                     |
+| **LOOPSCORE builtin**                | Model equation function allowing practitioners to specify an arbitrary loop and compute its relative loop score across the simulation                                                     |
+| **PATHSCORE builtin**                | Model equation function computing raw (non-relative) loop/path scores during simulation                                                                                                   |
+| **Link inclusion threshold**         | Simplification metric introduced in LoopX: minimum variation in relative link score magnitude across the simulation for a variable to be included in a simplified CLD                     |
+| **Loop inclusion threshold**         | Simplification metric introduced in LoopX: minimum average percentage of behavior a loop must explain to have its stocks (and optionally flows) included in a simplified CLD              |
+| **Polarity confidence** (Equation 3) | `\|r - \|b\|\| / (r + \|b\|)` -- measures how consistently a simplified link has a single polarity; values of 0.99 or lower trigger gray (mixed polarity) display                         |
+| **Composite relative loop score**    | For simplified CLD loops: sum of relative loop scores from all full-model loops that reduce to that simplified loop                                                                       |
+| **Loop polarity labels**             | Rx (reinforcing), Bx (balancing), Rux (unknown, predominantly reinforcing), Bux (unknown, predominantly balancing), Ux (unknown)                                                          |
+| **Flow inclusion toggle**            | Boolean controlling whether flows are automatically kept when a stock is included in a simplified CLD                                                                                     |
+| **Strongest path algorithm**         | Heuristic (Eberlein and Schoenberg, 2020) that dynamically identifies the most important loops at each time point, allowing the set of analyzed loops to change during simulation         |
+| **Perfect mixing approximation**     | Treatment of discrete elements (conveyors, etc.) as if their eventual response to input changes were instantaneous, preserving polarity and magnitude while potentially distorting timing |
 
 ---
 
@@ -462,6 +492,7 @@ Two simplified CLDs for the workforce training model under different parameteriz
 The method is implemented in the **Stella family of products** (Professional, Architect, and online tools), starting with Version 2.0. It is activated by a simple checkbox. The paper frames this implementation as a refinement and expansion of prior LoopX-style visualization concepts for production use on practitioner-built models of arbitrary complexity.
 
 Key implementation requirements:
+
 1. Ability to re-evaluate equations with ceteris paribus inputs (for link score computation).
 2. Ability to enumerate and track all pathways through macros.
 3. Strongest path algorithm for identifying important loops at each time step.

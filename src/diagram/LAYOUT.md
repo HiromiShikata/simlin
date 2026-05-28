@@ -3,6 +3,7 @@
 This document provides comprehensive information about how system dynamics diagrams are laid out and rendered in Simlin. It describes the coordinate system, element types, their visual properties, and layout rules to enable correct generation of Views with ViewElements.
 
 ## Table of Contents
+
 - [Coordinate System](#coordinate-system)
 - [View Structure](#view-structure)
 - [Element Types](#element-types)
@@ -23,6 +24,7 @@ This document provides comprehensive information about how system dynamics diagr
 ## Coordinate System
 
 ### Basic Properties
+
 - **Origin**: Top-left corner at (0,0)
 - **X-axis**: Increases to the right
 - **Y-axis**: Increases downward (standard SVG/web coordinate system)
@@ -30,12 +32,11 @@ This document provides comprehensive information about how system dynamics diagr
 - **Zoom**: Views have a zoom property that scales the entire canvas
 
 ### Coordinate Transformation
+
 - Screen to canvas conversion uses matrix transformation with zoom factor
 - Implementation in `screenToCanvasPoint` function:
   ```typescript
-  canvasPoint = screenPoint.matrixTransform(
-    new DOMMatrix([zoom, 0, 0, zoom, 0, 0]).inverse()
-  )
+  canvasPoint = screenPoint.matrixTransform(new DOMMatrix([zoom, 0, 0, zoom, 0, 0]).inverse());
   ```
 - Elements store their position as center coordinates (cx, cy)
 - For positioned elements (Stock, Aux, Module, Flow valve), x/y are aliased to cx/cy
@@ -43,7 +44,9 @@ This document provides comprehensive information about how system dynamics diagr
 ## View Structure
 
 ### StockFlowView
+
 The main container for a system dynamics diagram with these properties:
+
 ```typescript
 {
   nextUid: number,              // Next available UID for new elements
@@ -54,7 +57,9 @@ The main container for a system dynamics diagram with these properties:
 ```
 
 ### ViewBox/Rect
+
 Defines rectangular boundaries:
+
 ```typescript
 {
   top: number,
@@ -67,6 +72,7 @@ Defines rectangular boundaries:
 ## Element Types
 
 All elements implement the `ViewElement` interface with these common properties:
+
 - `uid`: Unique identifier (number)
 - `cx/cy`: Center coordinates (computed from x/y for positioned elements)
 - `ident`: Canonical identifier string (optional, defined for named elements)
@@ -76,11 +82,13 @@ All elements implement the `ViewElement` interface with these common properties:
 ### Stock Elements
 
 **Visual Representation**: Rectangle box representing accumulation/state
+
 - **Dimensions**: 45×35 pixels (StockWidth × StockHeight)
 - **Shape**: Rectangle with 1px black stroke, white fill
 - **Position**: Stored as (x,y) center coordinates
 
 **Data Structure**:
+
 ```typescript
 StockViewElement {
   uid: number,
@@ -97,6 +105,7 @@ StockViewElement {
 ```
 
 **Special Rendering**:
+
 - **Arrayed stocks**: Show 3 stacked rectangles offset by 3px
   - Back rectangle: offset (+3, +3)
   - Middle rectangle: original position
@@ -112,6 +121,7 @@ StockViewElement {
 ### Flow Elements
 
 **Visual Representation**: Pipe with valve (circle) and directional arrow
+
 - **Valve**: Circle with radius 9px (AuxRadius) at flow center (x,y)
 - **Pipe**: Double-line rendering:
   - Outer: 4px thick black stroke
@@ -119,6 +129,7 @@ StockViewElement {
 - **Arrowhead**: 8px radius (FlowArrowheadRadius) at destination end
 
 **Data Structure**:
+
 ```typescript
 FlowViewElement {
   uid: number,
@@ -140,6 +151,7 @@ Point {
 ```
 
 **Flow Path Rules**:
+
 1. **Must have at least 2 points** (source and destination)
 2. **First point** connects to source (stock or cloud)
 3. **Last point** connects to sink (stock or cloud)
@@ -153,11 +165,13 @@ Point {
    - Clouds adjust position when dragged
 
 **Path Rendering**:
+
 - Path is drawn as SVG path using M (move) and L (line) commands
 - Final segment adjusted by 7.5px (finalAdjust) to accommodate arrowhead
 - Arrowhead angle snapped to cardinal directions (0°, 90°, 180°, 270°)
 
 **Movement Constraints**:
+
 - **Horizontal flows**: All points have same y-coordinate
 - **Vertical flows**: All points have same x-coordinate
 - **Valve movement**: Constrained within bounds between connected elements
@@ -166,11 +180,13 @@ Point {
 ### Auxiliary Variables
 
 **Visual Representation**: Circle for scalar values and parameters
+
 - **Dimensions**: Circle with radius 9px (AuxRadius)
 - **Shape**: Circle with 1px black stroke, white fill
 - **Position**: Stored as (x,y) center coordinates
 
 **Data Structure**:
+
 ```typescript
 AuxViewElement {
   uid: number,
@@ -185,6 +201,7 @@ AuxViewElement {
 ```
 
 **Special Rendering**:
+
 - **Arrayed variables**: Show 3 stacked circles offset by 3px
   - Back circle: offset (+3, +3)
   - Middle circle: original position
@@ -198,11 +215,13 @@ AuxViewElement {
 ### Module Elements
 
 **Visual Representation**: Rounded rectangle representing sub-model
+
 - **Dimensions**: 55×45 pixels (ModuleWidth × ModuleHeight)
 - **Shape**: Rectangle with 5px corner radius (ModuleRadius)
 - **Stroke**: 1px black, white fill
 
 **Data Structure**:
+
 ```typescript
 ModuleViewElement {
   uid: number,
@@ -217,6 +236,7 @@ ModuleViewElement {
 ```
 
 **Special Properties**:
+
 - **Effective radius for connectors**: 25px (used for arc intersection calculations)
 - **No array rendering**: Modules don't show stacked shapes for arrays
 - **No sparklines**: Modules don't display embedded charts
@@ -224,6 +244,7 @@ ModuleViewElement {
 ### Cloud Elements
 
 **Visual Representation**: Cloud shape indicating infinite source/sink
+
 - **Dimensions**: Effective radius of 13.5px (CloudRadius)
 - **Base SVG path**: 55px width (CloudWidth), scaled to fit radius
 - **Shape**: Predefined SVG path (CloudPath) resembling a cloud
@@ -233,6 +254,7 @@ ModuleViewElement {
 - **Fill**: White
 
 **Data Structure**:
+
 ```typescript
 CloudViewElement {
   uid: number,
@@ -244,6 +266,7 @@ CloudViewElement {
 ```
 
 **Special Properties**:
+
 - **No label**: Clouds are unnamed (no name or ident property)
 - **Always attached**: Must be connected to exactly one flow
 - **Position constraints**:
@@ -256,6 +279,7 @@ CloudViewElement {
 ### Link/Connector Elements
 
 **Visual Representation**: Curved or straight arrow connecting elements
+
 - **Shape**: Path with arrowhead at destination
 - **Stroke**:
   - Normal: 0.5px gray
@@ -265,6 +289,7 @@ CloudViewElement {
 - **Background path**: Invisible wider path for easier selection
 
 **Data Structure**:
+
 ```typescript
 LinkViewElement {
   uid: number,
@@ -294,6 +319,7 @@ LinkViewElement {
    - SVG arc path parameters: radius, sweep-flag, large-arc-flag
 
 **Intersection Calculation with Elements**:
+
 - Elements have different effective radii for connector attachment:
   - **Stocks**: 15px effective radius
   - **Modules**: 25px effective radius
@@ -302,6 +328,7 @@ LinkViewElement {
 - Intersection point calculated using tangent offset from element center
 
 **Special Properties**:
+
 - **No center coordinates**: cx/cy return NaN (connectors don't have position)
 - **No ident**: Links are unnamed (ident returns undefined)
 - **isDashed property**: Can render with dashed stroke for special relationships
@@ -309,11 +336,13 @@ LinkViewElement {
 ### Alias Elements
 
 **Visual Representation**: Dashed circle referencing another variable
+
 - **Dimensions**: Circle with radius 9px (same as Aux)
 - **Shape**: Circle with dashed stroke (stroke-dasharray: 2px)
 - **Label**: Shows name of referenced element (not its own name)
 
 **Data Structure**:
+
 ```typescript
 AliasViewElement {
   uid: number,
@@ -326,6 +355,7 @@ AliasViewElement {
 ```
 
 **Special Properties**:
+
 - **No name/ident**: Aliases don't have their own name
 - **Label from reference**: Display name comes from aliasOf element
 - **No array rendering**: Aliases don't show stacked shapes
@@ -337,6 +367,7 @@ AliasViewElement {
 Labels can be positioned relative to their element using the `LabelSide` property:
 
 ### Label Sides
+
 - **'top'**: Above element, centered horizontally
 - **'bottom'**: Below element, centered horizontally
 - **'left'**: Left of element, right-aligned text
@@ -346,19 +377,21 @@ Labels can be positioned relative to their element using the `LabelSide` propert
 ### Label Layout Calculation
 
 **Constants**:
+
 ```typescript
-const LabelPadding = 3;   // Space between element and label text
-const lineSpacing = 14;   // Vertical space between lines of text
+const LabelPadding = 3; // Space between element and label text
+const lineSpacing = 14; // Vertical space between lines of text
 ```
 
 **Positioning Algorithm**:
+
 ```typescript
-switch(side) {
+switch (side) {
   case 'top':
     x = elementCenterX;
     y = elementCenterY - elementRadius - LabelPadding - textHeight;
     textAnchor = 'middle';
-    reverseBaseline = true;  // Lines stack upward
+    reverseBaseline = true; // Lines stack upward
     break;
   case 'bottom':
     x = elementCenterX;
@@ -380,17 +413,20 @@ switch(side) {
 ```
 
 ### Multi-line Labels
+
 - Lines separated by '\n' character in the name string
 - Line spacing: 14px between baselines
 - **Top-positioned labels**: Use reverse baseline - first line is positioned highest
 - **SVG tspan elements**: Each line rendered as separate tspan with dy offset
 
 ### Label Bounds Calculation
+
 - **Width estimation**: `maxLineCharacters × 6px + 10px` padding
 - **Height**: `lineCount × 14px`
 - **Bounds include** element bounds plus label bounds for complete bounding box
 
 ### Display Name Processing
+
 - **Underscores to spaces**: `initial_inventory` → `initial inventory`
 - **Newline support**: `\n` in names creates multi-line labels
 - Implemented by `displayName()` function
@@ -421,6 +457,7 @@ Flows connect stocks and clouds with specific constraints:
 ### Flow Movement Algorithm
 
 **UpdateStockAndFlows**: When moving a stock with connected flows:
+
 1. Classify flows by attachment side (left, right, top, bottom)
 2. Calculate proposed new stock position
 3. Constrain position to keep flows valid:
@@ -429,6 +466,7 @@ Flows connect stocks and clouds with specific constraints:
 4. Adjust all flow endpoints to new stock edges
 
 **UpdateFlow**: When moving a flow valve:
+
 1. Determine if flow is horizontal, vertical, or diagonal
 2. For stock-connected flows:
    - Maintain axis alignment
@@ -460,6 +498,7 @@ Links/connectors between elements follow these rules:
 ### Arrayed Elements
 
 Elements representing array variables show multiple stacked shapes:
+
 - **3 shapes total**: back, middle (main), front
 - **3px offset** between layers (diagonal offset)
 - **Front shape** is the interactive element
@@ -470,6 +509,7 @@ Elements representing array variables show multiple stacked shapes:
 ### Zero Radius Elements
 
 Special elements with `isZeroRadius = true`:
+
 - **No visual representation** at stored position
 - **Connectors attach** directly to center point (0px effective radius)
 - **Used for** invisible junction points or hidden elements
@@ -478,6 +518,7 @@ Special elements with `isZeroRadius = true`:
 ### Selection States
 
 Selected elements show visual feedback:
+
 - **Stroke color**: Blue (#4444dd)
 - **Text labels**: Blue color when parent selected
 - **Connectors**: Thicker stroke (1px vs 0.5px)
@@ -486,6 +527,7 @@ Selected elements show visual feedback:
 ### Target Validation
 
 During drag operations, valid/invalid drop targets show:
+
 - **Valid target**:
   - Color: Green (rgb(76, 175, 80))
   - Stroke width: 2px
@@ -498,6 +540,7 @@ During drag operations, valid/invalid drop targets show:
 ### Warning Indicators
 
 Elements with errors/warnings display:
+
 - **Appearance**: Orange circle (rgb(255, 152, 0))
 - **Size**: 3px radius
 - **Position**:
@@ -508,6 +551,7 @@ Elements with errors/warnings display:
 ### Sparklines
 
 Mini time-series visualizations within elements:
+
 - **Supported by**: Stocks, Aux, Flows, Aliases
 - **Position**: Inset 1px from element bounds
 - **Size**: Element dimension - 2px padding
@@ -518,32 +562,35 @@ Mini time-series visualizations within elements:
 ## Constants and Dimensions
 
 ### Element Dimensions (pixels)
+
 ```typescript
 // Basic shapes
-const AuxRadius = 9;              // Auxiliary and flow valve radius
+const AuxRadius = 9; // Auxiliary and flow valve radius
 const StockWidth = 45;
 const StockHeight = 35;
 const ModuleWidth = 55;
 const ModuleHeight = 45;
 
 // Derived dimensions
-const CloudRadius = 13.5;        // 1.5 × AuxRadius
-const CloudWidth = 55;           // Original cloud SVG path width
+const CloudRadius = 13.5; // 1.5 × AuxRadius
+const CloudWidth = 55; // Original cloud SVG path width
 
 // Visual details
-const ArrowheadRadius = 6;       // Connector arrowheads
-const FlowArrowheadRadius = 8;   // Flow arrowheads (larger)
-const ModuleRadius = 5;          // Corner rounding for modules
-const LabelPadding = 3;          // Space between element and label
-const lineSpacing = 14;          // Vertical space between text lines
+const ArrowheadRadius = 6; // Connector arrowheads
+const FlowArrowheadRadius = 8; // Flow arrowheads (larger)
+const ModuleRadius = 5; // Corner rounding for modules
+const LabelPadding = 3; // Space between element and label
+const lineSpacing = 14; // Vertical space between text lines
 
 // Behavioral constants
-const StraightLineMax = 6;       // Degrees - threshold for straight connectors
-const finalAdjust = 7.5;         // Flow path endpoint adjustment for arrowhead
+const StraightLineMax = 6; // Degrees - threshold for straight connectors
+const finalAdjust = 7.5; // Flow path endpoint adjustment for arrowhead
 ```
 
 ### Effective Radii for Connectors
+
 Used for calculating intersection points:
+
 ```typescript
 // Element-specific effective radii
 const StockEffectiveRadius = 15;
@@ -554,15 +601,16 @@ const ZeroRadiusEffective = 0;
 ```
 
 ### Styling Constants
+
 ```typescript
 // Stroke widths
-const normalStroke = 1;          // Default element stroke
-const connectorStroke = 0.5;     // Normal connectors
+const normalStroke = 1; // Default element stroke
+const connectorStroke = 0.5; // Normal connectors
 const selectedConnectorStroke = 1; // Selected connectors
-const targetStroke = 2;          // Validation feedback
-const flowOuterStroke = 4;       // Flow pipe outer
-const flowInnerStroke = 2;       // Flow pipe inner
-const cloudStroke = 2;           // Cloud outline
+const targetStroke = 2; // Validation feedback
+const flowOuterStroke = 4; // Flow pipe outer
+const flowInnerStroke = 2; // Flow pipe inner
+const cloudStroke = 2; // Cloud outline
 
 // Colors
 const normalColor = 'black';
@@ -576,12 +624,13 @@ const cloudColorLight = '#6388dc';
 const cloudColorDark = '#2D498A';
 
 // Dash arrays
-const aliasDashArray = 2;        // Dashed stroke for aliases
+const aliasDashArray = 2; // Dashed stroke for aliases
 ```
 
 ## Rendering Architecture
 
 ### Component Hierarchy
+
 ```
 Canvas (main SVG container)
 ├── Background grid (optional)
@@ -598,6 +647,7 @@ Canvas (main SVG container)
 ```
 
 ### Rendering Order
+
 1. **Background elements**: Grid, guides
 2. **Connectors**: Drawn first so they appear behind other elements
 3. **Flow pipes**: Behind flow valves
@@ -608,6 +658,7 @@ Canvas (main SVG container)
 8. **Overlays**: Selection highlights, warnings, sparklines
 
 ### SVG Structure
+
 - **Main SVG**: Scaled by zoom factor using transform
 - **Groups (g)**: Each element type wrapped in group for styling
 - **CSS classes**: Used for theming and state (selected, warning, etc.)
@@ -616,7 +667,9 @@ Canvas (main SVG container)
 ## Hit Testing and Selection
 
 ### Hit Detection
+
 Each element type has specific hit testing:
+
 - **Circles** (Aux, Alias, Flow valve): Distance from center ≤ radius
 - **Rectangles** (Stock, Module): Point within bounds
 - **Clouds**: Distance from center ≤ CloudRadius
@@ -624,12 +677,14 @@ Each element type has specific hit testing:
 - **Flows**: Both valve and path are selectable
 
 ### Selection Areas
+
 - **Primary element**: The visible shape
 - **Labels**: Separate hit target, double-click to edit
 - **Extended hit area**: Background paths for thin elements
 - **Arrowheads**: Separate selection target for reconnection
 
 ### Interaction Modes
+
 - **Single click**: Select element
 - **Double click on label**: Enter text edit mode
 - **Drag element**: Move with constraints
@@ -639,30 +694,35 @@ Each element type has specific hit testing:
 ## Best Practices for View Generation
 
 ### Element Positioning
+
 1. **Spacing**: Minimum 20px between element edges
 2. **Grid alignment**: Snap to 5px or 10px grid for cleaner layouts
 3. **Label clearance**: Account for label bounds when positioning
 4. **Flow clearance**: Keep valve at least 20px from connected elements
 
 ### Layout Strategies
+
 1. **Hierarchical**: Arrange in levels (sources → stocks → sinks)
 2. **Circular**: Place around feedback loops
 3. **Grid**: Align to regular grid pattern
 4. **Force-directed**: Use physics simulation for organic layout
 
 ### Naming Conventions
+
 1. **Canonical names**: Use underscores for word separation
 2. **Display names**: Automatically convert underscores to spaces
 3. **Line breaks**: Use \n for multi-line labels
 4. **Length limits**: Keep under 30 characters per line
 
 ### UID Management
+
 1. **Sequential assignment**: Start from 0, increment by 1
 2. **Uniqueness**: Required within view
 3. **Persistence**: Maintain UIDs when modifying view
 4. **References**: Always validate referenced UIDs exist
 
 ### Performance Considerations
+
 1. **Element count**: Optimize for < 100 elements per view
 2. **Connector complexity**: Prefer straight lines when possible
 3. **Label rendering**: Cache text measurements
@@ -671,6 +731,7 @@ Each element type has specific hit testing:
 ## Example View Generation
 
 ### Complete Stock-Flow System
+
 ```typescript
 const view = {
   nextUid: 8,
@@ -680,44 +741,44 @@ const view = {
     // Central stock
     new StockViewElement({
       uid: 0,
-      name: "inventory",
-      ident: "inventory",
+      name: 'inventory',
+      ident: 'inventory',
       x: 300,
       y: 200,
       labelSide: 'bottom',
       isZeroRadius: false,
       inflows: List([1]),
-      outflows: List([2])
+      outflows: List([2]),
     }),
 
     // Production flow (inflow)
     new FlowViewElement({
       uid: 1,
-      name: "production_rate",
-      ident: "production_rate",
-      x: 150,  // Valve position
+      name: 'production_rate',
+      ident: 'production_rate',
+      x: 150, // Valve position
       y: 200,
       labelSide: 'top',
       points: List([
-        new Point({ x: 75, y: 200, attachedToUid: 3 }),   // From cloud
-        new Point({ x: 278, y: 200, attachedToUid: 0 })   // To stock left edge (300 - 45/2)
+        new Point({ x: 75, y: 200, attachedToUid: 3 }), // From cloud
+        new Point({ x: 278, y: 200, attachedToUid: 0 }), // To stock left edge (300 - 45/2)
       ]),
-      isZeroRadius: false
+      isZeroRadius: false,
     }),
 
     // Sales flow (outflow)
     new FlowViewElement({
       uid: 2,
-      name: "sales_rate",
-      ident: "sales_rate",
-      x: 450,  // Valve position
+      name: 'sales_rate',
+      ident: 'sales_rate',
+      x: 450, // Valve position
       y: 200,
       labelSide: 'top',
       points: List([
-        new Point({ x: 323, y: 200, attachedToUid: 0 }),  // From stock right edge (300 + 45/2)
-        new Point({ x: 525, y: 200, attachedToUid: 4 })   // To cloud
+        new Point({ x: 323, y: 200, attachedToUid: 0 }), // From stock right edge (300 + 45/2)
+        new Point({ x: 525, y: 200, attachedToUid: 4 }), // To cloud
       ]),
-      isZeroRadius: false
+      isZeroRadius: false,
     }),
 
     // Source cloud
@@ -726,7 +787,7 @@ const view = {
       flowUid: 1,
       x: 75,
       y: 200,
-      isZeroRadius: false
+      isZeroRadius: false,
     }),
 
     // Sink cloud
@@ -735,29 +796,29 @@ const view = {
       flowUid: 2,
       x: 525,
       y: 200,
-      isZeroRadius: false
+      isZeroRadius: false,
     }),
 
     // Demand auxiliary
     new AuxViewElement({
       uid: 5,
-      name: "customer_demand",
-      ident: "customer_demand",
+      name: 'customer_demand',
+      ident: 'customer_demand',
       x: 450,
       y: 100,
       labelSide: 'right',
-      isZeroRadius: false
+      isZeroRadius: false,
     }),
 
     // Production capacity
     new AuxViewElement({
       uid: 6,
-      name: "production_capacity",
-      ident: "production_capacity",
+      name: 'production_capacity',
+      ident: 'production_capacity',
       x: 150,
       y: 100,
       labelSide: 'left',
-      isZeroRadius: false
+      isZeroRadius: false,
     }),
 
     // Link from demand to sales
@@ -765,8 +826,8 @@ const view = {
       uid: 7,
       fromUid: 5,
       toUid: 2,
-      arc: undefined,  // Straight line
-      isStraight: true
+      arc: undefined, // Straight line
+      isStraight: true,
     }),
 
     // Link from capacity to production
@@ -775,9 +836,9 @@ const view = {
       fromUid: 6,
       toUid: 1,
       arc: undefined,
-      isStraight: true
-    })
-  ]
+      isStraight: true,
+    }),
+  ],
 };
 ```
 

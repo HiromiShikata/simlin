@@ -1,5 +1,4 @@
-Test Limits
-===========
+# Test Limits
 
 This model tests the ability to parse limits on variables as part of the units string.
 
@@ -19,15 +18,11 @@ Limited Stock= INTEG (
 	|
 ```
 
-
-
 ![Vensim screenshot](vensim_screenshot.png)
 
+## Contributions
 
-Contributions
--------------
-
-| Component                         | Author          | Contact                    | Date    | Software Version        |
-|:--------------------------------- |:--------------- |:-------------------------- |:------- |:----------------------- |
-| test_limits.mdl                   | James Houghton  | james.p.houghton@gmail.com | 4/05/16 | Vensim DSS 6.3E for Mac  |
-| output.csv                        | James Houghton  | james.p.houghton@gmail.com | 8/30/15 | Vensim DSS 6.3E for Mac  |
+| Component       | Author         | Contact                    | Date    | Software Version        |
+| :-------------- | :------------- | :------------------------- | :------ | :---------------------- |
+| test_limits.mdl | James Houghton | james.p.houghton@gmail.com | 4/05/16 | Vensim DSS 6.3E for Mac |
+| output.csv      | James Houghton | james.p.houghton@gmail.com | 8/30/15 | Vensim DSS 6.3E for Mac |

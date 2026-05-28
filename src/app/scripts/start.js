@@ -3,7 +3,7 @@
 process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
 
-process.on('unhandledRejection', err => {
+process.on('unhandledRejection', (err) => {
   throw err;
 });
 
@@ -62,7 +62,7 @@ async function startDevServer() {
   }
 }
 
-startDevServer().catch(err => {
+startDevServer().catch((err) => {
   if (err && err.message) {
     console.log(err.message);
   }

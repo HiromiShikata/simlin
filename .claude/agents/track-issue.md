@@ -36,6 +36,7 @@ gh issue create --title "<concise title>" --body "<detailed description>"
 ```
 
 The issue body should include:
+
 - A clear description of the problem with concrete examples
 - Why it matters (correctness, maintainability, developer experience, etc.)
 - Component(s) affected

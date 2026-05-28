@@ -7,6 +7,7 @@ For current status and agent guidance, see `src/simlin-engine/src/mdl/CLAUDE.md`
 ## Motivation
 
 **Problems being solved:**
+
 1. **Build complexity**: The C++ xmutil requires Bison/Flex, a C++ toolchain, and complex cross-compilation setup
 2. **WASM compatibility**: Cannot easily include xmutil in WASM builds today; would require a large WASI build dependency
 
@@ -29,6 +30,7 @@ simlin_engine::datamodel::Project  <-- target output
 ```
 
 We deliberately skip the XMILE intermediate representation. By targeting `datamodel` directly:
+
 - We leverage existing XMILE conversion functions for free
 - We avoid double-parsing (MDL -> XMILE XML string -> parse XMILE -> datamodel)
 - We can extend the datamodel if needed for Vensim-specific features
@@ -48,6 +50,7 @@ All features implemented in xmutil must be supported. This section documents the
 ### Phase 1: Lexer (`lexer.rs`)
 
 #### Token Types
+
 - Numbers: integers, floats, scientific notation (e.g., `1e-6`, `1.5E+3`)
 - Strings/Symbols: variable names (can contain spaces, underscores)
 - Quoted strings with escape sequences (`\"` inside quotes)
@@ -65,6 +68,7 @@ All features implemented in xmutil must be supported. This section documents the
 - Group markers: `{**name**}` and `***name***|` formats via `GroupStar` token
 
 #### Lexer State Management
+
 - Track position for error messages
 - Handle multi-line tokens (line continuation with `\` at EOL)
 - Skip whitespace appropriately
@@ -74,6 +78,7 @@ All features implemented in xmutil must be supported. This section documents the
 ### Phase 2: AST Types (`ast.rs`)
 
 #### Expression AST
+
 - `Expr::Const(f64, Loc)` - numeric literals
 - `Expr::Var(name, subscripts, Loc)` - variable references
 - `Expr::Op2(BinaryOp, ...)` for binary, `Expr::Op1(UnaryOp, ...)` for unary operators
@@ -84,6 +89,7 @@ All features implemented in xmutil must be supported. This section documents the
 - `Equation::TabbedArray` and `Equation::NumberList` - number tables
 
 #### Equation Types
+
 - `Equation::Regular(Lhs, Expr)` - standard equation
 - `Equation::Lookup(Lhs, LookupTable)` - lookup definition
 - `Equation::WithLookup(Lhs, Box<Expr>, LookupTable)` - WITH LOOKUP
@@ -94,6 +100,7 @@ All features implemented in xmutil must be supported. This section documents the
 ### Phase 3: Parser
 
 #### Operator Precedence (low to high)
+
 1. `- +` (addition/subtraction)
 2. `:OR:`
 3. `= < > <= >= <>`
@@ -105,6 +112,7 @@ All features implemented in xmutil must be supported. This section documents the
 ### Phase 4: Built-in Functions (`builtins.rs`)
 
 Function recognition via `is_builtin()` using `to_lower_space()` canonicalization. Categories:
+
 - Mathematical: ABS, EXP, SQRT, LN, LOG, SIN, COS, TAN, MIN, MAX, INTEGER, MODULO, QUANTUM
 - Conditional: IF THEN ELSE, ZIDZ, XIDZ
 - Time: PULSE, PULSE TRAIN, STEP, RAMP
@@ -147,6 +155,7 @@ Function recognition via `is_builtin()` using `to_lower_space()` canonicalizatio
 ## Panic/Unwrap Reduction (Jan 2026)
 
 All primary production-path panic/unwrap risks have been fixed:
+
 1. Tabbed array parsing (`normalizer.rs`): returns `Result`
 2. Number parsing helper (`parser_helpers.rs`): returns `Result`
 3. View parsing (`view/mod.rs`): uses `ok_or(ViewError::UnexpectedEndOfInput)`
@@ -158,24 +167,26 @@ All primary production-path panic/unwrap risks have been fixed:
 The C-LEARN model (`test/xmutil_test_models/C-LEARN v77 for Vensim.mdl`) exercises subscripts, subranges, bang notation, and element-specific equations extensively.
 
 **Test command:**
+
 ```bash
 cargo test -p simlin-engine --features xmutil test_clearn_equivalence -- --ignored --nocapture
 ```
 
 As of January 2026, **26 differences** remain (reduced from initial 233), grouped into 8 root causes:
 
-| # | Root Cause | Diffs | Status |
-|---|-----------|-------|--------|
-| 1 | Element ordering normalization | 0 | FIXED |
-| 2 | Per-element equation string substitution | 0 | FIXED |
-| 3 | Bang subscript formatting broken | 0 | FIXED |
-| 4 | Docs/units taken from wrong equation | 0 | FIXED |
-| 5 | Empty equation placeholder "" vs "0+0" | 0 | FIXED |
-| 6 | Missing initial-value comment in ApplyToAll | ~4 | Open |
-| 7 | Trailing tab in dimension element names | ~8 | Open |
-| 8 | Miscellaneous (net flow, middle-dot, GF y-scale) | ~14 | Open |
+| #   | Root Cause                                       | Diffs | Status |
+| --- | ------------------------------------------------ | ----- | ------ |
+| 1   | Element ordering normalization                   | 0     | FIXED  |
+| 2   | Per-element equation string substitution         | 0     | FIXED  |
+| 3   | Bang subscript formatting broken                 | 0     | FIXED  |
+| 4   | Docs/units taken from wrong equation             | 0     | FIXED  |
+| 5   | Empty equation placeholder "" vs "0+0"           | 0     | FIXED  |
+| 6   | Missing initial-value comment in ApplyToAll      | ~4    | Open   |
+| 7   | Trailing tab in dimension element names          | ~8    | Open   |
+| 8   | Miscellaneous (net flow, middle-dot, GF y-scale) | ~14   | Open   |
 
 ### Remaining Fix Order
+
 1. Root Cause 7 (~8 diffs) -- strip trailing tabs in lexer
 2. Root Cause 6 (~4 diffs) -- extract initial-value comment from MDL
 3. Root Cause 8 (~14 diffs) -- net flow synthesis, middle-dot, GF y-scale
@@ -196,5 +207,6 @@ As of January 2026, **26 differences** remain (reduced from initial 233), groupe
 ## Future: Module-Style View Splitting
 
 The current `merge_views` approach combines all views into a single StockFlow view with group wrappers. Enhancement needed for module/level-structured models:
+
 - `vele->Ghost(adds)` parameter determines cross-level references
 - Cross-level connector handling in `XMILEGenerator.cpp:910-960`

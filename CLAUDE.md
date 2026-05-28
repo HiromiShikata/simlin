@@ -11,19 +11,19 @@ For documentation index, see [docs/README.md](/docs/README.md).
 
 ## Components
 
-| Component | Language | Description | Docs |
-|-----------|----------|-------------|------|
-| `src/simlin-engine` | Rust | Compiles, type-checks, and simulates SD models | [CLAUDE.md](/src/simlin-engine/CLAUDE.md) |
-| `src/libsimlin` | Rust | Flat C FFI to simlin-engine (WASM, CGo, C/C++) | [CLAUDE.md](/src/libsimlin/CLAUDE.md) |
-| `src/engine` | TypeScript | Promise-based TypeScript API for WASM engine | [CLAUDE.md](/src/engine/CLAUDE.md) |
-| `src/core` | TypeScript | Shared data models and common utilities | [CLAUDE.md](/src/core/CLAUDE.md) |
-| `src/diagram` | TypeScript | React model editor and visualization toolkit | [CLAUDE.md](/src/diagram/CLAUDE.md) |
-| `src/app` | TypeScript | Full-featured SD application | [CLAUDE.md](/src/app/CLAUDE.md) |
-| `src/server` | TypeScript | Express.js backend (Firebase Auth, Firestore) | [CLAUDE.md](/src/server/CLAUDE.md) |
-| `src/xmutil` | C++/Rust | Vensim-to-XMILE converter (test-only) | -- |
-| `src/simlin-cli` | Rust | CLI for simulation/conversion (testing/debugging) | [CLAUDE.md](/src/simlin-cli/CLAUDE.md) |
-| `src/pysimlin` | Python/Rust | Python bindings for the simulation engine | [CLAUDE.md](/src/pysimlin/CLAUDE.md) |
-| `website` | TypeScript | Rspress-based documentation site | [CLAUDE.md](/website/CLAUDE.md) |
+| Component           | Language    | Description                                       | Docs                                      |
+| ------------------- | ----------- | ------------------------------------------------- | ----------------------------------------- |
+| `src/simlin-engine` | Rust        | Compiles, type-checks, and simulates SD models    | [CLAUDE.md](/src/simlin-engine/CLAUDE.md) |
+| `src/libsimlin`     | Rust        | Flat C FFI to simlin-engine (WASM, CGo, C/C++)    | [CLAUDE.md](/src/libsimlin/CLAUDE.md)     |
+| `src/engine`        | TypeScript  | Promise-based TypeScript API for WASM engine      | [CLAUDE.md](/src/engine/CLAUDE.md)        |
+| `src/core`          | TypeScript  | Shared data models and common utilities           | [CLAUDE.md](/src/core/CLAUDE.md)          |
+| `src/diagram`       | TypeScript  | React model editor and visualization toolkit      | [CLAUDE.md](/src/diagram/CLAUDE.md)       |
+| `src/app`           | TypeScript  | Full-featured SD application                      | [CLAUDE.md](/src/app/CLAUDE.md)           |
+| `src/server`        | TypeScript  | Express.js backend (Firebase Auth, Firestore)     | [CLAUDE.md](/src/server/CLAUDE.md)        |
+| `src/xmutil`        | C++/Rust    | Vensim-to-XMILE converter (test-only)             | --                                        |
+| `src/simlin-cli`    | Rust        | CLI for simulation/conversion (testing/debugging) | [CLAUDE.md](/src/simlin-cli/CLAUDE.md)    |
+| `src/pysimlin`      | Python/Rust | Python bindings for the simulation engine         | [CLAUDE.md](/src/pysimlin/CLAUDE.md)      |
+| `website`           | TypeScript  | Rspress-based documentation site                  | [CLAUDE.md](/website/CLAUDE.md)           |
 
 ## Environment Setup
 
@@ -46,6 +46,7 @@ For benchmarks and profiling, see [docs/dev/benchmarks.md](/docs/dev/benchmarks.
 ## Pre-commit Hooks
 
 The pre-commit hook (`scripts/pre-commit`) runs automatically and performs:
+
 1. Rust formatting check
 2. Rust linting (clippy)
 3. Rust tests
@@ -95,12 +96,14 @@ IMPORTANT: If feedback seems non-actionable, it means you need comments explaini
 ## Development Workflow for LLM Agents
 
 ### Understanding Requirements
+
 - Read relevant code and documentation before making changes.
 - If there are important/ambiguous architecture decisions, stop and ask.
 - Start by adding tests to validate assumptions.
 - Build the simplest interfaces possible while fully addressing the task.
 
 ### libsimlin API Design
+
 Keep the FFI surface small and orthogonal. Prefer composable primitives over bulk endpoints. Do NOT add bulk/batch variants to paper over caller-side concurrency issues.
 
 ## Tracking Discovered Issues
@@ -112,6 +115,7 @@ Spawn the `track-issue` agent (via the Task tool with `subagent_type: "track-iss
 ## Generated/Noise Paths
 
 Treat these as generated output unless the task explicitly targets them:
+
 - `src/*/lib/**`, `src/*/lib.browser/**`, `src/*/lib.module/**`
 - `src/app/build/**`, `website/build/**`
 - `node_modules/**`, `target/**`, `playwright-report/**`, `test-results/**`

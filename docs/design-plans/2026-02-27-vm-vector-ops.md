@@ -17,6 +17,7 @@ The complexity comes from a structural difference between these operations and t
 ## Acceptance Criteria
 
 ### vm-vector-ops.AC1: VM produces correct results for all four operations
+
 - **vm-vector-ops.AC1.1 Success:** VECTOR SELECT with VSSUM action returns sum of selected elements
 - **vm-vector-ops.AC1.2 Success:** VECTOR SELECT with VSMIN/VSMEAN/VSMAX/VSPROD actions return correct reductions
 - **vm-vector-ops.AC1.3 Success:** VECTOR SELECT with no elements selected returns max_value
@@ -27,16 +28,19 @@ The complexity comes from a structural difference between these operations and t
 - **vm-vector-ops.AC1.8 Success:** ALLOCATE AVAILABLE distributes supply according to priority profiles and bisection algorithm
 
 ### vm-vector-ops.AC2: Minimal allocations
+
 - **vm-vector-ops.AC2.1 Success:** No heap allocation for arrays with <=32 elements (SmallVec inline capacity)
 - **vm-vector-ops.AC2.2 Success:** Array-producing opcodes write to pre-allocated temp_storage, not new allocations
 
 ### vm-vector-ops.AC3: Test parity
+
 - **vm-vector-ops.AC3.1 Success:** `simulates_vector_simple_mdl` passes with VM+interpreter comparison
 - **vm-vector-ops.AC3.2 Success:** `simulates_allocate_mdl` passes with VM+interpreter comparison
 - **vm-vector-ops.AC3.3 Success:** `simulates_allocate_xmile` passes with VM+interpreter comparison
 - **vm-vector-ops.AC3.4 Success:** Expected output .dat file validates VectorElmMap and VectorSortOrder values against known-correct results
 
 ### vm-vector-ops.AC4: Interpreter bug fix
+
 - **vm-vector-ops.AC4.1 Success:** VectorSortOrder in A2A context produces distinct per-element values (not all identical)
 - **vm-vector-ops.AC4.2 Success:** VectorElmMap in A2A context produces correct per-element indirect lookups
 - **vm-vector-ops.AC4.3 Success:** AllocateAvailable in A2A context produces correct per-requester allocations
@@ -85,12 +89,12 @@ A `read_view_element` helper in `vm.rs` extracts a single element from a `Runtim
 
 ### Opcodes
 
-| Opcode | Inputs | Output | Scratch |
-|--------|--------|--------|---------|
-| `VectorSelect {}` | 2 views (selection, expression) + 2 scalars (max_value, action) | 1 scalar on arithmetic stack | SmallVec<[u16; 4]> for indices |
-| `VectorElmMap { write_temp_id }` | 2 views (source, offset) | Array in temp_storage | None |
-| `VectorSortOrder { write_temp_id }` | 1 view (input) + 1 scalar (direction) | Array in temp_storage | SmallVec<[(f64, u16); 32]> |
-| `AllocateAvailable { write_temp_id }` | 2 views (requests, profile) + 1 scalar (avail) | Array in temp_storage | SmallVec<[f64; 32]>, SmallVec<[(f64,f64,f64,f64); 32]> |
+| Opcode                                | Inputs                                                          | Output                       | Scratch                                                |
+| ------------------------------------- | --------------------------------------------------------------- | ---------------------------- | ------------------------------------------------------ |
+| `VectorSelect {}`                     | 2 views (selection, expression) + 2 scalars (max_value, action) | 1 scalar on arithmetic stack | SmallVec<[u16; 4]> for indices                         |
+| `VectorElmMap { write_temp_id }`      | 2 views (source, offset)                                        | Array in temp_storage        | None                                                   |
+| `VectorSortOrder { write_temp_id }`   | 1 view (input) + 1 scalar (direction)                           | Array in temp_storage        | SmallVec<[(f64, u16); 32]>                             |
+| `AllocateAvailable { write_temp_id }` | 2 views (requests, profile) + 1 scalar (avail)                  | Array in temp_storage        | SmallVec<[f64; 32]>, SmallVec<[(f64,f64,f64,f64); 32]> |
 
 ### Interpreter bug fix
 
@@ -117,11 +121,13 @@ The VM uses `SmallVec<[u16; 4]>` throughout for dimension indices, `SmallVec<[f6
 ## Implementation Phases
 
 <!-- START_PHASE_1 -->
+
 ### Phase 1: Shared allocation helpers
 
 **Goal:** Extract allocation math from interpreter into a shared module.
 
 **Components:**
+
 - New `src/simlin-engine/src/alloc.rs` -- contains `erfc_approx`, `normal_cdf`, `alloc_curve`, `allocate_available` functions (moved from `src/simlin-engine/src/interpreter.rs` lines 80-250)
 - `src/simlin-engine/src/interpreter.rs` -- imports from `alloc.rs` instead of defining locally
 - `src/simlin-engine/src/lib.rs` -- declares the new module
@@ -129,42 +135,51 @@ The VM uses `SmallVec<[u16; 4]>` throughout for dimension indices, `SmallVec<[f6
 **Dependencies:** None (first phase)
 
 **Done when:** `cargo test -p simlin-engine` passes with the helpers moved. No behavioral change.
+
 <!-- END_PHASE_1 -->
 
 <!-- START_PHASE_2 -->
+
 ### Phase 2: Compiler A2A decomposition
 
 **Goal:** Array-producing builtins (VectorElmMap, VectorSortOrder, AllocateAvailable) are decomposed into `AssignTemp` + `TempArrayElement` during A2A expansion. This fixes the interpreter bug and prepares the expression tree for VM codegen.
 
 **Components:**
+
 - `src/simlin-engine/src/compiler/mod.rs` -- modify `Ast::ApplyToAll` handler to detect array-producing builtins, hoist them into `AssignTemp` before per-element iteration, and replace with `TempArray` references
 - `src/simlin-engine/src/compiler/mod.rs` -- `extract_temp_sizes()` must account for the new temps
 
 **Dependencies:** None (independent of Phase 1)
 
 **Done when:** Interpreter produces correct per-element values for VectorSortOrder, VectorElmMap, and AllocateAvailable in A2A contexts. Existing tests pass. Covers vm-vector-ops.AC4.
+
 <!-- END_PHASE_2 -->
 
 <!-- START_PHASE_3 -->
+
 ### Phase 3: Bytecode opcodes and VM helpers
 
 **Goal:** Define the four new opcodes and the `read_view_element` VM helper.
 
 **Components:**
+
 - `src/simlin-engine/src/bytecode.rs` -- add `VectorSelect`, `VectorElmMap`, `VectorSortOrder`, `AllocateAvailable` to the `Opcode` enum
 - `src/simlin-engine/src/vm.rs` -- add `read_view_element` helper function for extracting a single element from a `RuntimeView` at a given flat index
 
 **Dependencies:** None (independent of Phases 1-2)
 
 **Done when:** Code compiles. Opcodes are defined but not yet emitted or dispatched.
+
 <!-- END_PHASE_3 -->
 
 <!-- START_PHASE_4 -->
+
 ### Phase 4: Codegen emission
 
 **Goal:** The compiler emits the new opcodes for all four builtins.
 
 **Components:**
+
 - `src/simlin-engine/src/compiler/codegen.rs` -- replace the `TodoArrayBuiltin` error block with opcode emission:
   - VECTOR SELECT: inline in `walk_expr` (push views, push scalars, emit `VectorSelect`, pop views)
   - VectorElmMap / VectorSortOrder / AllocateAvailable: in the `AssignTemp` handler, detect these builtins as RHS and emit the dedicated opcode instead of `BeginIter` loop
@@ -172,14 +187,17 @@ The VM uses `SmallVec<[u16; 4]>` throughout for dimension indices, `SmallVec<[f6
 **Dependencies:** Phase 2 (expressions are now wrapped in AssignTemp), Phase 3 (opcodes exist)
 
 **Done when:** Models with these builtins compile to bytecode without error. Covers vm-vector-ops.AC1.
+
 <!-- END_PHASE_4 -->
 
 <!-- START_PHASE_5 -->
+
 ### Phase 5: VM dispatch
 
 **Goal:** The VM executes all four new opcodes, producing correct results.
 
 **Components:**
+
 - `src/simlin-engine/src/vm.rs` -- dispatch handlers for each opcode:
   - `VectorSelect`: iterate both views with selection filter, reduce with action
   - `VectorElmMap`: iterate offset view, indirect-index into source view, write to temp
@@ -189,14 +207,17 @@ The VM uses `SmallVec<[u16; 4]>` throughout for dimension indices, `SmallVec<[f6
 **Dependencies:** Phase 1 (shared alloc helpers), Phase 3 (opcodes defined), Phase 4 (opcodes emitted)
 
 **Done when:** VM simulation of vector_simple and allocate models produces correct results matching interpreter output. Covers vm-vector-ops.AC1, AC2, AC3.
+
 <!-- END_PHASE_5 -->
 
 <!-- START_PHASE_6 -->
+
 ### Phase 6: Test upgrades and validation
 
 **Goal:** All three interpreter-only tests run through the full VM+interpreter path and pass.
 
 **Components:**
+
 - `src/simlin-engine/tests/simulate.rs` -- change `simulates_vector_simple_mdl` from `simulate_mdl_path_interpreter_only` to `simulate_mdl_path`
 - `src/simlin-engine/tests/simulate.rs` -- change `simulates_allocate_mdl` from `simulate_mdl_path_interpreter_only` to `simulate_mdl_path`
 - `src/simlin-engine/tests/simulate.rs` -- change `simulates_allocate_xmile` from `simulate_path_interpreter_only` to `simulate_path`
@@ -205,6 +226,7 @@ The VM uses `SmallVec<[u16; 4]>` throughout for dimension indices, `SmallVec<[f6
 **Dependencies:** Phase 5 (VM dispatch works)
 
 **Done when:** All three tests pass with VM+interpreter comparison. Expected output values validated against hand-computation or Vensim reference. Covers vm-vector-ops.AC3.
+
 <!-- END_PHASE_6 -->
 
 ## Additional Considerations

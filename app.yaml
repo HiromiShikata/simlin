@@ -5,41 +5,41 @@ automatic_scaling:
   max_concurrent_requests: 100
 
 handlers:
-- url: /static
-  static_dir: public/static
-  secure: always
+  - url: /static
+    static_dir: public/static
+    secure: always
 
-- url: /$
-  static_files: public/index.html
-  upload: public/index.html
-  secure: always
+  - url: /$
+    static_files: public/index.html
+    upload: public/index.html
+    secure: always
 
-- url: /new$
-  static_files: public/index.html
-  upload: public/index.html
-  secure: always
+  - url: /new$
+    static_files: public/index.html
+    upload: public/index.html
+    secure: always
 
-- url: /(legal|legal/cookies|privacy)$
-  static_files: public/\1/index.html
-  upload: public/(legal|legal/cookies|privacy)/index.html
-  secure: always
+  - url: /(legal|legal/cookies|privacy)$
+    static_files: public/\1/index.html
+    upload: public/(legal|legal/cookies|privacy)/index.html
+    secure: always
 
-- url: /(robots|ads)\.txt$
-  static_files: public/\1.txt
-  upload: public/(robots|ads)\.txt
-  secure: always
+  - url: /(robots|ads)\.txt$
+    static_files: public/\1.txt
+    upload: public/(robots|ads)\.txt
+    secure: always
 
-- url: /(favicon.ico(.png)?)$
-  static_files: public/\1
-  upload: public/(favicon.ico(.png)?)
-  secure: always
+  - url: /(favicon.ico(.png)?)$
+    static_files: public/\1
+    upload: public/(favicon.ico(.png)?)
+    secure: always
 
-- url: /manifest.json$
-  static_files: public/manifest.json
-  upload: public/manifest.json
-  secure: always
+  - url: /manifest.json$
+    static_files: public/manifest.json
+    upload: public/manifest.json
+    secure: always
 
-- url: /.*
-  secure: always
-  redirect_http_response_code: 301
-  script: auto
+  - url: /.*
+    secure: always
+    redirect_http_response_code: 301
+    script: auto

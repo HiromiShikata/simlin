@@ -10,55 +10,55 @@ Run at the start of every session:
 
 ## Build
 
-| Command | Description |
-|---------|-------------|
-| `pnpm build` | Build web app + WASM engine (full stack) |
-| `cargo build` | Build Rust components only |
-| `pnpm clean` | Clean all build artifacts |
+| Command       | Description                                |
+| ------------- | ------------------------------------------ |
+| `pnpm build`  | Build web app + WASM engine (full stack)   |
+| `cargo build` | Build Rust components only                 |
+| `pnpm clean`  | Clean all build artifacts                  |
 | `pnpm format` | Format both TypeScript/JavaScript and Rust |
 
 ## Lint
 
-| Command | Description |
-|---------|-------------|
-| `pnpm lint` | Lint Rust (clippy) + TypeScript/JavaScript (eslint) |
-| `cargo clippy --all-targets --all-features -- -D warnings` | Rust linting only |
-| `cargo fmt --check` | Rust format check |
+| Command                                                    | Description                                         |
+| ---------------------------------------------------------- | --------------------------------------------------- |
+| `pnpm lint`                                                | Lint Rust (clippy) + TypeScript/JavaScript (eslint) |
+| `cargo clippy --all-targets --all-features -- -D warnings` | Rust linting only                                   |
+| `cargo fmt --check`                                        | Rust format check                                   |
 
 ## Test
 
-| Command | Description |
-|---------|-------------|
-| `cargo test` | Run all Rust tests |
-| `pnpm test` | Run all TypeScript tests |
-| `pnpm tsc` | TypeScript type checking |
+| Command      | Description              |
+| ------------ | ------------------------ |
+| `cargo test` | Run all Rust tests       |
+| `pnpm test`  | Run all TypeScript tests |
+| `pnpm tsc`   | TypeScript type checking |
 
 ## Code Coverage
 
-| Command | Description |
-|---------|-------------|
-| `cargo llvm-cov` | Rust code coverage (LLVM source-based) |
+| Command                 | Description                                     |
+| ----------------------- | ----------------------------------------------- |
+| `cargo llvm-cov`        | Rust code coverage (LLVM source-based)          |
 | `cargo llvm-cov --html` | HTML coverage report in `target/llvm-cov/html/` |
 
 Install: `cargo install cargo-llvm-cov`
 
 ## Benchmarks
 
-| Command | Description |
-|---------|-------------|
-| `cargo bench -p simlin-engine` | Run all Rust benchmarks |
-| `cargo bench -p simlin-engine --bench compiler` | Compiler pipeline benchmarks (real models) |
-| `cargo bench -p simlin-engine --bench simulation` | Simulation/VM benchmarks |
-| `cargo bench -p simlin-engine --bench array_ops` | Array operation benchmarks |
+| Command                                           | Description                                |
+| ------------------------------------------------- | ------------------------------------------ |
+| `cargo bench -p simlin-engine`                    | Run all Rust benchmarks                    |
+| `cargo bench -p simlin-engine --bench compiler`   | Compiler pipeline benchmarks (real models) |
+| `cargo bench -p simlin-engine --bench simulation` | Simulation/VM benchmarks                   |
+| `cargo bench -p simlin-engine --bench array_ops`  | Array operation benchmarks                 |
 
 Results are saved in `target/criterion/` with HTML reports. See [benchmarks.md](benchmarks.md) for profiling instructions.
 
 ## Generated Files
 
-| Command | Description |
-|---------|-------------|
-| `pnpm build:gen-protobufs` | Regenerate protobuf bindings (TypeScript + Rust) |
-| `cbindgen --config src/libsimlin/cbindgen.toml --crate simlin --output src/libsimlin/simlin.h` | Regenerate C header from FFI exports |
+| Command                                                                                        | Description                                      |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `pnpm build:gen-protobufs`                                                                     | Regenerate protobuf bindings (TypeScript + Rust) |
+| `cbindgen --config src/libsimlin/cbindgen.toml --crate simlin --output src/libsimlin/simlin.h` | Regenerate C header from FFI exports             |
 
 ## Component-Specific Commands
 
